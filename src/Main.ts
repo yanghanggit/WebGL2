@@ -28,14 +28,22 @@
 // //////////////////////////////////////////////////////////////////////////////////////
 
 
-function createCanvas(width?: number, height?: number): HTMLCanvasElement {
+function createCanvas(width: number, height: number): HTMLCanvasElement {
     const canvas: HTMLCanvasElement = document.createElement("canvas");
     canvas.width = +width;
     canvas.height = +height;
     return canvas;
 }
 
-function attachCanvas(container: HTMLElement, canvas: HTMLCanvasElement): void {
+function queryContainer(): HTMLDivElement {
+    const list = document.querySelectorAll(".egret-player");
+    if (list.length > 0) {
+        return list[0] as HTMLDivElement;
+    }
+    return null;
+}
+
+function attachCanvasToContainer(container: HTMLElement, canvas: HTMLCanvasElement): void {
     let style = canvas.style;
     style.cursor = "inherit";
     style.position = "absolute";
@@ -49,22 +57,18 @@ function attachCanvas(container: HTMLElement, canvas: HTMLCanvasElement): void {
     style.position = "absolute";
 }
 
+const version: string = '0.0.1';
 function main(): void {
-    console.log('main');
-    const list = document.querySelectorAll(".egret-player");
-    const length_2 = list.length;
-    for (let i = 0; i < length_2; ++i) {
-        const container = list[i] as HTMLDivElement;
-        const canvas: HTMLCanvasElement = createCanvas(window.innerWidth, window.innerHeight);
-        attachCanvas(container, canvas);
-
-        /* 测试canvas
-        const ctx2d = canvas.getContext('2d');
-        ctx2d.fillStyle = 'black';
-        ctx2d.fillRect(0, 0, canvas.width, canvas.height);
-        */
-        break;
-    }
+    //
+    console.log('webgl2 demo version = ' + version);
+    //
+    const canvas = createCanvas(window.innerWidth, window.innerHeight);
+    const container = queryContainer();
+    attachCanvasToContainer(container, canvas);
+    //
+    // const ctx2d = canvas.getContext('2d');
+    // ctx2d.fillStyle = 'black';
+    // ctx2d.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 
