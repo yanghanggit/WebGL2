@@ -4,8 +4,9 @@ class Application {
     private _exit: boolean = false;
     private _started: boolean = false;
     private _paused: boolean = false;
-    private _engine: WebGL2Engine = null;
-    private _gamePlay: GamePlay = null;
+    private readonly _engine: WebGL2Engine = null;
+    private readonly _gamePlay: GamePlay = null;
+    private _timer: WebGL2Timer = null;
 
     constructor(engine: WebGL2Engine, gamePlay: GamePlay) {
         this._engine = engine;
@@ -24,17 +25,38 @@ class Application {
         return this._exit;
     }
 
+    public get engine(): WebGL2Engine {
+        return this._engine;
+    }
+
     public start(): void {
         this._started = true;
         this._exit = false;
         this._paused = false;
+
+        this._timer = this.engine.createTimer();
+
+
     }
 
     public run(): void {
+        this.onBegin();
         this._gamePlay.play();
         this._engine.render();
+        this.onEnd();
     }
 
+    private onBegin(): void {
+        if (this._timer.ready()) {
+            //utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+        }
+        this._timer.start();
+    }
+
+    private onEnd(): void {
+        this._timer.end();
+    }
+    
     public stop(): void {
         this._gamePlay.stop();
         this._engine.stop();

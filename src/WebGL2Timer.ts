@@ -21,130 +21,154 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-// class Timer {
-//     constructor() {
-//     }
+// import { GL, WEBGL_INFO } from "./constants.js";
+// import { Query } from "./query.js";
 
-//     public restore(): Timer {
-//         return this;
-//     }
+/**
+    Rendering timer.
 
-//     public start(): Timer {
-//         return this;
-//     }
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {Object} cpuTimer Timer for CPU. Will be window.performance, if available, or window.Date.
+    @prop {WebGLQuery} gpuTimerQuery Timer query object for GPU (if gpu timing is supported).
+    @prop {boolean} gpuTimerQueryInProgress Whether a gpu timer query is currently in progress.
+    @prop {number} cpuStartTime When the last CPU timing started.
+    @prop {number} cpuTime Time spent on CPU during last timing. Only valid if ready() returns true.
+    @prop {number} gpuTime Time spent on GPU during last timing. Only valid if ready() returns true.
+            Will remain 0 if extension EXT_disjoint_timer_query_webgl2 is unavailable.
+*/
+class WebGL2Timer {
 
-//     public end(): Timer {
-//         return this;
-//     }
+    private readonly _engine: WebGL2Engine;
+    private readonly gl: WebGLRenderingContext;
+    private readonly cpuTimer: Performance | DateConstructor;
+    public gpuTimerQuery: WebGL2Query = null;
+    public cpuStartTime: number = 0;
+    public cpuTime: number = 0;
+    public gpuTime: number = 0;
 
-//     public ready(): boolean {
-//         return false;
-//     }
 
-//     public delete(): Timer {
-//         return this;
-//     }
-// }
+    constructor(engine: WebGL2Engine/*, gl: WebGLRenderingContext*/) {
 
-// class WebGL2Timer extends Timer {
+        this._engine = engine;
 
-//     private readonly _engine: WebGL2Engine = null;
-//     private readonly gl: WebGLRenderingContext = null;
-//     private cpuTimer: Performance | DateConstructor = null;
-//     private gpuTimerQuery: WebGL2Query = null;
-//     private cpuStartTime: number = 0;
-//     private cpuTime: number = 0;
-//     private gpuTime: number = 0;
 
-//     constructor(engine: WebGL2Engine) {
-//         super();
-//         this._engine = engine;
-//         this.gl = engine.gl;
-//         this.cpuTimer = window.performance || Date;
-//         // this.gpuTimerQuery = null;
-//         // this.cpuStartTime = 0;
-//         // this.cpuTime = 0;
-//         // this.gpuTime = 0;
-//         this.restore();
-//     }
+        this.gl = this._engine.gl;//gl;
+        this.cpuTimer = window.performance || /*window.*/Date;
 
-//     public restore(): WebGL2Timer {
-//         /*
-//         if (WEBGL_INFO.GPU_TIMER) {
-//             if (this.gpuTimerQuery) {
-//                 this.gpuTimerQuery.restore();
-//             } else {
-//                 this.gpuTimerQuery = new Query(this.gl, GL.TIME_ELAPSED_EXT);
-//             }
-//         }
+        this.gpuTimerQuery = null;
 
-//         this.cpuStartTime = 0;
-//         this.cpuTime = 0;
-//         this.gpuTime = 0;
-//         */
+        this.cpuStartTime = 0;
+        this.cpuTime = 0;
+        this.gpuTime = 0;
 
-//         return this;
-//     }
+        this.restore();
+    }
 
-//     public start(): WebGL2Timer {
-//         /*
-//         if (WEBGL_INFO.GPU_TIMER) {
-//             if (!this.gpuTimerQuery.active) {
-//                 this.gpuTimerQuery.begin();
-//                 this.cpuStartTime = this.cpuTimer.now();
-//             }
-//         } else {
-//             this.cpuStartTime = this.cpuTimer.now();
-//         }
-//         */
-//         return this;
-//     }
+    /**
+        Restore timer after context loss.
 
-//     public end(): WebGL2Timer {
-//         /*
-//         if (WEBGL_INFO.GPU_TIMER) {
-//             if (!this.gpuTimerQuery.active) {
-//                 this.gpuTimerQuery.end();
-//                 this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-//             }
-//         } else {
-//             this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
-//         }
-//         */
-//         return this;
-//     }
+        @method
+        @return {Timer} The Timer object.
+    */
+    restore() {
+        if (WEBGL_INFO.GPU_TIMER) {
+            if (this.gpuTimerQuery) {
+                this.gpuTimerQuery.restore();
+            } else {
+                this.gpuTimerQuery = new WebGL2Query(this._engine, GL.TIME_ELAPSED_EXT);//new Query(this.gl, GL.TIME_ELAPSED_EXT);
+            }
+        }
 
-//     public ready(): boolean {
-//         /*
-//         if (WEBGL_INFO.GPU_TIMER) {
-//             if (!this.gpuTimerQuery.active) {
-//                 return false;
-//             }
+        this.cpuStartTime = 0;
+        this.cpuTime = 0;
+        this.gpuTime = 0;
 
-//             var gpuTimerAvailable = this.gpuTimerQuery.ready();
-//             var gpuTimerDisjoint = this.gl.getParameter(GL.GPU_DISJOINT_EXT);
+        return this;
+    }
 
-//             if (gpuTimerAvailable && !gpuTimerDisjoint) {
-//                 this.gpuTime = this.gpuTimerQuery.result  / 1000000;
-//                 return true;
-//             } else {
-//                 return false;
-//             }
-//         } else {
-//             return Boolean(this.cpuStartTime);
-//         }
-//         */
-//         return true;
-//     }
 
-//     public delete(): WebGL2Timer {
-//         /*
-//         if (this.gpuTimerQuery) {
-//             this.gpuTimerQuery.delete();
-//             this.gpuTimerQuery = null;
-//         }
-//         */
-//         return this;
-//     }
+    /**
+        Start timing.
 
-// }
+        @method
+        @return {Timer} The Timer object.
+    */
+    start() {
+        if (WEBGL_INFO.GPU_TIMER) {
+            if (!this.gpuTimerQuery.active) {
+                this.gpuTimerQuery.begin();
+                this.cpuStartTime = this.cpuTimer.now();
+            }
+        } else {
+            this.cpuStartTime = this.cpuTimer.now();
+        }
+
+        return this;
+    }
+
+
+    /**
+        Stop timing.
+
+        @method
+        @return {Timer} The Timer object.
+    */
+    end() {
+        if (WEBGL_INFO.GPU_TIMER) {
+            if (!this.gpuTimerQuery.active) {
+                this.gpuTimerQuery.end();
+                this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
+            }
+        } else {
+            this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
+        }
+
+        return this;
+    }
+
+    /**
+        Check if timing results are available. If
+        this method returns true, the cpuTime and
+        gpuTime properties will be set to valid
+        values.
+
+        @method
+        @return {boolean} If results are available.
+    */
+    ready() {
+        if (WEBGL_INFO.GPU_TIMER) {
+            if (!this.gpuTimerQuery.active) {
+                return false;
+            }
+
+            var gpuTimerAvailable = this.gpuTimerQuery.ready();
+            var gpuTimerDisjoint = this.gl.getParameter(GL.GPU_DISJOINT_EXT);
+
+            if (gpuTimerAvailable && !gpuTimerDisjoint) {
+                this.gpuTime = this.gpuTimerQuery.result  / 1000000;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return Boolean(this.cpuStartTime);
+        }
+    }
+
+    /**
+        Delete this timer.
+
+        @method
+        @return {Timer} The Timer object.
+    */
+    delete() {
+        if (this.gpuTimerQuery) {
+            this.gpuTimerQuery.delete();
+            this.gpuTimerQuery = null;
+        }
+
+        return this;
+    }
+
+}

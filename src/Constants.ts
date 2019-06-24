@@ -785,7 +785,7 @@ const COMPRESSED_TEXTURE_TYPES = {
     [GL.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG]: true
 };
 
-const WEBGL_INFO = {};
+const WEBGL_INFO: any = {};
 
 const DUMMY_UNIT_ARRAY = new Array(1);
 

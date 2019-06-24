@@ -21,91 +21,113 @@
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///////////////////////////////////////////////////////////////////////////////////
 
-// class Query {
+//import { GL } from "./constants.js";
 
-//     constructor() {
-//     }
+/**
+    Generic query object.
 
-//     public restore(): Query {
-//         return this;
-//     }
+    @class
+    @prop {WebGLRenderingContext} gl The WebGL context.
+    @prop {WebGLQuery} query Query object.
+    @prop {GLEnum} target The type of information being queried.
+    @prop {boolean} active Whether or not a query is currently in progress.
+    @prop {Any} result The result of the query (only available after a call to ready() returns true). 
+*/
+class WebGL2Query {
 
-//     public begin(): Query {
-//         return this;
-//     }
+    private readonly _engine: WebGL2Engine;
+    private readonly gl: WebGLRenderingContext;
+    private query: WebGLQuery;
+    private readonly target: number;
+    public active: boolean;
+    public result: number;
 
-//     public end(): Query {
-//         return this;
-//     }
+    constructor(engine: WebGL2Engine, /*gl: WebGLRenderingContext,*/ target: number) {
+        this._engine = engine;
+        this.gl = engine.gl;
+        this.query = null;
+        this.target = target;
+        this.active = false;
+        this.result = null;
 
-//     public ready(): boolean {
-//         return false;
-//     }
+        this.restore();
+    }
 
-//     public delete(): Query {
-//         return this;
-//     }
-// }
+    /**
+        Restore query after context loss.
 
+        @method
+        @return {Query} The Query object.
+    */
+    restore() {
+        this.query = this.gl.createQuery();
+        this.active = false;
+        this.result = null;
 
-// class WebGL2Query extends Query {
+        return this;
+    }
 
-//     private readonly _engine: WebGL2Engine = null;
-//     private readonly gl: WebGLRenderingContext = null;
-//     private readonly target: number = 0;
-//     private query: WebGLQuery = null;
-//     private active: boolean = false;
-//     private result: number = 0;
+    /**
+        Begin a query.
 
-//     constructor(engine: WebGL2Engine, target: number) {
-//         super();
-//         this._engine = engine;
-//         this.gl = engine.gl;
-//         this.target = target;
-//         this.restore();
-//     }
+        @method
+        @return {Query} The Query object.
+    */
+    begin() {
+        if (!this.active) {
+            this.gl.beginQuery(this.target, this.query);
+            this.result = null;
+        }
 
-//     public restore(): WebGL2Query {
-//         this.query = this.gl.createQuery();
-//         this.active = false;
-//         this.result = null;
-//         return this;
-//     }
+        return this;
+    }
 
-//     public begin(): WebGL2Query {
-//         if (!this.active) {
-//             this.gl.beginQuery(this.target, this.query);
-//             this.result = 0;
-//         }
-//         return this;
-//     }
+    /**
+        End a query.
 
-//     public end(): WebGL2Query {
-//         if (!this.active) {
-//             this.gl.endQuery(this.target);
-//             this.active = true;
-//         }
-//         return this;
-//     }
+        @method
+        @return {Query} The Query object.
+    */
+    end() {
+        if (!this.active) {
+            this.gl.endQuery(this.target);
+            this.active = true;
+        }
 
-//     public ready(): boolean {
-        
-//         if (this.active && this.gl.getQueryParameter(this.query, GL.QUERY_RESULT_AVAILABLE)) {
-//             this.active = false;
-//             // Note(Tarek): Casting because FF incorrectly returns booleans.
-//             // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714 
-//             this.result = Number(this.gl.getQueryParameter(this.query, GL.QUERY_RESULT));
-//             return true;
-//         }
-//         return false;
-//     }
+        return this;
+    }
 
-//     public delete(): WebGL2Query {
-//         if (this.query) {
-//             this.gl.deleteQuery(this.query);
-//             this.query = null;
-//         }
-//         return this;
-//     }
+    /**
+        Check if query result is available.
 
-// }
+        @method
+        @return {boolean} If results are available.
+    */
+    ready() {
+        if (this.active && this.gl.getQueryParameter(this.query, GL.QUERY_RESULT_AVAILABLE)) {
+            this.active = false;
+            // Note(Tarek): Casting because FF incorrectly returns booleans.
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=1422714 
+            this.result = Number(this.gl.getQueryParameter(this.query, GL.QUERY_RESULT));
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+        Delete this query.
+
+        @method
+        @return {Query} The Query object.
+    */
+    delete() {
+        if (this.query) {
+            this.gl.deleteQuery(this.query);
+            this.query = null;
+        }
+
+        return this;
+    }
+
+}

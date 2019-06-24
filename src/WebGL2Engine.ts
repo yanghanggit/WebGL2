@@ -29,5 +29,9 @@ class WebGL2Engine {
     public resize(width: number, height: number): void {
        // super.resize(width, height);
     }
+
+    public createTimer(): WebGL2Timer {
+      return new WebGL2Timer(this);
+  }
 }
 
