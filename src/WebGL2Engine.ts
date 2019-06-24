@@ -1,11 +1,11 @@
 
-class WebGL2Engine extends Engine {
+class WebGL2Engine {
 
     private readonly _canvas: HTMLCanvasElement = null;
     private readonly _webgl2Context: WebGLRenderingContext = null;
 
     constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
-        super();
+        //super();
         this._canvas = canvas;
         this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
     }
@@ -15,19 +15,19 @@ class WebGL2Engine extends Engine {
     }
 
     public render(): void {
-       super.render();
+       //super.render();
     }
 
     public stop(): void {
-        super.stop();
+       // super.stop();
     }
 
     public destroy(): void {
-        super.destroy();
+       // super.destroy();
     }
 
     public resize(width: number, height: number): void {
-        super.resize(width, height);
+       // super.resize(width, height);
     }
 }
 

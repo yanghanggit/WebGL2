@@ -4,10 +4,10 @@ class Application {
     private _exit: boolean = false;
     private _started: boolean = false;
     private _paused: boolean = false;
-    private _engine: Engine = null;
+    private _engine: WebGL2Engine = null;
     private _gamePlay: GamePlay = null;
 
-    constructor(engine: Engine, gamePlay: GamePlay) {
+    constructor(engine: WebGL2Engine, gamePlay: GamePlay) {
         this._engine = engine;
         this._gamePlay = gamePlay;
     }
