@@ -27,73 +27,43 @@
 // //
 // //////////////////////////////////////////////////////////////////////////////////////
 
+class Application {
 
-function createCanvas(width: number, height: number): HTMLCanvasElement {
-    const canvas: HTMLCanvasElement = document.createElement("canvas");
-    canvas.width = +width;
-    canvas.height = +height;
-    return canvas;
-}
+    private _exit: boolean = false;
+    private _started: boolean = false;
+    private _paused: boolean = false;
 
-function queryContainer(): HTMLDivElement {
-    const list = document.querySelectorAll(".egret-player");
-    if (list.length > 0) {
-        return list[0] as HTMLDivElement;
+    constructor() {
     }
-    return null;
-}
 
-function attachCanvasToContainer(container: HTMLElement, canvas: HTMLCanvasElement): void {
-    let style = canvas.style;
-    style.cursor = "inherit";
-    style.position = "absolute";
-    style.top = "0";
-    style.bottom = "0";
-    style.left = "0";
-    style.right = "0";
-    container.appendChild(canvas);
-    style = container.style;
-    style.overflow = "hidden";
-    style.position = "absolute";
-}
-
-const version: string = '0.0.1';
-let app: Application = null;
-function main(): void {
-    //
-    console.log('webgl2 demo version = ' + version);
-    //
-    const canvas = createCanvas(window.innerWidth, window.innerHeight);
-    const container = queryContainer();
-    attachCanvasToContainer(container, canvas);
-    //
-    app = new Application();
-    let stop: number = 0;
-    function tick(): void {   
-        if (!app) {
-            cancelAnimationFrame(stop);
-            return;
-        }
-        if (!app.started) {
-            app.start();
-        }
-        if (!app.paused) {
-            app.run();
-        }
-        if (app.exit) {
-            app.stop();
-            app.destroy();
-            app = null;
-            cancelAnimationFrame(stop);
-        }
-        else {
-            stop = requestAnimationFrame(tick);
-        }
+    public get started(): boolean {
+        return this._started;
     }
-    stop = requestAnimationFrame(tick);
-    // const ctx2d = canvas.getContext('2d');
-    // ctx2d.fillStyle = 'black';
-    // ctx2d.fillRect(0, 0, canvas.width, canvas.height);
-}
 
+    public get paused(): boolean {
+        return this._paused;
+    }
+
+    public get exit(): boolean {
+        return this._exit;
+    }
+
+    public start(): void {
+        this._started = true;
+        this._exit = false;
+        this._paused = false;
+    }
+
+    public run(): void {
+
+    }
+
+    public stop(): void {
+
+    }
+
+    public destroy(): void {
+
+    }
+}
 
