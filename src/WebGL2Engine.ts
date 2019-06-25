@@ -1,32 +1,54 @@
 
+
+function loadShaderFromFile(filename: string, onLoadShader: Function): void {
+   const request = new XMLHttpRequest();
+   request.onreadystatechange = function () {
+      if (request.readyState === 4 && request.status === 200) {
+         onLoadShader(request.responseText);
+      }
+   };
+   request.open("GET", filename, true);
+   request.send();
+}
+
 class WebGL2Engine {
 
-    private readonly _canvas: HTMLCanvasElement = null;
-    private readonly _webgl2Context: WebGLRenderingContext = null;
+   private readonly _canvas: HTMLCanvasElement = null;
+   private readonly _webgl2Context: WebGLRenderingContext = null;
 
-    constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
-        this._canvas = canvas;
-        this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
-    }
+   constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
+      this._canvas = canvas;
+      this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
 
-    public get gl(): WebGLRenderingContext {
-        return this._webgl2Context;
-    }
 
-    public render(): void {
-    }
+      const vsFile = "resource/assets/shader1.vert.glsl";
+      const fsFile = "resource/assets/shader1.frag.glsl";
+      loadShaderFromFile(vsFile, function (content: string) {
+         console.log(vsFile + ' => ' + content);
+      });
+      // loadShaderFromFile(fsFile, function (content: string) {
+      //    console.log(vsFile + ' => ' + content);
+      // });
+   }
 
-    public stop(): void {
-    }
+   public get gl(): WebGLRenderingContext {
+      return this._webgl2Context;
+   }
 
-    public dispose(): void {
-    }
+   public render(): void {
+   }
 
-    public resize(width: number, height: number): void {
-    }
+   public stop(): void {
+   }
 
-    public createTimer(): WebGL2Timer {
+   public dispose(): void {
+   }
+
+   public resize(width: number, height: number): void {
+   }
+
+   public createTimer(): WebGL2Timer {
       return new WebGL2Timer(this);
-  }
+   }
 }
 
