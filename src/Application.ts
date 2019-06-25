@@ -1,34 +1,5 @@
 
 
-class Profile {
-
-    private _timer: WebGL2Timer = null;
-    constructor(timer: WebGL2Timer) {
-        this._timer = timer;
-    }
-
-    public start(): Profile {
-        if (this._timer.ready()) {
-            //utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
-        }
-        this._timer.start();
-        return this;
-    }
-
-    public end(): Profile {
-        this._timer.end();
-        return this;
-    }
-
-    public dispose(): Profile {
-        this._timer.delete();
-        this._timer = null;
-        return this;
-    }
-}
-
-
-
 class Application {
 
     private _exited: boolean = false;
