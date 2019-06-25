@@ -67,6 +67,21 @@ class Application {
         return this;
     }
 
+    public exit(): Application {
+        this._exited = true;
+        return this;
+    }
+
+    public pause(): Application {
+        this._paused = true;
+        return this;
+    }
+
+    public resume(): Application {
+        this._paused = false;
+        return this;
+    }
+
     public update(): Application {
         this._profile.start();
         ////////////////////////////
