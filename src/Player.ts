@@ -1,5 +1,5 @@
 
-class GamePlay {
+class Player {
 
     constructor() {
     }
@@ -12,7 +12,7 @@ class GamePlay {
 
     }
     
-    public destroy(): void {
+    public dispose(): void {
 
     }
 }

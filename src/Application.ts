@@ -1,16 +1,46 @@
 
+
+class Profile {
+
+    private _timer: WebGL2Timer = null;
+    constructor(timer: WebGL2Timer) {
+        this._timer = timer;
+    }
+
+    public start(): Profile {
+        if (this._timer.ready()) {
+            //utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+        }
+        this._timer.start();
+        return this;
+    }
+
+    public end(): Profile {
+        this._timer.end();
+        return this;
+    }
+
+    public dispose(): Profile {
+        this._timer.delete();
+        this._timer = null;
+        return this;
+    }
+}
+
+
+
 class Application {
 
-    private _exit: boolean = false;
+    private _exited: boolean = false;
     private _started: boolean = false;
     private _paused: boolean = false;
-    private readonly _engine: WebGL2Engine = null;
-    private readonly _gamePlay: GamePlay = null;
-    private _timer: WebGL2Timer = null;
+    private _engine: WebGL2Engine = null;
+    private _player: Player = null;
+    private _profile: Profile = null;
 
-    constructor(engine: WebGL2Engine, gamePlay: GamePlay) {
+    constructor(engine: WebGL2Engine, _player: Player) {
         this._engine = engine;
-        this._gamePlay = gamePlay;
+        this._player = _player;
     }
 
     public get started(): boolean {
@@ -21,54 +51,54 @@ class Application {
         return this._paused;
     }
 
-    public get exit(): boolean {
-        return this._exit;
+    public get exited(): boolean {
+        return this._exited;
     }
 
     public get engine(): WebGL2Engine {
         return this._engine;
     }
 
-    public start(): void {
+    public start(): Application {
         this._started = true;
-        this._exit = false;
+        this._exited = false;
         this._paused = false;
-
-        this._timer = this.engine.createTimer();
-
-
+        this._profile = new Profile(this.engine.createTimer());
+        return this;
     }
 
-    public run(): void {
-        this.onBegin();
-        this._gamePlay.play();
+    public update(): Application {
+        this._profile.start();
+        ////////////////////////////
+        this._player.play();
         this._engine.render();
-        this.onEnd();
+        ////////////////////////////
+        this._profile.end();
+        return this;
     }
 
-    private onBegin(): void {
-        if (this._timer.ready()) {
-            //utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
-        }
-        this._timer.start();
-    }
-
-    private onEnd(): void {
-        this._timer.end();
-    }
-    
-    public stop(): void {
-        this._gamePlay.stop();
+    public stop(): Application {
+        this._player.stop();
         this._engine.stop();
+        return this;
     }
 
-    public destroy(): void {
-        this._gamePlay.destroy();
-        this._engine.destroy();
+    public dispose(): Application {
+
+        this._player.dispose();
+        this._player = null;
+
+        this._engine.dispose();
+        this._engine = null;
+
+        this._profile.dispose();
+        this._profile = null;
+        return this;
     }
 
-    public resize(width: number, height: number): void {
+    public resize(width: number, height: number): Application {
         this._engine.resize(width, height);
+        return this;
     }
 }
 

@@ -29,6 +29,30 @@ function attachCanvasToContainer(container: HTMLElement, canvas: HTMLCanvasEleme
     style.position = "absolute";
 }
 
+function runApp(app: Application): void {
+    let stop: number = 0;
+    function updateApp(): void {   
+        if (!app.started) {
+            window.onresize = function() {
+                app.resize(window.innerWidth, window.innerHeight);
+            };
+            app.start();
+        }
+        if (!app.paused && app.started) {
+            app.update();
+        }
+        if (app.exited) {
+            app.stop().dispose();
+            app = null;
+            cancelAnimationFrame(stop);
+        }
+        else {
+            stop = requestAnimationFrame(updateApp);
+        }
+    }
+    stop = requestAnimationFrame(updateApp);
+}
+
 function main(): void {
     //
     const version: string = '0.0.1';
@@ -39,45 +63,9 @@ function main(): void {
     attachCanvasToContainer(container, canvas);
     //
     const webgl2Engine = new WebGL2Engine(canvas, null);
-    const gamePlay = new GamePlay;
-    let app: Application = new Application(webgl2Engine, gamePlay);
-    //
-    window.onresize = function() {
-        if (app) {
-            app.resize(window.innerWidth, window.innerHeight);
-        }
-    };
-    //
-    let stop: number = 0;
-    function tick(): void {   
-        if (!app) {
-            cancelAnimationFrame(stop);
-            return;
-        }
-        if (!app.started) {
-            app.start();
-        }
-        if (!app.paused) {
-            app.run();
-        }
-        if (app.exit) {
-            app.stop();
-            app.destroy();
-            app = null;
-            cancelAnimationFrame(stop);
-        }
-        else {
-            stop = requestAnimationFrame(tick);
-        }
-    }
-    stop = requestAnimationFrame(tick);
-
-    
-
-
-    // const ctx2d = canvas.getContext('2d');
-    // ctx2d.fillStyle = 'black';
-    // ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+    const player = new Player;
+    const app: Application = new Application(webgl2Engine, player);
+    runApp(app);
 }
 
 

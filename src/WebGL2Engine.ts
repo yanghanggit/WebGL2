@@ -5,7 +5,6 @@ class WebGL2Engine {
     private readonly _webgl2Context: WebGLRenderingContext = null;
 
     constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
-        //super();
         this._canvas = canvas;
         this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
     }
@@ -15,19 +14,15 @@ class WebGL2Engine {
     }
 
     public render(): void {
-       //super.render();
     }
 
     public stop(): void {
-       // super.stop();
     }
 
-    public destroy(): void {
-       // super.destroy();
+    public dispose(): void {
     }
 
     public resize(width: number, height: number): void {
-       // super.resize(width, height);
     }
 
     public createTimer(): WebGL2Timer {
