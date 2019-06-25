@@ -66,6 +66,13 @@ function main(): void {
     const player = new Player;
     const app: Application = new Application(webgl2Engine, player);
     runApp(app);
+
+    ///Users/yanghang/WebGL2/resource/assets
+    // const vsFile = "resource/assets/vertex-accum.vertex";
+    // //const fsFile = "resource/assets/shader1.frag.glsl";
+    // loadShaderFromFile(vsFile, function (content: string) {
+    //    console.log(vsFile + ' => ' + content);
+    // });
 }
 
 

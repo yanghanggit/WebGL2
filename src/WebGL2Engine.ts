@@ -20,12 +20,7 @@ class WebGL2Engine {
       this._canvas = canvas;
       this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
 
-
-      const vsFile = "resource/assets/shader1.vert.glsl";
-      const fsFile = "resource/assets/shader1.frag.glsl";
-      loadShaderFromFile(vsFile, function (content: string) {
-         console.log(vsFile + ' => ' + content);
-      });
+      
       // loadShaderFromFile(fsFile, function (content: string) {
       //    console.log(vsFile + ' => ' + content);
       // });
