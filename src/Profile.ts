@@ -14,7 +14,7 @@ class Profile implements System {
 
     public profileStart(): Profile {
         if (this._timer.ready()) {
-            this.show().update();
+            this.show().updateTimer();
         }
         this._timer.start();
         return this;

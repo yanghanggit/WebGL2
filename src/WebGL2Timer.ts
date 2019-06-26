@@ -72,7 +72,8 @@ class WebGL2Timer {
         @return {Timer} The Timer object.
     */
     restore() {
-        if (WEBGL_INFO.GPU_TIMER) {
+        //if (WEBGL_INFO.GPU_TIMER) {
+        if (this._engine.capbility('GPU_TIMER')) {
             if (this.gpuTimerQuery) {
                 this.gpuTimerQuery.restore();
             } else {
@@ -95,7 +96,8 @@ class WebGL2Timer {
         @return {Timer} The Timer object.
     */
     start() {
-        if (WEBGL_INFO.GPU_TIMER) {
+        //if (WEBGL_INFO.GPU_TIMER) {
+        if (this._engine.capbility('GPU_TIMER')) {
             if (!this.gpuTimerQuery.active) {
                 this.gpuTimerQuery.begin();
                 this.cpuStartTime = this.cpuTimer.now();
@@ -115,7 +117,8 @@ class WebGL2Timer {
         @return {Timer} The Timer object.
     */
     end() {
-        if (WEBGL_INFO.GPU_TIMER) {
+        //if (WEBGL_INFO.GPU_TIMER) {
+        if (this._engine.capbility('GPU_TIMER')) {
             if (!this.gpuTimerQuery.active) {
                 this.gpuTimerQuery.end();
                 this.cpuTime = this.cpuTimer.now() - this.cpuStartTime;
@@ -137,7 +140,8 @@ class WebGL2Timer {
         @return {boolean} If results are available.
     */
     ready() {
-        if (WEBGL_INFO.GPU_TIMER) {
+        //if (WEBGL_INFO.GPU_TIMER) {
+        if (this._engine.capbility('GPU_TIMER')) {
             if (!this.gpuTimerQuery.active) {
                 return false;
             }
@@ -146,7 +150,7 @@ class WebGL2Timer {
             var gpuTimerDisjoint = this.gl.getParameter(GL.GPU_DISJOINT_EXT);
 
             if (gpuTimerAvailable && !gpuTimerDisjoint) {
-                this.gpuTime = this.gpuTimerQuery.result  / 1000000;
+                this.gpuTime = this.gpuTimerQuery.result / 1000000;
                 return true;
             } else {
                 return false;

@@ -15,12 +15,15 @@ class WebGL2Engine implements System {
 
    private readonly _canvas: HTMLCanvasElement = null;
    private readonly _webgl2Context: WebGLRenderingContext = null;
+   private readonly _webGL2Capability: WebGL2Capability = null;
 
    constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
+      //
       this._canvas = canvas;
       this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
-
-
+      //
+      this._webGL2Capability = new WebGL2Capability(this);
+      this._webGL2Capability.initialize();
       // loadShaderFromFile(fsFile, function (content: string) {
       //    console.log(vsFile + ' => ' + content);
       // });
@@ -28,6 +31,10 @@ class WebGL2Engine implements System {
 
    public get gl(): WebGLRenderingContext {
       return this._webgl2Context;
+   }
+
+   public capbility(name: string): any {
+      return this._webGL2Capability.cap[name];
    }
 
    public render(): WebGL2Engine {
