@@ -1,4 +1,8 @@
 
+class RunEvent {
+    public callback: Function = null;
+}
+
 class Application implements System {
 
     private _exited: boolean = false;
@@ -8,6 +12,7 @@ class Application implements System {
     private _player: WebGL2DemoPlayer = null;
     private _profile: WebGL2Profile = null;
     private readonly subsystems: System[] = [];
+    private readonly _events: RunEvent[] = [];
 
     constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
         //
@@ -86,8 +91,26 @@ class Application implements System {
             sys.update();
         }
         this._engine.render();
+        this.callbackLater();
         ////////////////////////////
         this._profile.profileEnd();
+        return this;
+    }
+
+    private callbackLater(): Application {
+        if (this._events.length > 0) {
+            for (const v of this._events) {
+                v.callback && v.callback();
+            }
+            this._events.length = 0;
+        }
+        return this;
+    }
+
+    public addCallbackLater(callback: Function): Application {
+        const v = new RunEvent;
+        v.callback = callback;
+        this._events.push(v);
         return this;
     }
 
