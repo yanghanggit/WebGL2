@@ -11,7 +11,7 @@ function loadShaderFromFile(filename: string, onLoadShader: Function): void {
    request.send();
 }
 
-class WebGL2Engine {
+class WebGL2Engine implements System {
 
    private readonly _canvas: HTMLCanvasElement = null;
    private readonly _webgl2Context: WebGLRenderingContext = null;
@@ -20,7 +20,7 @@ class WebGL2Engine {
       this._canvas = canvas;
       this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
 
-      
+
       // loadShaderFromFile(fsFile, function (content: string) {
       //    console.log(vsFile + ' => ' + content);
       // });
@@ -30,16 +30,40 @@ class WebGL2Engine {
       return this._webgl2Context;
    }
 
-   public render(): void {
+   public render(): WebGL2Engine {
+      return this;
    }
 
-   public stop(): void {
+   public update(): WebGL2Engine {
+      return this;
    }
 
-   public dispose(): void {
+   public stop(): WebGL2Engine {
+      return this;
    }
 
-   public resize(width: number, height: number): void {
+   public dispose(): WebGL2Engine {
+      return this;
+   }
+
+   public resize(width: number, height: number): WebGL2Engine {
+      return this;
+   }
+
+   public start(): WebGL2Engine {
+      return this;
+   }
+
+   public pause(): WebGL2Engine {
+      return this;
+   }
+
+   public resume(): WebGL2Engine {
+      return this;
+   }
+
+   public exit(): WebGL2Engine {
+      return this;
    }
 
    public createTimer(): WebGL2Timer {

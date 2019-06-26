@@ -5,14 +5,14 @@ let cpuTimeSum = 0;
 let gpuTimeSum = 0;
 let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
-class Profile {
+class Profile implements System {
 
     private _timer: WebGL2Timer = null;
     constructor(timer: WebGL2Timer) {
         this._timer = timer;
     }
 
-    public start(): Profile {
+    public profileStart(): Profile {
         if (this._timer.ready()) {
             this.show().update();
         }
@@ -20,7 +20,7 @@ class Profile {
         return this;
     }
 
-    public end(): Profile {
+    public profileEnd(): Profile {
         this._timer.end();
         return this;
     }
@@ -48,28 +48,55 @@ class Profile {
         return this;
     }
 
-    public update(): Profile {
+    public updateTimer(): Profile {
         const timer = this._timer;
-        return this._update(timer.cpuTime, timer.gpuTime);
+        return this._updateTimer(timer.cpuTime, timer.gpuTime);
     }
 
-    private _update(cpuTime: number, gpuTime: number): Profile {
+    private _updateTimer(cpuTime: number, gpuTime: number): Profile {
         cpuTimeSum += cpuTime;
         gpuTimeSum += gpuTime;
         ++timeSampleCount;
         if (timeSampleCount === NUM_TIMING_SAMPLES) {
             let cpuTimeAve = cpuTimeSum / NUM_TIMING_SAMPLES;
             let gpuTimeAve = gpuTimeSum / NUM_TIMING_SAMPLES;
-            this.cpuTimeElement.innerText = "CPU time: " + cpuTimeAve.toFixed(3) + "ms";
-            if (gpuTimeAve > 0) {
-                this.gpuTimeElement.innerText = "GPU time: " + gpuTimeAve.toFixed(3) + "ms";
-            } else {
-                this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
+            if (this.timerDiv) {
+                this.cpuTimeElement.innerText = "CPU time: " + cpuTimeAve.toFixed(3) + "ms";
+                if (gpuTimeAve > 0) {
+                    this.gpuTimeElement.innerText = "GPU time: " + gpuTimeAve.toFixed(3) + "ms";
+                } else {
+                    this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
+                }
             }
             cpuTimeSum = 0;
             gpuTimeSum = 0;
             timeSampleCount = 0;
         }
+        return this;
+    }
+
+    public start(): Profile {
+        return this;
+    }
+
+    public stop(): Profile {
+        return this;
+    }
+
+    public pause(): Profile {
+        return this;
+
+    }
+
+    public resume(): Profile {
+        return this;
+    }
+
+    public exit(): Profile {
+        return this;
+    }
+
+    public update(): Profile {
         return this;
     }
 }

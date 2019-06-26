@@ -1,6 +1,5 @@
 
-
-class Application {
+class Application implements System {
 
     private _exited: boolean = false;
     private _started: boolean = false;
@@ -8,10 +7,26 @@ class Application {
     private _engine: WebGL2Engine = null;
     private _player: Player = null;
     private _profile: Profile = null;
+    private readonly subsystems: System[] = [];
 
     constructor(engine: WebGL2Engine, _player: Player) {
+        //
         this._engine = engine;
         this._player = _player;
+        this._profile = new Profile(this.engine.createTimer());
+        //
+
+        this.addSystem(this._player);
+        this.addSystem(this._engine);
+        this.addSystem(this._profile);
+    }
+
+    private addSystem(sys: System): boolean {
+        if (this.subsystems.indexOf(sys) >= 0) {
+            return false;
+        }
+        this.subsystems.push(sys);
+        return true;
     }
 
     public get started(): boolean {
@@ -34,51 +49,60 @@ class Application {
         this._started = true;
         this._exited = false;
         this._paused = false;
-        this._profile = new Profile(this.engine.createTimer());
+        for (const sys of this.subsystems) {
+            sys.start();
+        }
         return this;
     }
 
     public exit(): Application {
         this._exited = true;
+        for (const sys of this.subsystems) {
+            sys.exit();
+        }
         return this;
     }
 
     public pause(): Application {
         this._paused = true;
+        for (const sys of this.subsystems) {
+            sys.pause();
+        }
         return this;
     }
 
     public resume(): Application {
         this._paused = false;
+        for (const sys of this.subsystems) {
+            sys.resume();
+        }
         return this;
     }
 
     public update(): Application {
-        this._profile.start();
+        this._profile.profileStart();
         ////////////////////////////
-        this._player.play();
+        for (const sys of this.subsystems) {
+            sys.update();
+        }
         this._engine.render();
         ////////////////////////////
-        this._profile.end();
+        this._profile.profileEnd();
         return this;
     }
 
     public stop(): Application {
-        this._player.stop();
-        this._engine.stop();
+        for (const sys of this.subsystems) {
+            sys.stop();
+        }
         return this;
     }
 
     public dispose(): Application {
-
-        this._player.dispose();
-        this._player = null;
-
-        this._engine.dispose();
-        this._engine = null;
-
-        this._profile.dispose();
-        this._profile = null;
+        for (const sys of this.subsystems) {
+            sys.dispose();
+        }
+        this.subsystems.length = 0;
         return this;
     }
 
