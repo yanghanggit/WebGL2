@@ -17,8 +17,11 @@ class Application implements System {
     constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
         //
         this._engine = engine;
+        this._engine.attachApplication(this);
+        //
         this._player = _player;
         this._player.attachApplication(this);
+        //
         this._profile = new WebGL2Profile(this.engine.createTimer());
         //
         this.addSystem(this._player);
