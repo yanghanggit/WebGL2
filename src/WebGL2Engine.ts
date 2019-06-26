@@ -70,6 +70,17 @@ class WebGL2Engine implements System {
    private readonly _webgl2Context: WebGLRenderingContext = null;
    private readonly _webGL2Capability: WebGL2Capability = null;
    private readonly _webGL2State: WebGL2State = null;
+   private width: number = 0;//this.gl.drawingBufferWidth;
+   private height: number = 0;//this.gl.drawingBufferHeight;
+   private viewportX: number = 0;
+   private viewportY: number = 0;
+   private viewportWidth: number = 0;
+   private viewportHeight: number = 0;
+   private currentDrawCalls = null;
+   private emptyFragmentShader = null;
+   private clearBits: number = 0;
+   private contextLostExt = null;
+   private contextRestoredHandler = null;
 
    constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
       //
@@ -80,54 +91,38 @@ class WebGL2Engine implements System {
       // loadShaderFromFile(fsFile, function (content: string) {
       //    console.log(vsFile + ' => ' + content);
       // });
-   }
+      this.width = this.gl.drawingBufferWidth;
+      this.height = this.gl.drawingBufferHeight;
+      // this.viewportX = 0;
+      // this.viewportY = 0;
+      // this.viewportWidth = 0;
+      // this.viewportHeight = 0;
+      // this.currentDrawCalls = null;
+      // this.emptyFragmentShader = null;
 
-   public get application(): Application {
-      return this._application;
-   }
+      this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT;
 
-   public attachApplication(_application: Application): WebGL2Engine {
-      this._application = _application;
-      return this;
-   }
+      //   this.cpuTime = 0;
+      //   this.gpuTime = 0;
 
-   public get gl(): WebGLRenderingContext {
-      return this._webgl2Context;
-   }
+      this.viewport(0, 0, this.width, this.height);
 
-   public capbility(name: string): any {
-      return this._webGL2Capability.cap[name];
-   }
+      this.contextLostExt = null;
+      this.contextRestoredHandler = null;
 
-   public getExtension(ext: string): any {
-      return this.gl.getExtension(ext);
-   }
-   /*
-   var dummyGL = document.createElement("canvas").getContext("webgl2");
-   if (!dummyGL) {
-       console.error("WebGL 2 not available");
-       window.onload = function() {
-           document.open();
-           document.write("<!DOCTYPE html><html><body>This example requires WebGL 2 which is unavailable on this system.</body></html>");
-           document.close();
-       }
-   }
+      // this.initExtensions();
 
-   window.testExtension = function(ext) {
-       return Boolean(dummyGL.getExtension(ext));
-   };
-   */
+      this._canvas.addEventListener("webglcontextlost", (e) => {
+         e.preventDefault();
+      });
 
-   public get state(): WebGL2State {
-      return this._webGL2State;
-   }
+      this._canvas.addEventListener("webglcontextrestored", () => {
+         this.initExtensions();
 
-   public render(): WebGL2Engine {
-      return this;
-   }
-
-   public update(): WebGL2Engine {
-      return this;
+         if (this.contextRestoredHandler) {
+            this.contextRestoredHandler();
+         }
+      });
    }
 
    public stop(): WebGL2Engine {
@@ -155,6 +150,93 @@ class WebGL2Engine implements System {
    }
 
    public exit(): WebGL2Engine {
+      return this;
+   }
+
+   viewport(x, y, width, height) {
+
+      if (this.viewportWidth !== width || this.viewportHeight !== height ||
+         this.viewportX !== x || this.viewportY !== y) {
+         this.viewportX = x;
+         this.viewportY = y;
+         this.viewportWidth = width;
+         this.viewportHeight = height;
+         this.gl.viewport(x, y, this.viewportWidth, this.viewportHeight);
+      }
+
+      return this;
+   }
+
+   clearColor(r, g, b, a) {
+      this.gl.clearColor(r, g, b, a);
+      return this;
+   }
+
+   blend() {
+      this.gl.enable(this.gl.BLEND);
+
+      return this;
+   }
+
+   depthMask(mask) {
+      this.gl.depthMask(mask);
+
+      return this;
+   }
+
+
+
+   // Enable extensions
+   initExtensions() {
+      this.gl.getExtension("EXT_color_buffer_float");
+      this.gl.getExtension("OES_texture_float_linear");
+      this.gl.getExtension("WEBGL_compressed_texture_s3tc");
+      this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
+      this.gl.getExtension("WEBGL_compressed_texture_etc");
+      this.gl.getExtension("WEBGL_compressed_texture_astc");
+      this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
+      this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
+      this.gl.getExtension("EXT_disjoint_timer_query");
+      this.gl.getExtension("EXT_texture_filter_anisotropic");
+
+      this.state.extensions.debugShaders = this.gl.getExtension("WEBGL_debug_shaders");
+      this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
+
+      // Draft extensions
+      this.gl.getExtension("KHR_parallel_shader_compile");
+      this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
+   }
+
+   public get application(): Application {
+      return this._application;
+   }
+
+   public attachApplication(_application: Application): WebGL2Engine {
+      this._application = _application;
+      return this;
+   }
+
+   public get gl(): WebGLRenderingContext {
+      return this._webgl2Context;
+   }
+
+   public capbility(name: string): any {
+      return this._webGL2Capability.cap[name];
+   }
+
+   public getExtension(ext: string): any {
+      return this.gl.getExtension(ext);
+   }
+
+   public get state(): WebGL2State {
+      return this._webGL2State;
+   }
+
+   public render(): WebGL2Engine {
+      return this;
+   }
+
+   public update(): WebGL2Engine {
       return this;
    }
 
@@ -262,38 +344,6 @@ class WebGL2Engine implements System {
             }
          }
       );
-
-
-      // const request = new XMLHttpRequest();
-      // request.onreadystatechange = function () {
-      //    if (request.readyState === 4 && request.status === 200) {
-      //       onLoadShader && onLoadShader(request.responseText);
-      //    }
-      //    else {
-      //       //onLoadShaderFailed && onLoadShaderFailed(filename);
-      //    }
-      // };
-      // request.open("GET", filename, true);
-      // request.send();
-      // const http = new XMLHttpRequest();
-      // http.open("GET", url, true);
-      // //http.responseType = "blob";
-      // http.onload = function (e) {
-      //    if (this["status"] == 200 || this["status"] === 0) {
-      //       onLoadShader && onLoadShader(http.responseText);
-      //    }
-      // };
-      // http.onerror = function (e) {
-      //    console.log(url + ':' + e);
-      //    onLoadShaderFailed && onLoadShaderFailed(url);
-      // }
-      // http.send();
    }
-
-
-
-
-
-
 }
 
