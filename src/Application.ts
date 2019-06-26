@@ -6,7 +6,7 @@ class Application implements System {
     private _paused: boolean = false;
     private _engine: WebGL2Engine = null;
     private _player: WebGL2DemoPlayer = null;
-    private _profile: Profile = null;
+    private _profile: WebGL2Profile = null;
     private readonly subsystems: System[] = [];
 
     constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
@@ -14,9 +14,8 @@ class Application implements System {
         this._engine = engine;
         this._player = _player;
         this._player.attachApplication(this);
-        this._profile = new Profile(this.engine.createTimer());
+        this._profile = new WebGL2Profile(this.engine.createTimer());
         //
-
         this.addSystem(this._player);
         this.addSystem(this._engine);
         this.addSystem(this._profile);

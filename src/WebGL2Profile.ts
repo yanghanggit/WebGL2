@@ -5,14 +5,14 @@ let cpuTimeSum = 0;
 let gpuTimeSum = 0;
 let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
-class Profile implements System {
+class WebGL2Profile implements System {
 
     private _timer: WebGL2Timer = null;
     constructor(timer: WebGL2Timer) {
         this._timer = timer;
     }
 
-    public profileStart(): Profile {
+    public profileStart(): WebGL2Profile {
         if (this._timer.ready()) {
             this.show().updateTimer();
         }
@@ -20,12 +20,12 @@ class Profile implements System {
         return this;
     }
 
-    public profileEnd(): Profile {
+    public profileEnd(): WebGL2Profile {
         this._timer.end();
         return this;
     }
 
-    public dispose(): Profile {
+    public dispose(): WebGL2Profile {
         this._timer.delete();
         this._timer = null;
         return this;
@@ -35,7 +35,7 @@ class Profile implements System {
     private timerDiv: HTMLDivElement;
     private cpuTimeElement: HTMLDivElement;
     private gpuTimeElement: HTMLDivElement;
-    public show(): Profile {
+    public show(): WebGL2Profile {
         if (!this.timerDiv) {
             this.timerDiv = document.createElement("div")
             this.timerDiv.id = "timer";
@@ -48,12 +48,12 @@ class Profile implements System {
         return this;
     }
 
-    public updateTimer(): Profile {
+    public updateTimer(): WebGL2Profile {
         const timer = this._timer;
         return this._updateTimer(timer.cpuTime, timer.gpuTime);
     }
 
-    private _updateTimer(cpuTime: number, gpuTime: number): Profile {
+    private _updateTimer(cpuTime: number, gpuTime: number): WebGL2Profile {
         cpuTimeSum += cpuTime;
         gpuTimeSum += gpuTime;
         ++timeSampleCount;
@@ -75,28 +75,28 @@ class Profile implements System {
         return this;
     }
 
-    public start(): Profile {
+    public start(): WebGL2Profile {
         return this;
     }
 
-    public stop(): Profile {
+    public stop(): WebGL2Profile {
         return this;
     }
 
-    public pause(): Profile {
+    public pause(): WebGL2Profile {
         return this;
 
     }
 
-    public resume(): Profile {
+    public resume(): WebGL2Profile {
         return this;
     }
 
-    public exit(): Profile {
+    public exit(): WebGL2Profile {
         return this;
     }
 
-    public update(): Profile {
+    public update(): WebGL2Profile {
         return this;
     }
 }
