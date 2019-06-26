@@ -73,7 +73,7 @@ class WebGL2Engine implements System {
       return this._webGL2Capability.cap[name];
    }
 
-   public state(): WebGL2State {
+   public get state(): WebGL2State {
       return this._webGL2State;
    }
 
