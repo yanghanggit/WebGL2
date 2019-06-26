@@ -5,12 +5,18 @@ class WebGL2Capability {
    
    private readonly _engine: WebGL2Engine;
    public readonly cap: { [index: string]: any } = {};
+   private initialized: boolean = false;
 
    constructor(engine: WebGL2Engine) {
       this._engine = engine;
+      this.initialize();
    }
 
    public initialize(): WebGL2Capability {
+      if (this.initialized) {
+         return this;
+      }
+      this.initialized = true;
 
       const gl = this._engine.gl;
       const cap = this.cap;
