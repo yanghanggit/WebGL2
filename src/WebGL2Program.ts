@@ -41,7 +41,7 @@
     @prop {Object} uniforms Map of uniform names to handles.
     @prop {Object} appState Tracked GL state.
 */
-export class WebGL2Program {
+class WebGL2Program {
 
     private readonly _engine: WebGL2Engine;
     private readonly gl: WebGLRenderingContext;

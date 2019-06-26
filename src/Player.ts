@@ -1,4 +1,5 @@
 
+
 class Player implements System {
 
     constructor() {
@@ -32,4 +33,3 @@ class Player implements System {
         return this;
     }
 }
-

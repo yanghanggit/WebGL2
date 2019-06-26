@@ -5,14 +5,15 @@ class Application implements System {
     private _started: boolean = false;
     private _paused: boolean = false;
     private _engine: WebGL2Engine = null;
-    private _player: Player = null;
+    private _player: WebGL2DemoPlayer = null;
     private _profile: Profile = null;
     private readonly subsystems: System[] = [];
 
-    constructor(engine: WebGL2Engine, _player: Player) {
+    constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
         //
         this._engine = engine;
         this._player = _player;
+        this._player.attachApplication(this);
         this._profile = new Profile(this.engine.createTimer());
         //
 

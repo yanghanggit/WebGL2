@@ -31,9 +31,9 @@ function attachCanvasToContainer(container: HTMLElement, canvas: HTMLCanvasEleme
 
 function runApp(app: Application): void {
     let stop: number = 0;
-    function updateApp(): void {   
+    function updateApp(): void {
         if (!app.started) {
-            window.onresize = function() {
+            window.onresize = function () {
                 app.resize(window.innerWidth, window.innerHeight);
             };
             app.start();
@@ -63,9 +63,11 @@ function main(): void {
     attachCanvasToContainer(container, canvas);
     //
     const webgl2Engine = new WebGL2Engine(canvas, null);
-    const player = new Player;
-    const app: Application = new Application(webgl2Engine, player);
+    const webGL2DemoPlayer = new WebGL2DemoPlayer(webgl2Engine);
+    const app: Application = new Application(webgl2Engine, webGL2DemoPlayer);
     runApp(app);
+    //第一个场景
+    webGL2DemoPlayer.changeScene(new OITScene(webGL2DemoPlayer));
 
     ///Users/yanghang/WebGL2/resource/assets
     // const vsFile = "resource/assets/vertex-accum.vertex";
