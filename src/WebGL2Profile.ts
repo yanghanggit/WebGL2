@@ -37,8 +37,12 @@ class WebGL2Profile implements System {
     private gpuTimeElement: HTMLDivElement;
     public show(): WebGL2Profile {
         if (!this.timerDiv) {
-            this.timerDiv = document.createElement("div")
+            this.timerDiv = document.createElement("div");
             this.timerDiv.id = "timer";
+            const style = this.timerDiv.style;
+            style.setProperty('position', 'fixed');
+            style.setProperty('z-index', '999');
+            style.setProperty('top', '0');
             this.cpuTimeElement = document.createElement("div");
             this.gpuTimeElement = document.createElement("div");
             this.timerDiv.appendChild(this.cpuTimeElement);

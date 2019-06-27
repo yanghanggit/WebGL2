@@ -20,6 +20,11 @@ class OITScene extends WebGL2DemoScene {
     private accumDrawCall: WebGL2DrawCall;
     private blendDrawCall: WebGL2DrawCall;
     private rotationMatrix: Float32Array;
+    private spheres;
+    private modelMatrixData;
+    private modelMatrices;
+
+    private ready: boolean = false;
 
     
     public enter(): OITScene {
@@ -39,6 +44,7 @@ class OITScene extends WebGL2DemoScene {
         console.log('OITScene load finish');
         this.createScene();
         console.log('OITScene createScene');
+        this.ready = true;
     }
 
     private createScene(): void {
@@ -65,7 +71,7 @@ class OITScene extends WebGL2DemoScene {
         const canvas = app.canvas;
 
         //let app = PicoGL.createApp(canvas)
-        app.clearColor(0.0, 0.0, 0.0, 1.0)
+        app.clearColor(0.5, 0.5, 0.5, 1.0)
             .blend()
             .depthMask(false);
 
@@ -175,11 +181,14 @@ class OITScene extends WebGL2DemoScene {
         this.projMatrix = projMatrix;
         this.viewMatrix = viewMatrix;
         this.sceneUniforms = sceneUniforms;
-        /////////
+        this.spheres = spheres;
+        this.modelMatrixData = modelMatrixData;
+        this.modelMatrices = modelMatrices;
         const image = this.image;
         const MAX_TEXTURE_ANISOTROPY = app.capbility('MAX_TEXTURE_ANISOTROPY');
         const accumProgram = this.accumProgram;
         const blendProgram = this.blendProgram;
+        /////////
 
         /////
         let texture = app.createTexture2D(image, {
@@ -231,6 +240,52 @@ class OITScene extends WebGL2DemoScene {
     }
 
     public update(): OITScene {
+        //return;
+        if (!this.ready) {
+            return this;
+        }
+
+        const spheres = this.spheres;
+        const utils = this.engine;
+        const app = this.engine;
+        const rotationMatrix = this.rotationMatrix;
+        const modelMatrixData = this.modelMatrixData;
+        const modelMatrices = this.modelMatrices;
+        const PicoGL = GL;
+        const accumBuffer = this.accumBuffer;
+        const accumDrawCall = this.accumDrawCall;
+        const blendDrawCall = this.blendDrawCall;
+        /////////
+        // if (timer.ready()) {
+        //     utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+        // }
+
+        // timer.start();
+
+        for (let i = 0, len = spheres.length; i < len; ++i) {
+            spheres[i].rotate[1] += 0.002;
+
+            utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);
+            mat4.fromYRotation(rotationMatrix, spheres[i].rotate[1]);
+            mat4.multiply(spheres[i].modelMatrix, rotationMatrix, spheres[i].modelMatrix)
+
+            modelMatrixData.set(spheres[i].modelMatrix, i * 16);
+        }
+        modelMatrices.data(modelMatrixData);
+
+        // ACCUMULATION
+        app.drawFramebuffer(accumBuffer)
+        .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO, PicoGL.ONE_MINUS_SRC_ALPHA)
+        .clear();
+        accumDrawCall.draw()
+        
+        // BLEND
+        app.defaultDrawFramebuffer()
+        .blendFunc(PicoGL.ONE, PicoGL.ONE_MINUS_SRC_ALPHA)
+        .clear();
+        blendDrawCall.draw();
+        
+        //timer.end(); 
         return this;
     }
 

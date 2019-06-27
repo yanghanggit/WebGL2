@@ -133,6 +133,7 @@ class Application implements System {
     }
 
     public resize(width: number, height: number): Application {
+        this._player.resize(width, height);
         this._engine.resize(width, height);
         return this;
     }

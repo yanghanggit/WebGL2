@@ -1,31 +1,40 @@
 
 
-function loadShaderFromFile(url: string, onLoadShader: Function, onLoadShaderFailed: Function): void {
-   // const request = new XMLHttpRequest();
-   // request.onreadystatechange = function () {
-   //    if (request.readyState === 4 && request.status === 200) {
-   //       onLoadShader && onLoadShader(request.responseText);
-   //    }
-   //    else {
-   //       //onLoadShaderFailed && onLoadShaderFailed(filename);
-   //    }
-   // };
-   // request.open("GET", filename, true);
-   // request.send();
-   const http = new XMLHttpRequest();
-   http.open("GET", url, true);
-   //http.responseType = "blob";
-   http.onload = function (e) {
-      if (this["status"] == 200 || this["status"] === 0) {
-         onLoadShader && onLoadShader(http.responseText);
-      }
-   };
-   http.onerror = function (e) {
-      console.log(url + ':' + e);
-      onLoadShaderFailed && onLoadShaderFailed(url);
-   }
-   http.send();
-}
+const zeros = [0, 0, 0];
+const ones = [1, 1, 1];
+
+const translateMat = mat4.create();
+const rotateXMat = mat4.create();
+const rotateYMat = mat4.create();
+const rotateZMat = mat4.create();
+const scaleMat = mat4.create();
+
+// function loadShaderFromFile(url: string, onLoadShader: Function, onLoadShaderFailed: Function): void {
+//    // const request = new XMLHttpRequest();
+//    // request.onreadystatechange = function () {
+//    //    if (request.readyState === 4 && request.status === 200) {
+//    //       onLoadShader && onLoadShader(request.responseText);
+//    //    }
+//    //    else {
+//    //       //onLoadShaderFailed && onLoadShaderFailed(filename);
+//    //    }
+//    // };
+//    // request.open("GET", filename, true);
+//    // request.send();
+//    const http = new XMLHttpRequest();
+//    http.open("GET", url, true);
+//    //http.responseType = "blob";
+//    http.onload = function (e) {
+//       if (this["status"] == 200 || this["status"] === 0) {
+//          onLoadShader && onLoadShader(http.responseText);
+//       }
+//    };
+//    http.onerror = function (e) {
+//       console.log(url + ':' + e);
+//       onLoadShaderFailed && onLoadShaderFailed(url);
+//    }
+//    http.send();
+// }
 
 /*
 this.state = {
@@ -138,6 +147,11 @@ class WebGL2Engine implements System {
    }
 
    public resize(width: number, height: number): WebGL2Engine {
+      this.canvas.width = width;
+      this.canvas.height = height;
+      this.width = this.gl.drawingBufferWidth;
+      this.height = this.gl.drawingBufferHeight;
+      this.viewport(0, 0, this.width, this.height);
       return this;
    }
 
@@ -510,5 +524,55 @@ class WebGL2Engine implements System {
    createDrawCall(program, vertexArray, primitive?) {
       return new WebGL2DrawCall(/*this.gl, this.state,*/this, program, vertexArray, primitive);
    }
+
+   xformMatrix(xform, translate, rotate, scale) {
+      translate = translate || zeros;
+      rotate = rotate || zeros;
+      scale = scale || ones;
+
+      mat4.fromTranslation(translateMat, translate);
+      mat4.fromXRotation(rotateXMat, rotate[0]);
+      mat4.fromYRotation(rotateYMat, rotate[1]);
+      mat4.fromZRotation(rotateZMat, rotate[2]);
+      mat4.fromScaling(scaleMat, scale);
+
+      mat4.multiply(xform, rotateXMat, scaleMat);
+      mat4.multiply(xform, rotateYMat, xform);
+      mat4.multiply(xform, rotateZMat, xform);
+      mat4.multiply(xform, translateMat, xform);
+   }
+
+   drawFramebuffer(framebuffer) {
+      framebuffer.bindForDraw();
+      return this;
+   }
+
+   blendFuncSeparate(csrc, cdest, asrc, adest) {
+      this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
+
+      return this;
+   }
+
+   clear() {
+      this.gl.clear(this.clearBits);
+
+      return this;
+   }
+
+   defaultDrawFramebuffer() {
+      if (this.state.drawFramebuffer !== null) {
+         this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
+         this.state.drawFramebuffer = null;
+      }
+
+      return this;
+   }
+
+   blendFunc(src, dest) {
+      this.gl.blendFunc(src, dest);
+
+      return this;
+   }
+
 }
 
