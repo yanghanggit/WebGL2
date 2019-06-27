@@ -225,7 +225,7 @@ class OITScene extends WebGL2DemoScene {
             const programs = await this.engine.createPrograms([this.accumVsSource, this.accumFsSource], [this.blendVsSource, this.blendFsSource]);
             this.accumProgram = programs[0];
             this.blendProgram = programs[1];
-            const images = await this.engine.loadImages(["resource/assets/bird.png"]);
+            const images = await this.engine.loadImages(["resource/assets/bg.jpg"]);
             this.image = images[0];
             //console.log('load finish');
         }
