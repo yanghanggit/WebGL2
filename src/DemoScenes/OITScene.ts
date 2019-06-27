@@ -40,10 +40,9 @@ class OITScene extends WebGL2DemoScene {
     }
 
     private async start(): Promise<void> {
+        console.log('-----------OITScene-----------');
         await this.loadResource();
-        console.log('OITScene load finish');
         this.createScene();
-        console.log('OITScene createScene');
         this.ready = true;
     }
 
