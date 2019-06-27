@@ -272,7 +272,7 @@ class OITScene extends WebGL2DemoScene {
         app.drawFramebuffer(accumBuffer)
         .blendFuncSeparate(PicoGL.ONE, PicoGL.ONE, PicoGL.ZERO, PicoGL.ONE_MINUS_SRC_ALPHA)
         .clear();
-        accumDrawCall.draw()
+        accumDrawCall.draw();
         
         // BLEND
         app.defaultDrawFramebuffer()
