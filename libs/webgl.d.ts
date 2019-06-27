@@ -1,10 +1,5 @@
 interface WebGLRenderingContext {
 
-    /*
-    *
-    */
-    getActiveUniformBlockName(program: WebGLProgram, uniformBlockIndex: number): string;
-
     drawArraysInstanced(mode: number, first: number, count: number, primcount: number): void;
     drawElementsInstanced(mode: number, count: number, type: number, offset: number, primcount: number): void;
     vertexAttribDivisor(index: number, divisor: number): void;

@@ -345,5 +345,22 @@ class WebGL2Engine implements System {
          }
       );
    }
+
+   createTexture2D(image, width, height, options?) {
+      if (typeof image === "number") {
+          // Create empty texture just give width/height.
+          options = height;
+          height = width;
+          width = image;
+          image = null;
+      } else if (height === undefined) {
+          // Passing in a DOM element. Height/width not required.
+          options = width;
+          width = image.width;
+          height = image.height;
+      }
+
+      return new WebGL2Texture(/*this.gl, this.state,*/this, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
+  }
 }
 

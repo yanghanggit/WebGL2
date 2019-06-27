@@ -25,24 +25,38 @@ class OITScene extends WebGL2DemoScene {
         const NUM_PER_ROW = 8;
         const RADIUS = 0.6;
 
+        // let vertex = new egret.Point(1, 1);
+        // {
+            
+        //     let viewSize = new egret.Point(1, 1);
+        //     let res = new egret.Point(2.0*vertex.x/viewSize.x - 1.0, 2.0*vertex.y/viewSize.y - 1.0);
+        //     console.log(res);
+        // }
+        
+        // {
+        //     //let vertex = new egret.Point(0, 0);
+        //     let viewSize = new egret.Point(2, 2);
+        //     let res = new egret.Point(2.0*vertex.x/viewSize.x - 1.0, 2.0*vertex.y/viewSize.y - 1.0);
+        //     console.log(res);
+        // }
+
+        // {
+        //     //let vertex = new egret.Point(0, 0);
+        //     let viewSize = new egret.Point(4, 4);
+        //     let res = new egret.Point(2.0*vertex.x/viewSize.x - 1.0, 2.0*vertex.y/viewSize.y - 1.0);
+        //     console.log(res);
+        // }
+        
         // let canvas = document.getElementById("gl-canvas");
         // canvas.width = window.innerWidth;
         // canvas.height = window.innerHeight;
-
         /*
         let app = PicoGL.createApp(canvas)
         .clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
         .depthMask(false);
-        */
-        this.engine.clearColor(0.0, 0.0, 0.0, 1.0)
-            .blend()
-            .depthMask(false);
 
-            //mat4.create();
-
-        /*
-        //let timer = app.createTimer();
+        let timer = app.createTimer();
 
         let spheres = new Array(NUM_SPHERES);
         let sphereColorData = new Uint8Array(NUM_SPHERES * 4);

@@ -75,6 +75,20 @@ interface WebGLRenderingContext {
     clearBufferiv(buffer: number, drawbuffer: number, values: ArrayBufferView, srcOffset: number | null): void;
     clearBufferuiv(buffer: number, drawbuffer: number, values: ArrayBufferView, srcOffset: number | null): void;
     clearBufferfi(buffer: number, drawbuffer: number, depth: number, stencil: number): void;
+
+    /*
+    *
+    */
+    getActiveUniformBlockName(program: WebGLProgram, uniformBlockIndex: number): string;
+    texStorage2D(target: number, levels: number, internalformat: number, width: number, height: number): void;
+    texStorage3D(target: number, levels: number, internalformat: number, width: number, height: number, depth: number): void;
+    compressedTexSubImage2D(target: number, level: number, xoffset: number, yoffset: number, width: number, height: number, format: number, offset: number): void;
+    compressedTexSubImage2D(target: number, level: number, xoffset: number, yoffset: number, width: number, height: number, format: number, srcData: ArrayBufferView): void;
+    compressedTexSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, offset: number): void;
+    compressedTexSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, srcData: ArrayBufferView): void;
+    texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, type: number, pboOffset: number): void;
+    texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, type: number, source: (HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageData)): void;
+    texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, type: number, srcData: ArrayBufferView): void;
 }
 
 interface ImageBitmap {
