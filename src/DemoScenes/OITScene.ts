@@ -12,7 +12,16 @@ class OITScene extends WebGL2DemoScene {
     private projMatrix: Float32Array;
     private viewMatrix: Float32Array;
     private sceneUniforms: WebGL2UniformBuffer;
+    private image: HTMLImageElement;
+    private accumProgram: WebGL2Program;
+    private blendProgram: WebGL2Program;
 
+
+    private accumDrawCall: WebGL2DrawCall;
+    private blendDrawCall: WebGL2DrawCall;
+    private rotationMatrix: Float32Array;
+
+    
     public enter(): OITScene {
         const engine = this.engine;
         if (!engine.getExtension('EXT_color_buffer_float')) {
@@ -160,14 +169,40 @@ class OITScene extends WebGL2DemoScene {
             .update();
 
 
-
-
-        ////
+        //////////
         this.accumBuffer = accumBuffer;
         this.viewProjMatrix = viewProjMatrix;
         this.projMatrix = projMatrix;
         this.viewMatrix = viewMatrix;
         this.sceneUniforms = sceneUniforms;
+        /////////
+        const image = this.image;
+        const MAX_TEXTURE_ANISOTROPY = app.capbility('MAX_TEXTURE_ANISOTROPY');
+        const accumProgram = this.accumProgram;
+        const blendProgram = this.blendProgram;
+
+        /////
+        let texture = app.createTexture2D(image, {
+            flipY: true,
+            maxAnisotropy: MAX_TEXTURE_ANISOTROPY/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/
+        });
+
+        let accumDrawCall = app.createDrawCall(accumProgram, sphereArray)
+            .uniformBlock("SceneUniforms", sceneUniforms)
+            .texture("uTexture", texture);
+
+        let blendDrawCall = app.createDrawCall(blendProgram, quadArray)
+            .texture("uAccumulate", accumBuffer.colorAttachments[0])
+            .texture("uAccumulateAlpha", accumBuffer.colorAttachments[1]);
+
+        let rotationMatrix = mat4.create();
+
+
+        /////
+        this.accumDrawCall = accumDrawCall;
+        this.blendDrawCall = blendDrawCall;
+        this.rotationMatrix = rotationMatrix;
+        /////
     }
 
     private async loadResource(): Promise<void> {
@@ -184,7 +219,10 @@ class OITScene extends WebGL2DemoScene {
             this.blendVsSource = txts[2];
             this.blendFsSource = txts[3];
             const programs = await this.engine.createPrograms([this.accumVsSource, this.accumFsSource], [this.blendVsSource, this.blendFsSource]);
+            this.accumProgram = programs[0];
+            this.blendProgram = programs[1];
             const images = await this.engine.loadImages(["resource/assets/webgl-logo.png"]);
+            this.image = images[0];
             //console.log('load finish');
         }
         catch (e) {

@@ -45,7 +45,7 @@ class WebGL2Framebuffer {
 
     private framebuffer = null;
     private numColorTargets = 0;
-    private colorAttachments = [];
+    public colorAttachments = [];
     private colorAttachmentEnums = [];
     private colorAttachmentTargets = [];
     private depthAttachment = null;

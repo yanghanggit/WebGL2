@@ -350,7 +350,7 @@ class WebGL2Engine implements System {
       );
    }
 
-   createTexture2D(image, width, height, options?) {
+   createTexture2D(image, width, height?, options?) {
       if (typeof image === "number") {
          // Create empty texture just give width/height.
          options = height;
@@ -505,6 +505,10 @@ class WebGL2Engine implements System {
 
    createUniformBuffer(layout, usage?: number) {
       return new WebGL2UniformBuffer(/*this.gl, this.state,*/this, layout, usage);
+   }
+
+   createDrawCall(program, vertexArray, primitive?) {
+      return new WebGL2DrawCall(/*this.gl, this.state,*/this, program, vertexArray, primitive);
    }
 }
 
