@@ -125,6 +125,10 @@ class WebGL2Engine implements System {
       });
    }
 
+   public get canvas(): HTMLCanvasElement {
+      return this._canvas;
+   }
+
    public stop(): WebGL2Engine {
       return this;
    }
@@ -497,6 +501,10 @@ class WebGL2Engine implements System {
 
    createVertexArray() {
       return new WebGL2VertexArray(/*this.gl, this.state,*/this);
-  }
+   }
+
+   createUniformBuffer(layout, usage?: number) {
+      return new WebGL2UniformBuffer(/*this.gl, this.state,*/this, layout, usage);
+   }
 }
 

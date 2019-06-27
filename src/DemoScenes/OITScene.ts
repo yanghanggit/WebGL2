@@ -1,6 +1,18 @@
 
 class OITScene extends WebGL2DemoScene {
 
+
+    private accumVsSource: string;// = txts[0];
+    private accumFsSource: string;// = txts[1];
+    private blendVsSource: string;// = txts[2];
+    private blendFsSource: string;// = txts[3];
+    private accumBuffer: WebGL2Framebuffer;
+
+    private viewProjMatrix: Float32Array;
+    private projMatrix: Float32Array;
+    private viewMatrix: Float32Array;
+    private sceneUniforms: WebGL2UniformBuffer;
+
     public enter(): OITScene {
         const engine = this.engine;
         if (!engine.getExtension('EXT_color_buffer_float')) {
@@ -22,7 +34,7 @@ class OITScene extends WebGL2DemoScene {
 
     private createScene(): void {
         // import { PicoGL } from "../src/picogl.js";
-       
+
         // utils.addTimerElement();
 
         // if (!testExtension("EXT_color_buffer_float")) {
@@ -34,18 +46,19 @@ class OITScene extends WebGL2DemoScene {
         const NUM_SPHERES = 32;
         const NUM_PER_ROW = 8;
         const RADIUS = 0.6;
-        
+
         // let canvas = document.getElementById("gl-canvas");
         // canvas.width = window.innerWidth;
         // canvas.height = window.innerHeight;
         let app = this.engine;
         const PicoGL = GL;
         const utils = app;
+        const canvas = app.canvas;
 
         //let app = PicoGL.createApp(canvas)
         app.clearColor(0.0, 0.0, 0.0, 1.0)
-        .blend()
-        .depthMask(false);
+            .blend()
+            .depthMask(false);
 
         //let timer = app.createTimer();
 
@@ -77,22 +90,22 @@ class OITScene extends WebGL2DemoScene {
         // let accumVsSource = document.getElementById("vertex-accum").text.trim();
         // let accumFsSource = document.getElementById("fragment-accum").text.trim();
 
-        let accumulateTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA16F 
+        let accumulateTarget = app.createTexture2D(app.width, app.height, {
+            internalFormat: PicoGL.RGBA16F
         });
-        let accumulateAlphaTarget = app.createTexture2D(app.width, app.height, { 
-            internalFormat: PicoGL.RGBA16F 
+        let accumulateAlphaTarget = app.createTexture2D(app.width, app.height, {
+            internalFormat: PicoGL.RGBA16F
         });
         let accumBuffer = app.createFramebuffer()
-        .colorTarget(0, accumulateTarget)
-        .colorTarget(1, accumulateAlphaTarget);
+            .colorTarget(0, accumulateTarget)
+            .colorTarget(1, accumulateAlphaTarget);
 
         // BLEND PROGRAM
         // let blendVsSource = document.getElementById("vertex-quad").text.trim();
         // let blendFsSource = document.getElementById("fragment-blend").text.trim();
 
         // INSTANCED SPHERE GEOMETRY
-        let sphere = utils.createSphere({radius: 0.5});
+        let sphere = utils.createSphere({ radius: 0.5 });
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
         let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
@@ -103,12 +116,12 @@ class OITScene extends WebGL2DemoScene {
         let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         let sphereArray = app.createVertexArray()
-        .vertexAttributeBuffer(0, positions)
-        .vertexAttributeBuffer(1, uv)
-        .vertexAttributeBuffer(2, normals)
-        .instanceAttributeBuffer(3, colors, { normalized: true })
-        .instanceAttributeBuffer(4, modelMatrices)
-        .indexBuffer(indices);
+            .vertexAttributeBuffer(0, positions)
+            .vertexAttributeBuffer(1, uv)
+            .vertexAttributeBuffer(2, normals)
+            .instanceAttributeBuffer(3, colors, { normalized: true })
+            .instanceAttributeBuffer(4, modelMatrices)
+            .indexBuffer(indices);
 
         // QUAD GEOMETRY
         let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
@@ -121,10 +134,10 @@ class OITScene extends WebGL2DemoScene {
         ]));
 
         let quadArray = app.createVertexArray()
-        .vertexAttributeBuffer(0, quadPositions);
+            .vertexAttributeBuffer(0, quadPositions);
 
         // UNIFORM DATA
-        /*let projMatrix = mat4.create();
+        let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         let viewMatrix = mat4.create();
@@ -134,19 +147,27 @@ class OITScene extends WebGL2DemoScene {
         let viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-        let lightPosition = vec3.fromValues(0.5, 1, 2); 
+        let lightPosition = vec3.fromValues(0.5, 1, 2);
 
         // UNIFORM BUFFER
         let sceneUniforms = app.createUniformBuffer([
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
-        ])
-        .set(0, viewProjMatrix)
-        .set(1, eyePosition)
-        .set(2, lightPosition)
-        .update();
-        */
+        ]).set(0, viewProjMatrix)
+            .set(1, eyePosition)
+            .set(2, lightPosition)
+            .update();
+
+
+
+
+        ////
+        this.accumBuffer = accumBuffer;
+        this.viewProjMatrix = viewProjMatrix;
+        this.projMatrix = projMatrix;
+        this.viewMatrix = viewMatrix;
+        this.sceneUniforms = sceneUniforms;
     }
 
     private async loadResource(): Promise<void> {
@@ -158,11 +179,11 @@ class OITScene extends WebGL2DemoScene {
                 'resource/assets/fragment-blend.fragment'
             ];
             const txts = await this.engine.loadText(ress);
-            let accumVsSource = txts[0];
-            let accumFsSource = txts[1];
-            let blendVsSource = txts[2];
-            let blendFsSource = txts[3];
-            const programs = await this.engine.createPrograms([accumVsSource, accumFsSource], [blendVsSource, blendFsSource]);
+            this.accumVsSource = txts[0];
+            this.accumFsSource = txts[1];
+            this.blendVsSource = txts[2];
+            this.blendFsSource = txts[3];
+            const programs = await this.engine.createPrograms([this.accumVsSource, this.accumFsSource], [this.blendVsSource, this.blendFsSource]);
             const images = await this.engine.loadImages(["resource/assets/webgl-logo.png"]);
             //console.log('load finish');
         }
@@ -180,6 +201,19 @@ class OITScene extends WebGL2DemoScene {
     }
 
     public resize(width: number, height: number): OITScene {
+        const app = this.engine;
+        const accumBuffer = this.accumBuffer;
+        const viewProjMatrix = this.viewProjMatrix;
+        const projMatrix = this.projMatrix;
+        const viewMatrix = this.viewMatrix;
+        const sceneUniforms = this.sceneUniforms;
+
+        app.resize(window.innerWidth, window.innerHeight);
+        accumBuffer.resize();
+
+        mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
+        sceneUniforms.set(0, viewProjMatrix).update();
         return this;
     }
 }
