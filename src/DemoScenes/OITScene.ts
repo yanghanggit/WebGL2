@@ -168,11 +168,7 @@ class OITScene extends WebGL2DemoScene {
             PicoGL.FLOAT_MAT4,
             PicoGL.FLOAT_VEC4,
             PicoGL.FLOAT_VEC4
-        ]).set(0, viewProjMatrix)
-            .set(1, eyePosition)
-            .set(2, lightPosition)
-            .update();
-
+        ]).set(0, viewProjMatrix).set(1, eyePosition).set(2, lightPosition).update();
 
         //////////
         this.accumBuffer = accumBuffer;

@@ -53,16 +53,14 @@ function runApp(app: Application): void {
     stop = requestAnimationFrame(updateApp);
 }
 
-
-const scenes = [
+/////////
+const sceneClasses = [
     OITScene,
-    OITScene2
+    EmptyScene
 ]
-
 let currentSceneIndex = 0;
-
-let webGL2DemoPlayer: WebGL2DemoPlayer = null
-
+let webGL2DemoPlayer: WebGL2DemoPlayer = null;
+///////////
 function main(): void {
     //
     const version: string = '0.0.1';
@@ -77,29 +75,23 @@ function main(): void {
     const app: Application = new Application(webgl2Engine, webGL2DemoPlayer);
     runApp(app);
     //第一个场景
-
-    // const scenes : WebGL2DemoScene[] = [
-    //     new OITScene(webGL2DemoPlayer),
-    //     new OITScene2(webGL2DemoPlayer)
-    // ]
-    changeSceneByIndex(currentSceneIndex, scenes);
-    //const clazz = scenes[0] as any;
-    //webGL2DemoPlayer.changeScene(new clazz(webGL2DemoPlayer) /*new OITScene(webGL2DemoPlayer)*/);
-
-    ///Users/yanghang/WebGL2/resource/assets
-    // const vsFile = "resource/assets/vertex-accum.vertex";
-    // //const fsFile = "resource/assets/shader1.frag.glsl";
-    // loadShaderFromFile(vsFile, function (content: string) {
-    //    console.log(vsFile + ' => ' + content);
-    // });
+    changeSceneByIndex(currentSceneIndex, sceneClasses);
 }
 
 
 function changeSceneByIndex(index: number, scenes: any[]): void {
     if (index < scenes.length) {
         const clazz = scenes[index] as any;
-        webGL2DemoPlayer.changeScene(new clazz(webGL2DemoPlayer) /*new OITScene(webGL2DemoPlayer)*/);
+        webGL2DemoPlayer.changeScene(new clazz(webGL2DemoPlayer));
     }
 }
+
+function nextScene(): void {
+    ++currentSceneIndex;
+    currentSceneIndex = currentSceneIndex % (sceneClasses.length);
+    changeSceneByIndex(currentSceneIndex, sceneClasses);
+}
+
+
 
 

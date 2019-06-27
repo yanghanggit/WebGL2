@@ -168,9 +168,7 @@ class WebTouchHandler /*extends HashObject*/ {
      */
     private onTouchEnd = (event: any): void => {
         ////这么招吧，是在不愿意再改这个了
-        ++currentSceneIndex;
-        currentSceneIndex = currentSceneIndex % (scenes.length);
-        changeSceneByIndex(currentSceneIndex, scenes);
+        nextScene();
         ////
         let location = this.getLocation(event);
         this.touch.onTouchEnd(location.x, location.y, event.identifier);
