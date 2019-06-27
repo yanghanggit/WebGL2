@@ -296,9 +296,8 @@ class OITScene extends WebGL2DemoScene {
         const viewMatrix = this.viewMatrix;
         const sceneUniforms = this.sceneUniforms;
 
-        app.resize(window.innerWidth, window.innerHeight);
-        accumBuffer.resize();
-
+        //app.resize(window.innerWidth, window.innerHeight);
+        accumBuffer.resize(width, height);
         mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         sceneUniforms.set(0, viewProjMatrix).update();
