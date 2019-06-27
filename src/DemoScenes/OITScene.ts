@@ -100,7 +100,7 @@ class OITScene extends WebGL2DemoScene {
 
         // PER-INSTANCE COLORS AND MODEL MATRICES
         let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 4, sphereColorData);
-        /*let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
@@ -124,7 +124,7 @@ class OITScene extends WebGL2DemoScene {
         .vertexAttributeBuffer(0, quadPositions);
 
         // UNIFORM DATA
-        let projMatrix = mat4.create();
+        /*let projMatrix = mat4.create();
         mat4.perspective(projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
 
         let viewMatrix = mat4.create();

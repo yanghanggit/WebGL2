@@ -489,6 +489,14 @@ class WebGL2Engine implements System {
 
    createIndexBuffer(type, itemSize, data, usage?: number) {
       return new WebGL2VertexBuffer(/*this.gl, this.state,*/this, type, itemSize, data, usage, true);
+   }
+
+   createMatrixBuffer(type, data, usage?: number) {
+      return new WebGL2VertexBuffer(/*this.gl, this.state,*/this, type, 0, data, usage);
+   }
+
+   createVertexArray() {
+      return new WebGL2VertexArray(/*this.gl, this.state,*/this);
   }
 }
 
