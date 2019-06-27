@@ -35,6 +35,7 @@ class WebGL2Profile implements System {
     private timerDiv: HTMLDivElement;
     private cpuTimeElement: HTMLDivElement;
     private gpuTimeElement: HTMLDivElement;
+    private fpsElement: HTMLDivElement;
     public show(): WebGL2Profile {
         if (!this.timerDiv) {
             const timerDiv = this.timerDiv = document.createElement("div");
@@ -45,9 +46,11 @@ class WebGL2Profile implements System {
             style.setProperty('z-index', '999');
             style.setProperty('top', '0');
             this.cpuTimeElement = document.createElement("div");
-            this.gpuTimeElement = document.createElement("div");
             timerDiv.appendChild(this.cpuTimeElement);
+            this.gpuTimeElement = document.createElement("div");
             timerDiv.appendChild(this.gpuTimeElement);
+            this.fpsElement = document.createElement("div");
+            timerDiv.appendChild(this.fpsElement);
             document.body.appendChild(this.timerDiv);
         }
         return this;
@@ -72,6 +75,8 @@ class WebGL2Profile implements System {
                 } else {
                     this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
                 }
+                // const fps = 1000 / cpuTimeAve;
+                // this.fpsElement.innerText = "FPS: " + (fps).toFixed(3);
             }
             cpuTimeSum = 0;
             gpuTimeSum = 0;
