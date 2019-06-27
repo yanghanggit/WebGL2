@@ -13,6 +13,7 @@ class Application implements System {
     private _profile: WebGL2Profile = null;
     private readonly subsystems: System[] = [];
     private readonly _events: RunEvent[] = [];
+    private readonly webTouchHandler: WebTouchHandler;
 
     constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
         //
@@ -27,6 +28,8 @@ class Application implements System {
         this.addSystem(this._player);
         this.addSystem(this._engine);
         this.addSystem(this._profile);
+
+        this.webTouchHandler = new WebTouchHandler(null, engine.canvas);
     }
 
     private addSystem(sys: System): boolean {
