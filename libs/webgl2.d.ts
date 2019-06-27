@@ -89,6 +89,8 @@ interface WebGLRenderingContext {
     texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, type: number, pboOffset: number): void;
     texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, type: number, source: (HTMLImageElement | HTMLCanvasElement | HTMLVideoElement | ImageData)): void;
     texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number, width: number, height: number, depth: number, format: number, type: number, srcData: ArrayBufferView): void;
+    framebufferTextureLayer(target: number, attachment: number, texture: WebGLTexture, level: number, layer: number): void;
+
 }
 
 interface ImageBitmap {

@@ -60,11 +60,11 @@ class WebGL2Texture {
     private readonly appState: WebGL2State;
 
     private binding;// = binding;
-    private texture;// = null;
+    public texture;// = null;
     private width;// = width || 0;
     private height;// = height || 0;
     private depth;// = depth || 0;
-    private is3D;// = is3D;
+    public is3D;// = is3D;
     private compressed;// = Boolean(COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
     private internalFormat;// = options.internalFormat;
     private format;// = this.internalFormat;

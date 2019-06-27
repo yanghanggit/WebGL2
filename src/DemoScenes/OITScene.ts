@@ -15,48 +15,39 @@ class OITScene extends WebGL2DemoScene {
 
     private async start(): Promise<void> {
         await this.loadResource();
+        console.log('OITScene load finish');
         this.createScene();
+        console.log('OITScene createScene');
     }
 
     private createScene(): void {
+        // import { PicoGL } from "../src/picogl.js";
+       
+        // utils.addTimerElement();
+
+        // if (!testExtension("EXT_color_buffer_float")) {
+        //     document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
+        // }
+
         const NEAR = 0.1;
         const FAR = 10.0;
         const NUM_SPHERES = 32;
         const NUM_PER_ROW = 8;
         const RADIUS = 0.6;
-
-        // let vertex = new egret.Point(1, 1);
-        // {
-            
-        //     let viewSize = new egret.Point(1, 1);
-        //     let res = new egret.Point(2.0*vertex.x/viewSize.x - 1.0, 2.0*vertex.y/viewSize.y - 1.0);
-        //     console.log(res);
-        // }
-        
-        // {
-        //     //let vertex = new egret.Point(0, 0);
-        //     let viewSize = new egret.Point(2, 2);
-        //     let res = new egret.Point(2.0*vertex.x/viewSize.x - 1.0, 2.0*vertex.y/viewSize.y - 1.0);
-        //     console.log(res);
-        // }
-
-        // {
-        //     //let vertex = new egret.Point(0, 0);
-        //     let viewSize = new egret.Point(4, 4);
-        //     let res = new egret.Point(2.0*vertex.x/viewSize.x - 1.0, 2.0*vertex.y/viewSize.y - 1.0);
-        //     console.log(res);
-        // }
         
         // let canvas = document.getElementById("gl-canvas");
         // canvas.width = window.innerWidth;
         // canvas.height = window.innerHeight;
-        /*
-        let app = PicoGL.createApp(canvas)
-        .clearColor(0.0, 0.0, 0.0, 1.0)
+        let app = this.engine;
+        const PicoGL = GL;
+        const utils = app;
+
+        //let app = PicoGL.createApp(canvas)
+        app.clearColor(0.0, 0.0, 0.0, 1.0)
         .blend()
         .depthMask(false);
 
-        let timer = app.createTimer();
+        //let timer = app.createTimer();
 
         let spheres = new Array(NUM_SPHERES);
         let sphereColorData = new Uint8Array(NUM_SPHERES * 4);
@@ -83,8 +74,8 @@ class OITScene extends WebGL2DemoScene {
         }
 
         // ACCUMULATION PROGRAM
-        let accumVsSource = document.getElementById("vertex-accum").text.trim();
-        let accumFsSource = document.getElementById("fragment-accum").text.trim();
+        // let accumVsSource = document.getElementById("vertex-accum").text.trim();
+        // let accumFsSource = document.getElementById("fragment-accum").text.trim();
 
         let accumulateTarget = app.createTexture2D(app.width, app.height, { 
             internalFormat: PicoGL.RGBA16F 
@@ -97,8 +88,8 @@ class OITScene extends WebGL2DemoScene {
         .colorTarget(1, accumulateAlphaTarget);
 
         // BLEND PROGRAM
-        let blendVsSource = document.getElementById("vertex-quad").text.trim();
-        let blendFsSource = document.getElementById("fragment-blend").text.trim();
+        // let blendVsSource = document.getElementById("vertex-quad").text.trim();
+        // let blendFsSource = document.getElementById("fragment-blend").text.trim();
 
         // INSTANCED SPHERE GEOMETRY
         let sphere = utils.createSphere({radius: 0.5});
@@ -109,7 +100,7 @@ class OITScene extends WebGL2DemoScene {
 
         // PER-INSTANCE COLORS AND MODEL MATRICES
         let colors = app.createVertexBuffer(PicoGL.UNSIGNED_BYTE, 4, sphereColorData);
-        let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
+        /*let modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, modelMatrixData);
 
         let sphereArray = app.createVertexArray()
         .vertexAttributeBuffer(0, positions)
@@ -173,7 +164,7 @@ class OITScene extends WebGL2DemoScene {
             let blendFsSource = txts[3];
             const programs = await this.engine.createPrograms([accumVsSource, accumFsSource], [blendVsSource, blendFsSource]);
             const images = await this.engine.loadImages(["resource/assets/webgl-logo.png"]);
-            console.log('load finish');
+            //console.log('load finish');
         }
         catch (e) {
             console.error(e);
