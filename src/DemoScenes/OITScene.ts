@@ -39,7 +39,7 @@ class OITScene extends WebGL2DemoScene {
             .blend()
             .depthMask(false);
 
-
+            //mat4.create();
 
         /*
         //let timer = app.createTimer();
