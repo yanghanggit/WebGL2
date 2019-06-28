@@ -2,8 +2,8 @@
 class WebGL2DemoScene {
 
     private readonly _player: WebGL2DemoPlayer = null;
+    protected _ready: boolean = false;
     constructor(player: WebGL2DemoPlayer) {
-        //super();
         this._player = player;
     }
 

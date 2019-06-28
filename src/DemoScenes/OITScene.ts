@@ -27,7 +27,6 @@ class OITScene extends WebGL2DemoScene {
     private spheresTransform: Transform[] = [];
     private modelMatrixData: Float32Array;
     private modelMatrices: WebGL2VertexBuffer;
-    private ready: boolean = false;
 
     public enter(): WebGL2DemoScene {
         const engine = this.engine;
@@ -45,7 +44,7 @@ class OITScene extends WebGL2DemoScene {
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
-        this.ready = true;
+        this._ready = true;
     }
 
     private createScene(): void {
@@ -169,7 +168,7 @@ class OITScene extends WebGL2DemoScene {
     }
 
     public update(): WebGL2DemoScene {
-        if (!this.ready) {
+        if (!this._ready) {
             return this;
         }
         //

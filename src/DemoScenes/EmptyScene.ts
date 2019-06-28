@@ -3,10 +3,34 @@ class EmptyScene extends WebGL2DemoScene {
     
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        this.start().catch(e => {
+            console.error(e);
+        });
+        this._ready = true; 
         return this;
     }
 
+    private async start(): Promise<void> {
+        await this.loadResource();
+        this.createScene();
+    }
+
+    private createScene(): void {
+
+    }
+
+    private async loadResource(): Promise<void> {
+        try {
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+
     public update(): WebGL2DemoScene {
+        if (!this._ready) {
+            return;
+        }
         this.engine.clear();
         return this;
     }
