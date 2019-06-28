@@ -144,10 +144,10 @@ class OITScene extends WebGL2DemoScene {
     private async loadResource(): Promise<void> {
         try {
             const ress: string[] = [
-                'resource/assets/vertex-accum.vertex',
-                'resource/assets/fragment-accum.fragment',
-                'resource/assets/vertex-quad.vertex',
-                'resource/assets/fragment-blend.fragment'
+                'resource/assets/vertex-accum.vertex.glsl',
+                'resource/assets/fragment-accum.fragment.glsl',
+                'resource/assets/vertex-quad.vertex.glsl',
+                'resource/assets/fragment-blend.fragment.glsl'
             ];
             //
             const txts = await this.engine.loadText(ress);
