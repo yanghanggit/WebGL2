@@ -1,5 +1,5 @@
 
-class EmptyScene extends WebGL2DemoScene {
+class WanderingTrianglesScene extends WebGL2DemoScene {
     
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));

@@ -27,6 +27,10 @@ class WebGL2DemoScene {
         return this._player.engine;
     }
 
+    public get application(): Application {
+        return this._player.application;
+    }
+
     public resize(width: number, height: number): WebGL2DemoScene {
         return this;
     }

@@ -56,6 +56,10 @@ class Application implements System {
         return this._engine;
     }
 
+    public get profile(): WebGL2Profile {
+        return this._profile;
+    }
+
     public start(): Application {
         this._started = true;
         this._exited = false;

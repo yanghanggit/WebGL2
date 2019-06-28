@@ -38,6 +38,7 @@ class OITScene extends WebGL2DemoScene {
         this.start().catch(e => {
             console.error(e);
         });
+        this.application.profile.setTitle(egret.getQualifiedClassName(this));
         return this;
     }
 

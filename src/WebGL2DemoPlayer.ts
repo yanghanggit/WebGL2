@@ -5,6 +5,7 @@ class WebGL2DemoPlayer implements System {
     private _application: Application = null;
     private readonly _engine: WebGL2Engine = null;
     private _currentScene: WebGL2DemoScene = null;
+    private _nextScene: WebGL2DemoScene = null;
 
     constructor(_engine: WebGL2Engine) {
         //super();
@@ -25,16 +26,23 @@ class WebGL2DemoPlayer implements System {
     }
 
     public changeScene(targetScene: WebGL2DemoScene): WebGL2DemoPlayer {
-        if (this._currentScene) {
-            this._currentScene.leave();
-            this._currentScene = null;
+        if (this._currentScene === targetScene) {
+            return this;
         }
-        this._currentScene = targetScene;
-        this._currentScene.enter();
+        this._nextScene = targetScene;
         return this;
     }
 
     public update(): WebGL2DemoPlayer {
+        if (this._nextScene) {
+            if (this._currentScene) {
+                this._currentScene.leave();
+                this._currentScene = null;
+            }
+            this._currentScene = this._nextScene;
+            this._currentScene.enter();
+            this._nextScene = null;
+        }
         this.updateCurrentScene();
         return this;
     }

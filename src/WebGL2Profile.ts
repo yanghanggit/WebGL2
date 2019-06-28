@@ -8,6 +8,12 @@ let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 class WebGL2Profile implements System {
 
     private _timer: WebGL2Timer = null;
+    private _timerDiv: HTMLDivElement = null;
+    private _cpuTimeElement: HTMLDivElement = null;
+    private _gpuTimeElement: HTMLDivElement = null;
+    private _fpsElement: HTMLDivElement = null;
+    private _titleElement: HTMLDivElement = null;
+
     constructor(timer: WebGL2Timer) {
         this._timer = timer;
     }
@@ -31,27 +37,24 @@ class WebGL2Profile implements System {
         return this;
     }
 
-    //
-    private timerDiv: HTMLDivElement;
-    private cpuTimeElement: HTMLDivElement;
-    private gpuTimeElement: HTMLDivElement;
-    private fpsElement: HTMLDivElement;
     public show(): WebGL2Profile {
-        if (!this.timerDiv) {
-            const timerDiv = this.timerDiv = document.createElement("div");
+        if (!this._timerDiv) {
+            const timerDiv = this._timerDiv = document.createElement("div");
             timerDiv.id = "timer";
             const style = timerDiv.style;
             //置顶，必须显示在最上面
             style.setProperty('position', 'fixed');
             style.setProperty('z-index', '999');
             style.setProperty('top', '0');
-            this.cpuTimeElement = document.createElement("div");
-            timerDiv.appendChild(this.cpuTimeElement);
-            this.gpuTimeElement = document.createElement("div");
-            timerDiv.appendChild(this.gpuTimeElement);
-            this.fpsElement = document.createElement("div");
-            timerDiv.appendChild(this.fpsElement);
-            document.body.appendChild(this.timerDiv);
+            this._cpuTimeElement = document.createElement("div");
+            timerDiv.appendChild(this._cpuTimeElement);
+            this._gpuTimeElement = document.createElement("div");
+            timerDiv.appendChild(this._gpuTimeElement);
+            this._fpsElement = document.createElement("div");
+            timerDiv.appendChild(this._fpsElement);
+            this._titleElement = document.createElement("div");
+            timerDiv.appendChild(this._titleElement);
+            document.body.appendChild(this._timerDiv);
         }
         return this;
     }
@@ -68,12 +71,12 @@ class WebGL2Profile implements System {
         if (timeSampleCount === NUM_TIMING_SAMPLES) {
             let cpuTimeAve = cpuTimeSum / NUM_TIMING_SAMPLES;
             let gpuTimeAve = gpuTimeSum / NUM_TIMING_SAMPLES;
-            if (this.timerDiv) {
-                this.cpuTimeElement.innerText = "CPU time: " + cpuTimeAve.toFixed(3) + "ms";
+            if (this._timerDiv) {
+                this._cpuTimeElement.innerText = "CPU time: " + cpuTimeAve.toFixed(3) + "ms";
                 if (gpuTimeAve > 0) {
-                    this.gpuTimeElement.innerText = "GPU time: " + gpuTimeAve.toFixed(3) + "ms";
+                    this._gpuTimeElement.innerText = "GPU time: " + gpuTimeAve.toFixed(3) + "ms";
                 } else {
-                    this.gpuTimeElement.innerText = "GPU time: (Unavailable)";
+                    this._gpuTimeElement.innerText = "GPU time: (Unavailable)";
                 }
                 // const fps = 1000 / cpuTimeAve;
                 // this.fpsElement.innerText = "FPS: " + (fps).toFixed(3);
@@ -107,6 +110,14 @@ class WebGL2Profile implements System {
     }
 
     public update(): WebGL2Profile {
+        return this;
+    }
+
+    public setTitle(title: string): WebGL2Profile {
+        this.show();
+        if (this._titleElement) {
+            this._titleElement.innerText = title;
+        }
         return this;
     }
 }
