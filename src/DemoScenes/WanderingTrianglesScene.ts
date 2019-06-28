@@ -57,6 +57,7 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
         const offsetsB = engine.createVertexBuffer(GL.FLOAT, 2, offsetData.length);
         const rotationsA = engine.createVertexBuffer(GL.FLOAT, 1, rotationData);
         const rotationsB = engine.createVertexBuffer(GL.FLOAT, 1, rotationData.length);
+        //
         const positions = engine.createVertexBuffer(GL.FLOAT, 2, positionData);
         const colors = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 3, colorData);
         //
@@ -88,6 +89,9 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
             .instanceAttributeBuffer(1, colors, { normalized: true })
             .instanceAttributeBuffer(2, offsetsB)
             .instanceAttributeBuffer(3, rotationsB);
+        //
+        this.drawCallA = engine.createDrawCall(this.drawProgram, drawArrayA);
+        this.drawCallB = engine.createDrawCall(this.drawProgram, drawArrayB);
 
         //
         this.updateDrawCallA = engine.createDrawCall(this.updateProgram, updateArrayA)
@@ -98,10 +102,7 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
         this.updateDrawCallB = engine.createDrawCall(this.updateProgram, updateArrayB)
             .primitive(GL.POINTS)
             .transformFeedback(transformFeedbackA);
-
         //
-        this.drawCallA = engine.createDrawCall(this.drawProgram, drawArrayA);
-        this.drawCallB = engine.createDrawCall(this.drawProgram, drawArrayB);
         this.updateDrawCall = this.updateDrawCallA;
         this.mainDrawCall = this.drawCallB;
     }
@@ -138,6 +139,7 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
+        //
         const engine = this.engine;
         engine.noRasterize();
         this.updateDrawCall.draw();

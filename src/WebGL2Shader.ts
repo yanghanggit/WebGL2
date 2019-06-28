@@ -35,7 +35,7 @@ class WebGL2Shader {
     private readonly _engine: WebGL2Engine;
     private readonly gl: WebGLRenderingContext;
     private readonly appState: WebGL2State;
-    private shader = null;
+    public shader: WebGLShader = null;
     private type = null;
     private source = null;
 

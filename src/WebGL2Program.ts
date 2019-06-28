@@ -1,223 +1,129 @@
-///////////////////////////////////////////////////////////////////////////////////
-// The MIT License (MIT)
-//
-// Copyright (c) 2017 Tarek Sherif
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of
-// this software and associated documentation files (the "Software"), to deal in
-// the Software without restriction, including without limitation the rights to
-// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-// the Software, and to permit persons to whom the Software is furnished to do so,
-// subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-///////////////////////////////////////////////////////////////////////////////////
 
-// import { GL, WEBGL_INFO } from "./constants.js";
-// import { Shader } from "./shader.js";
-// import {
-//     SingleComponentUniform,
-//     MultiNumericUniform,
-//     MultiBoolUniform,
-//     MatrixUniform
-// } from "./uniforms.js";
+class WebGL2Program extends WebGL2Object {
 
-/**
-    WebGL program consisting of compiled and linked vertex and fragment
-    shaders.
-
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLProgram} program The WebGL program.
-    @prop {boolean} transformFeedback Whether this program is set up for transform feedback.
-    @prop {Object} uniforms Map of uniform names to handles.
-    @prop {Object} appState Tracked GL state.
-*/
-class WebGL2Program {
-
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private readonly appState: WebGL2State;
-    private program = null;
-    private transformFeedbackVaryings = null;
+    private program: WebGLProgram = null;
+    private readonly transformFeedbackVaryings: string[] = null;
     private uniforms = {};
-    public uniformBlocks = {};
+    public uniformBlocks: { [index: string]: number } = {};
     public uniformBlockCount = 0;
-    public samplers = {};
-    public samplerCount = 0;
-    private vertexSource = null;
-    private vertexShader = null;
-    private fragmentSource = null;
-    private fragmentShader = null;
-    private linked = false;
+    public readonly samplers: { [index: string]: number } = {};
+    public samplerCount: number = 0;
+    private vertexSource: string;
+    private vertexShader: WebGL2Shader = null;
+    private fragmentSource: string;
+    private fragmentShader: WebGL2Shader = null;
+    private linked: boolean = false;
 
+    constructor(_engine: WebGL2Engine, vsSource: string | WebGL2Shader, fsSource: string | WebGL2Shader, xformFeebackVars: string[]) {
+        super(_engine);
 
-    constructor(/*gl, appState,*/ _engine: WebGL2Engine, vsSource, fsSource, xformFeebackVars) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        this.appState = _engine.state;//appState;
-        this.program = null;
         this.transformFeedbackVaryings = xformFeebackVars || null;
-        this.uniforms = {};
-        this.uniformBlocks = {};
-        this.uniformBlockCount = 0;
-        this.samplers = {};
-        this.samplerCount = 0;
+        //this.uniforms = {};
+        //this.uniformBlocks = {};
+        //this.uniformBlockCount = 0;
+        //this.samplers = {};
+        //this.samplerCount = 0;
 
-        this.vertexSource = null;
-        this.vertexShader = null;
-        this.fragmentSource = null;
-        this.fragmentShader = null;
-        this.linked = false;
-
+        // this.vertexSource = null;
+        // this.vertexShader = null;
+        // this.fragmentSource = null;
+        // this.fragmentShader = null;
+        // this.linked = false;
+        //
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
         } else {
             this.vertexShader = vsSource;
         }
-
+        //
         if (typeof fsSource === "string") {
             this.fragmentSource = fsSource;
         } else {
             this.fragmentShader = fsSource;
         }
-
         this.initialize();
     }
 
-    /**
-        Restore program after context loss. Note that this
-        will stall for completion. <b>App.restorePrograms</b>
-        is the preferred method for program restoration as
-        it will parallelize compilation where available.
-
-        @method
-        @return {Program} The Program object.
-    */
-    restore() {
+    public restore(): WebGL2Program {
         this.initialize();
         this.link();
         this.checkLinkage();
-
         return this;
     }
 
-    /**
-        Get the vertex shader source translated for the platform's API.
-
-        @method
-        @return {String} The translated vertex shader source.
-    */
     translatedVertexSource() {
         if (this.vertexShader) {
             return this.vertexShader.translatedSource();
         } else {
-            let vertexShader = new WebGL2Shader(/*this.gl, this.appState,*/this._engine, GL.VERTEX_SHADER, this.vertexSource);
-            let translatedSource = vertexShader.translatedSource();
+            const vertexShader = new WebGL2Shader(this.engine, GL.VERTEX_SHADER, this.vertexSource);
+            const translatedSource = vertexShader.translatedSource();
             vertexShader.delete();
             return translatedSource;
         }
     }
 
-    /**
-        Get the fragment shader source translated for the platform's API.
-
-        @method
-        @return {String} The translated fragment shader source.
-    */
     translatedFragmentSource() {
         if (this.fragmentShader) {
             return this.fragmentShader.translatedSource();
         } else {
-            let fragmentShader = new WebGL2Shader(/*this.gl, this.appState,*/this._engine, GL.FRAGMENT_SHADER, this.fragmentSource);
-            let translatedSource = fragmentShader.translatedSource();
+            const fragmentShader = new WebGL2Shader(this.engine, GL.FRAGMENT_SHADER, this.fragmentSource);
+            const translatedSource = fragmentShader.translatedSource();
             fragmentShader.delete();
             return translatedSource;
         }
     }
 
-    /**
-        Delete this program.
-
-        @method
-        @return {Program} The Program object.
-    */
-    delete() {
+    public delete(): WebGL2Object {
         if (this.program) {
             this.gl.deleteProgram(this.program);
             this.program = null;
-
-            if (this.appState.program === this) {
+            if (this.state.program === this) {
                 this.gl.useProgram(null);
-                this.appState.program = null;
+                this.state.program = null;
             }
         }
-
         return this;
     }
 
-    // Initialize program state
-    initialize() {
-        if (this.appState.program === this) {
+    public initialize(): WebGL2Program {
+        if (this.state.program === this) {
             this.gl.useProgram(null);
-            this.appState.program = null;
+            this.state.program = null;
         }
-
         this.linked = false;
         this.uniformBlockCount = 0;
         this.samplerCount = 0;
-
         if (this.vertexSource) {
-            this.vertexShader = new WebGL2Shader(/*this.gl, this.appState,*/this._engine, GL.VERTEX_SHADER, this.vertexSource);
+            this.vertexShader = new WebGL2Shader(this.engine, GL.VERTEX_SHADER, this.vertexSource);
         }
-
         if (this.fragmentSource) {
-            this.fragmentShader = new WebGL2Shader(/*this.gl, this.appState,*/this._engine, GL.FRAGMENT_SHADER, this.fragmentSource);
+            this.fragmentShader = new WebGL2Shader(this.engine, GL.FRAGMENT_SHADER, this.fragmentSource);
         }
-
         this.program = this.gl.createProgram();
-
         return this;
     }
 
-    // Attach shaders and link program.
-    // Done as a separate step to avoid stalls on compileShader
-    // when doing async compile.
-    link() {
+    public link(): WebGL2Program {
         this.gl.attachShader(this.program, this.vertexShader.shader);
         this.gl.attachShader(this.program, this.fragmentShader.shader);
         if (this.transformFeedbackVaryings) {
             this.gl.transformFeedbackVaryings(this.program, this.transformFeedbackVaryings, GL.SEPARATE_ATTRIBS);
         }
         this.gl.linkProgram(this.program);
-
         return this;
     }
 
-    // Check if compilation is complete
-    checkCompletion() {
-        if (WEBGL_INFO.PARALLEL_SHADER_COMPILE) {
+    public checkCompletion(): boolean {
+        if (this.engine.capbility('PARALLEL_SHADER_COMPILE')) {
             return this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR);
         }
-
         return true;
     }
 
-    // Check if program linked.
-    // Will stall for completion.
-    checkLinkage() {
+    public checkLinkage(): WebGL2Program {
         if (this.linked) {
             return this;
         }
-
         if (this.gl.getProgramParameter(this.program, GL.LINK_STATUS)) {
             this.linked = true;
             this.initVariables();
@@ -226,34 +132,29 @@ class WebGL2Program {
             this.vertexShader.checkCompilation();
             this.fragmentShader.checkCompilation();
         }
-
         if (this.vertexSource) {
             this.vertexShader.delete();
             this.vertexShader = null;
         }
-
         if (this.fragmentSource) {
             this.fragmentShader.delete();
             this.fragmentShader = null;
         }
-
         return this;
     }
 
-    // Get variable handles from program
-    initVariables() {
+    public initVariables(): WebGL2Program {
+        //
         this.bind();
-
-        let numUniforms = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORMS);
-        let textureUnit;
-
+        //
+        const numUniforms = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORMS);
+        let textureUnit = 0;
         for (let i = 0; i < numUniforms; ++i) {
-            let uniformInfo = this.gl.getActiveUniform(this.program, i);
-            let uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
+            const uniformInfo = this.gl.getActiveUniform(this.program, i);
+            const uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
             let UniformClass = null;
-            let type = uniformInfo.type;
-            let numElements = uniformInfo.size;
-
+            const type = uniformInfo.type;
+            const numElements = uniformInfo.size;
             switch (type) {
                 case GL.SAMPLER_2D:
                 case GL.INT_SAMPLER_2D:
@@ -313,38 +214,31 @@ class WebGL2Program {
                     console.error("Unrecognized type for uniform ", uniformInfo.name);
                     break;
             }
-
             if (UniformClass) {
                 this.uniforms[uniformInfo.name] = new UniformClass(this.gl, uniformHandle, type, numElements);
             }
         }
-
-        let numUniformBlocks = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORM_BLOCKS);
-
+        const numUniformBlocks = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORM_BLOCKS);
         for (let i = 0; i < numUniformBlocks; ++i) {
-            let blockName = this.gl.getActiveUniformBlockName(this.program, i);
-            let blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
-
-            let uniformBlockBase = this.uniformBlockCount++;
+            const blockName = this.gl.getActiveUniformBlockName(this.program, i);
+            const blockIndex = this.gl.getUniformBlockIndex(this.program, blockName);
+            const uniformBlockBase = this.uniformBlockCount++;
             this.gl.uniformBlockBinding(this.program, blockIndex, uniformBlockBase);
             this.uniformBlocks[blockName] = uniformBlockBase;
         }
-    }
-
-    // Set the value of a uniform.
-    uniform(name, value) {
-        this.uniforms[name].set(value);
-
         return this;
     }
 
-    // Use this program.
-    bind() {
-        if (this.appState.program !== this) {
-            this.gl.useProgram(this.program);
-            this.appState.program = this;
-        }
+    public uniform(name, value): WebGL2Program {
+        this.uniforms[name].set(value);
+        return this;
+    }
 
+    public bind(): WebGL2Program {
+        if (this.state.program !== this) {
+            this.gl.useProgram(this.program);
+            this.state.program = this;
+        }
         return this;
     }
 }
