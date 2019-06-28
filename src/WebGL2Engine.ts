@@ -151,7 +151,6 @@ class WebGL2Engine implements System {
       return this;
    }
 
-   // Enable extensions
    private initExtensions(): WebGL2Engine {
       const gl = this.gl;
       gl.getExtension("EXT_color_buffer_float");
@@ -201,6 +200,7 @@ class WebGL2Engine implements System {
    }
 
    public render(): WebGL2Engine {
+      //目前就是空跑，后续主要是运行DrawCall的list
       return this;
    }
 
@@ -448,7 +448,7 @@ class WebGL2Engine implements System {
       return new WebGL2VertexArray(this);
    }
 
-   public createUniformBuffer(layout, usage?: number): WebGL2UniformBuffer {
+   public createUniformBuffer(layout: number[], usage?: number): WebGL2UniformBuffer {
       return new WebGL2UniformBuffer(this, layout, usage);
    }
 
