@@ -41,11 +41,14 @@ class WebGL2Profile implements System {
         if (!this._timerDiv) {
             const timerDiv = this._timerDiv = document.createElement("div");
             timerDiv.id = "timer";
+            //
             const style = timerDiv.style;
             //置顶，必须显示在最上面
             style.setProperty('position', 'fixed');
             style.setProperty('z-index', '999');
             style.setProperty('top', '0');
+            style.setProperty('color', '#F00');
+            //
             this._cpuTimeElement = document.createElement("div");
             timerDiv.appendChild(this._cpuTimeElement);
             this._gpuTimeElement = document.createElement("div");
