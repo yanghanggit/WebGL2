@@ -1,68 +1,38 @@
 
 
-const zeros = [0, 0, 0];
-const ones = [1, 1, 1];
-
+const zeros = vec3.fromValues(0, 0, 0);
+const ones = vec3.fromValues(1, 1, 1);
 const translateMat = mat4.create();
 const rotateXMat = mat4.create();
 const rotateYMat = mat4.create();
 const rotateZMat = mat4.create();
 const scaleMat = mat4.create();
 
-// function loadShaderFromFile(url: string, onLoadShader: Function, onLoadShaderFailed: Function): void {
-//    // const request = new XMLHttpRequest();
-//    // request.onreadystatechange = function () {
-//    //    if (request.readyState === 4 && request.status === 200) {
-//    //       onLoadShader && onLoadShader(request.responseText);
-//    //    }
-//    //    else {
-//    //       //onLoadShaderFailed && onLoadShaderFailed(filename);
-//    //    }
-//    // };
-//    // request.open("GET", filename, true);
-//    // request.send();
-//    const http = new XMLHttpRequest();
-//    http.open("GET", url, true);
-//    //http.responseType = "blob";
-//    http.onload = function (e) {
-//       if (this["status"] == 200 || this["status"] === 0) {
-//          onLoadShader && onLoadShader(http.responseText);
-//       }
-//    };
-//    http.onerror = function (e) {
-//       console.log(url + ':' + e);
-//       onLoadShaderFailed && onLoadShaderFailed(url);
-//    }
-//    http.send();
-// }
+interface SphereModel {
+   positions: Float32Array,
+   normals: Float32Array,
+   uvs: Float32Array,
+   indices: Uint16Array
+}
 
-/*
-this.state = {
-   program: null,
-   vertexArray: null,
-   transformFeedback: null,
-   activeTexture: -1,
-   textures: new Array(WEBGL_INFO.MAX_TEXTURE_UNITS),
-   uniformBuffers: new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS),
-   freeUniformBufferBases: [],
-   drawFramebuffer: null,
-   readFramebuffer: null,
-   extensions: {}
-};
-*/
+interface CreateSphereModelOptions {
+   longBands: number,
+   latBands: number,
+   radius: number,
+}
 
 class WebGL2State {
 
-   private readonly _engine: WebGL2Engine;
+   private readonly _engine: WebGL2Engine = null;
    public program: any = null;
    public vertexArray: any = null;
    public transformFeedback: any = null;
    public activeTexture: number = -1;
-   public readonly textures: any[] = [];//new Array(WEBGL_INFO.MAX_TEXTURE_UNITS),
-   public readonly uniformBuffers: any[] = [];//new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS),
-   public readonly freeUniformBufferBases;//: any[] = [];
-   public drawFramebuffer: WebGL2Framebuffer;//: any[] = null;
-   public readFramebuffer: WebGL2Framebuffer;//: any[] = null;
+   public readonly textures: WebGL2Texture[] = [];
+   public readonly uniformBuffers: any[] = [];
+   public readonly freeUniformBufferBases;
+   public drawFramebuffer: WebGL2Framebuffer = null;
+   public readFramebuffer: WebGL2Framebuffer = null;
    public readonly extensions: any = {};
 
    constructor(_engine: WebGL2Engine) {
@@ -79,8 +49,8 @@ class WebGL2Engine implements System {
    private readonly _webgl2Context: WebGLRenderingContext = null;
    private readonly _webGL2Capability: WebGL2Capability = null;
    private readonly _webGL2State: WebGL2State = null;
-   public width: number = 0;//this.gl.drawingBufferWidth;
-   public height: number = 0;//this.gl.drawingBufferHeight;
+   public width: number = 0;
+   public height: number = 0;
    private viewportX: number = 0;
    private viewportY: number = 0;
    private viewportWidth: number = 0;
@@ -88,8 +58,8 @@ class WebGL2Engine implements System {
    private currentDrawCalls = null;
    private emptyFragmentShader = null;
    private clearBits: number = 0;
-   private contextLostExt = null;
-   private contextRestoredHandler = null;
+   private contextLostExt: any = null;
+   private contextRestoredHandler: Function = null;
 
    constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
       //
@@ -97,37 +67,20 @@ class WebGL2Engine implements System {
       this._webgl2Context = canvas.getContext("webgl2", contextAttributes) as WebGLRenderingContext;
       this._webGL2Capability = new WebGL2Capability(this);
       this._webGL2State = new WebGL2State(this);
-      // loadShaderFromFile(fsFile, function (content: string) {
-      //    console.log(vsFile + ' => ' + content);
-      // });
+      //
       this.width = this.gl.drawingBufferWidth;
       this.height = this.gl.drawingBufferHeight;
-      // this.viewportX = 0;
-      // this.viewportY = 0;
-      // this.viewportWidth = 0;
-      // this.viewportHeight = 0;
-      // this.currentDrawCalls = null;
-      // this.emptyFragmentShader = null;
-
       this.clearBits = this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT | this.gl.STENCIL_BUFFER_BIT;
-
-      //   this.cpuTime = 0;
-      //   this.gpuTime = 0;
-
       this.viewport(0, 0, this.width, this.height);
-
-      this.contextLostExt = null;
-      this.contextRestoredHandler = null;
-
-      // this.initExtensions();
-
+      //
+      this.initExtensions();
+      //
       this._canvas.addEventListener("webglcontextlost", (e) => {
          e.preventDefault();
       });
-
+      //
       this._canvas.addEventListener("webglcontextrestored", () => {
          this.initExtensions();
-
          if (this.contextRestoredHandler) {
             this.contextRestoredHandler();
          }
@@ -171,8 +124,7 @@ class WebGL2Engine implements System {
       return this;
    }
 
-   viewport(x, y, width, height) {
-
+   public viewport(x: number, y: number, width: number, height: number): WebGL2Engine {
       if (this.viewportWidth !== width || this.viewportHeight !== height ||
          this.viewportX !== x || this.viewportY !== y) {
          this.viewportX = x;
@@ -181,48 +133,46 @@ class WebGL2Engine implements System {
          this.viewportHeight = height;
          this.gl.viewport(x, y, this.viewportWidth, this.viewportHeight);
       }
-
       return this;
    }
 
-   clearColor(r, g, b, a) {
+   public clearColor(r: number, g: number, b: number, a: number): WebGL2Engine {
       this.gl.clearColor(r, g, b, a);
       return this;
    }
 
-   blend() {
+   public blend(): WebGL2Engine {
       this.gl.enable(this.gl.BLEND);
-
       return this;
    }
 
-   depthMask(mask) {
+   public depthMask(mask: boolean): WebGL2Engine {
       this.gl.depthMask(mask);
-
       return this;
    }
-
-
 
    // Enable extensions
-   initExtensions() {
-      this.gl.getExtension("EXT_color_buffer_float");
-      this.gl.getExtension("OES_texture_float_linear");
-      this.gl.getExtension("WEBGL_compressed_texture_s3tc");
-      this.gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
-      this.gl.getExtension("WEBGL_compressed_texture_etc");
-      this.gl.getExtension("WEBGL_compressed_texture_astc");
-      this.gl.getExtension("WEBGL_compressed_texture_pvrtc");
-      this.gl.getExtension("EXT_disjoint_timer_query_webgl2");
-      this.gl.getExtension("EXT_disjoint_timer_query");
-      this.gl.getExtension("EXT_texture_filter_anisotropic");
-
-      this.state.extensions.debugShaders = this.gl.getExtension("WEBGL_debug_shaders");
-      this.contextLostExt = this.gl.getExtension("WEBGL_lose_context");
-
+   private initExtensions(): WebGL2Engine {
+      const gl = this.gl;
+      gl.getExtension("EXT_color_buffer_float");
+      gl.getExtension("OES_texture_float_linear");
+      gl.getExtension("WEBGL_compressed_texture_s3tc");
+      gl.getExtension("WEBGL_compressed_texture_s3tc_srgb");
+      gl.getExtension("WEBGL_compressed_texture_etc");
+      gl.getExtension("WEBGL_compressed_texture_astc");
+      gl.getExtension("WEBGL_compressed_texture_pvrtc");
+      gl.getExtension("EXT_disjoint_timer_query_webgl2");
+      gl.getExtension("EXT_disjoint_timer_query");
+      gl.getExtension("EXT_texture_filter_anisotropic");
+      //
+      this.contextLostExt = gl.getExtension("WEBGL_lose_context");
+      //
+      const stateExtensions = this.state.extensions;
+      stateExtensions.debugShaders = gl.getExtension("WEBGL_debug_shaders");
       // Draft extensions
-      this.gl.getExtension("KHR_parallel_shader_compile");
-      this.state.extensions.multiDrawInstanced = this.gl.getExtension("WEBGL_multi_draw_instanced");
+      gl.getExtension("KHR_parallel_shader_compile");
+      stateExtensions.multiDrawInstanced = gl.getExtension("WEBGL_multi_draw_instanced");
+      return this;
    }
 
    public get application(): Application {
@@ -262,27 +212,24 @@ class WebGL2Engine implements System {
       return new WebGL2Timer(this);
    }
 
-   createPrograms(...sources) {
+   public createPrograms(...sources: any[]): Promise<any> {
       return new Promise((resolve, reject) => {
-         let numPrograms = sources.length;
-         let programs = new Array(numPrograms);
-         let pendingPrograms = new Array(numPrograms);
+         const numPrograms = sources.length;
+         const programs = new Array(numPrograms);
+         const pendingPrograms = new Array(numPrograms);
          let numPending = numPrograms;
-
          for (let i = 0; i < numPrograms; ++i) {
-            let source = sources[i];
-            let vsSource = source[0];
-            let fsSource = source[1];
-            let xformFeedbackVars = source[2];
-            programs[i] = new WebGL2Program(/*this.gl, this.state,*/this, vsSource, fsSource, xformFeedbackVars);
+            const source = sources[i];
+            const vsSource = source[0];
+            const fsSource = source[1];
+            const xformFeedbackVars = source[2];
+            programs[i] = new WebGL2Program(this, vsSource, fsSource, xformFeedbackVars);
             pendingPrograms[i] = programs[i];
          }
-
          for (let i = 0; i < numPrograms; ++i) {
             programs[i].link();
          }
-
-         let poll = () => {
+         const poll = () => {
             let linked = 0;
             for (let i = 0; i < numPending; ++i) {
                if (pendingPrograms[i].checkCompletion()) {
@@ -297,17 +244,13 @@ class WebGL2Engine implements System {
                   pendingPrograms[i - linked] = pendingPrograms[i];
                }
             }
-
             numPending -= linked;
-
             if (numPending === 0) {
                resolve(programs);
             } else {
-               this.application.addCallbackLater(poll);
-               //requestAnimationFrame(poll);
+               this.application.callbackLater(poll);
             }
          };
-
          poll();
       });
    }
@@ -316,7 +259,7 @@ class WebGL2Engine implements System {
       return new Promise(
          (resolve) => {
             let numImages = urls.length;
-            let images = new Array(numImages);
+            const images = new Array(numImages);
             function onload() {
                if (--numImages === 0) {
                   resolve(images);
@@ -335,7 +278,7 @@ class WebGL2Engine implements System {
       return new Promise(
          (resolve) => {
             let loadcount = urls.length;
-            let texts = new Array(loadcount);
+            const texts = new Array(loadcount);
             function onload() {
                if ((--loadcount) === 0) {
                   resolve(texts);
@@ -364,36 +307,26 @@ class WebGL2Engine implements System {
       );
    }
 
-   createTexture2D(image, width, height?, options?) {
+   public createTexture2D(image: number | HTMLImageElement, width: number | Object, height?: number | Object, options?: Object): WebGL2Texture {
       if (typeof image === "number") {
-         // Create empty texture just give width/height.
          options = height;
          height = width;
          width = image;
          image = null;
       } else if (height === undefined) {
-         // Passing in a DOM element. Height/width not required.
          options = width;
          width = image.width;
          height = image.height;
       }
-
-      return new WebGL2Texture(/*this.gl, this.state,*/this, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
+      return new WebGL2Texture(this, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
    }
 
-   /**
-         Create a framebuffer.
- 
-         @method
-         @return {Framebuffer} New Framebuffer object.
-     */
-   createFramebuffer() {
-      return new WebGL2Framebuffer(/*this.gl, this.state*/this);
+   public createFramebuffer(): WebGL2Framebuffer {
+      return new WebGL2Framebuffer(this);
    }
 
-   createSphere(options) {
-      options = options || {};
-
+   public createSphere(options: CreateSphereModelOptions): SphereModel {
+      options = options || {} as CreateSphereModelOptions;
       let longBands = options.longBands || 32;
       let latBands = options.latBands || 32;
       let radius = options.radius || 1;
@@ -401,20 +334,19 @@ class WebGL2Engine implements System {
       let long_step = 2 * Math.PI / longBands;
       let num_positions = longBands * latBands * 4;
       let num_indices = longBands * latBands * 6;
-      let lat_angle, long_angle;
+      let lat_angle: number, long_angle: number;
       let positions = new Float32Array(num_positions * 3);
       let normals = new Float32Array(num_positions * 3);
       let uvs = new Float32Array(num_positions * 2);
       let indices = new Uint16Array(num_indices);
-      let x1, x2, x3, x4,
-         y1, y2,
-         z1, z2, z3, z4,
-         u1, u2,
-         v1, v2;
-      let i, j;
+      let x1: number, x2: number, x3: number, x4: number,
+         y1: number, y2: number,
+         z1: number, z2: number, z3: number, z4: number,
+         u1: number, u2: number,
+         v1: number, v2: number;
+      let i: number, j: number;
       let k = 0, l = 0;
-      let vi, ti;
-
+      let vi: number, ti: number;
       for (i = 0; i < latBands; i++) {
          lat_angle = i * lat_step;
          y1 = Math.cos(lat_angle);
@@ -492,87 +424,80 @@ class WebGL2Engine implements System {
             l += 6;
          }
       }
-
       return {
          positions: positions,
          normals: normals,
          uvs: uvs,
          indices: indices
-      };
+      } as SphereModel;
    }
 
-   createVertexBuffer(type, itemSize, data, usage?: number) {
-      return new WebGL2VertexBuffer(/*this.gl, this.state,*/this, type, itemSize, data, usage);
+   public createVertexBuffer(type: number, itemSize: number, data: Float32Array | Uint8Array, usage?: number): WebGL2VertexBuffer {
+      return new WebGL2VertexBuffer(this, type, itemSize, data, usage);
    }
 
-   createIndexBuffer(type, itemSize, data, usage?: number) {
-      return new WebGL2VertexBuffer(/*this.gl, this.state,*/this, type, itemSize, data, usage, true);
+   public createIndexBuffer(type: number, itemSize: number, data: Uint16Array, usage?: number): WebGL2VertexBuffer {
+      return new WebGL2VertexBuffer(this, type, itemSize, data, usage, true);
    }
 
-   createMatrixBuffer(type, data, usage?: number) {
-      return new WebGL2VertexBuffer(/*this.gl, this.state,*/this, type, 0, data, usage);
+   public createMatrixBuffer(type: number, data: Float32Array, usage?: number): WebGL2VertexBuffer {
+      return new WebGL2VertexBuffer(this, type, 0, data, usage);
    }
 
-   createVertexArray() {
-      return new WebGL2VertexArray(/*this.gl, this.state,*/this);
+   public createVertexArray(): WebGL2VertexArray {
+      return new WebGL2VertexArray(this);
    }
 
-   createUniformBuffer(layout, usage?: number) {
-      return new WebGL2UniformBuffer(/*this.gl, this.state,*/this, layout, usage);
+   public createUniformBuffer(layout, usage?: number): WebGL2UniformBuffer {
+      return new WebGL2UniformBuffer(this, layout, usage);
    }
 
-   createDrawCall(program, vertexArray, primitive?) {
-      return new WebGL2DrawCall(/*this.gl, this.state,*/this, program, vertexArray, primitive);
+   public createDrawCall(program: WebGL2Program, vertexArray: WebGL2VertexArray, primitive?: any): WebGL2DrawCall {
+      return new WebGL2DrawCall(this, program, vertexArray, primitive);
    }
 
-   xformMatrix(xform, translate, rotate, scale) {
+   public xformMatrix(xform: Float32Array, translate: Float32Array, rotate: Float32Array, scale: Float32Array): Float32Array {
       translate = translate || zeros;
       rotate = rotate || zeros;
       scale = scale || ones;
-
       mat4.fromTranslation(translateMat, translate);
       mat4.fromXRotation(rotateXMat, rotate[0]);
       mat4.fromYRotation(rotateYMat, rotate[1]);
       mat4.fromZRotation(rotateZMat, rotate[2]);
       mat4.fromScaling(scaleMat, scale);
-
       mat4.multiply(xform, rotateXMat, scaleMat);
       mat4.multiply(xform, rotateYMat, xform);
       mat4.multiply(xform, rotateZMat, xform);
       mat4.multiply(xform, translateMat, xform);
+      return xform;
    }
 
-   drawFramebuffer(framebuffer) {
+   public drawFramebuffer(framebuffer: WebGL2Framebuffer): WebGL2Engine {
       framebuffer.bindForDraw();
       return this;
    }
 
-   blendFuncSeparate(csrc, cdest, asrc, adest) {
+   public blendFuncSeparate(csrc: number, cdest: number, asrc: number, adest: number): WebGL2Engine {
       this.gl.blendFuncSeparate(csrc, cdest, asrc, adest);
-
       return this;
    }
 
-   clear() {
+   public clear(): WebGL2Engine {
       this.gl.clear(this.clearBits);
-
       return this;
    }
 
-   defaultDrawFramebuffer() {
-      if (this.state.drawFramebuffer !== null) {
+   public defaultDrawFramebuffer(): WebGL2Engine {
+      if (this.state.drawFramebuffer) {
          this.gl.bindFramebuffer(this.gl.DRAW_FRAMEBUFFER, null);
          this.state.drawFramebuffer = null;
       }
-
       return this;
    }
 
-   blendFunc(src, dest) {
+   public blendFunc(src: number, dest: number): WebGL2Engine {
       this.gl.blendFunc(src, dest);
-
       return this;
    }
-
 }
 

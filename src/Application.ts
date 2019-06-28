@@ -13,7 +13,7 @@ class Application implements System {
     private _profile: WebGL2Profile = null;
     private readonly subsystems: System[] = [];
     private readonly _events: RunEvent[] = [];
-    private readonly webTouchHandler: WebTouchHandler;
+    private readonly webTouchHandler: WebTouchHandler = null;
 
     constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
         //
@@ -97,13 +97,13 @@ class Application implements System {
             sys.update();
         }
         this._engine.render();
-        this.callbackLater();
+        this.flushCallbackLater();
         ////////////////////////////
         this._profile.profileEnd();
         return this;
     }
 
-    private callbackLater(): Application {
+    private flushCallbackLater(): Application {
         if (this._events.length > 0) {
             for (const v of this._events) {
                 v.callback && v.callback();
@@ -113,7 +113,7 @@ class Application implements System {
         return this;
     }
 
-    public addCallbackLater(callback: Function): Application {
+    public callbackLater(callback: Function): Application {
         const v = new RunEvent;
         v.callback = callback;
         this._events.push(v);
