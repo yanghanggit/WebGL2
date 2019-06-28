@@ -16,26 +16,12 @@ class WebGL2Program extends WebGL2Object {
 
     constructor(_engine: WebGL2Engine, vsSource: string | WebGL2Shader, fsSource: string | WebGL2Shader, xformFeebackVars: string[]) {
         super(_engine);
-
         this.transformFeedbackVaryings = xformFeebackVars || null;
-        //this.uniforms = {};
-        //this.uniformBlocks = {};
-        //this.uniformBlockCount = 0;
-        //this.samplers = {};
-        //this.samplerCount = 0;
-
-        // this.vertexSource = null;
-        // this.vertexShader = null;
-        // this.fragmentSource = null;
-        // this.fragmentShader = null;
-        // this.linked = false;
-        //
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
         } else {
             this.vertexShader = vsSource;
         }
-        //
         if (typeof fsSource === "string") {
             this.fragmentSource = fsSource;
         } else {
@@ -152,7 +138,7 @@ class WebGL2Program extends WebGL2Object {
         for (let i = 0; i < numUniforms; ++i) {
             const uniformInfo = this.gl.getActiveUniform(this.program, i);
             const uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
-            let UniformClass = null;
+            let UniformClass: any = null;
             const type = uniformInfo.type;
             const numElements = uniformInfo.size;
             switch (type) {
