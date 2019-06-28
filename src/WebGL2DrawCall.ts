@@ -4,22 +4,22 @@ class WebGL2DrawCall extends WebGL2Object {
     private currentProgram: WebGL2Program;
     private drawPrimitive: number;
     private currentVertexArray: WebGL2VertexArray;
-    private currentTransformFeedback;
+    private currentTransformFeedback: WebGL2TransformFeedback;
 
     private uniformIndices;
     private uniformNames;
     private uniformValues;
     private uniformCount: number;
-    private uniformBuffers;
+    private uniformBuffers: WebGL2UniformBuffer[];
     private uniformBlockNames;
     private uniformBlockCount: number;
-    private textures;
+    private textures: WebGL2Texture[];
     private textureCount: number;
     private offsets: Int32Array;
     private numElements: Int32Array;
     private numInstances: Int32Array;
     private numDraws: number;
-
+    private MULTI_DRAW_INSTANCED: boolean = false;
 
     constructor(_engine: WebGL2Engine, program: WebGL2Program, vertexArray: WebGL2VertexArray = null, primitive?: number) {
         super(_engine);
@@ -27,15 +27,15 @@ class WebGL2DrawCall extends WebGL2Object {
         this.currentProgram = program;
         this.drawPrimitive = GL.TRIANGLES;
         this.currentVertexArray = vertexArray;
-        this.currentTransformFeedback = null;
+        //this.currentTransformFeedback = null;
         this.uniformIndices = {};
-        this.uniformNames = new Array(WEBGL_INFO.MAX_UNIFORMS);
-        this.uniformValues = new Array(WEBGL_INFO.MAX_UNIFORMS);
+        this.uniformNames = new Array(/*WEBGL_INFO.MAX_UNIFORMS*/this.engine.capbility('MAX_UNIFORMS'));
+        this.uniformValues = new Array(/*WEBGL_INFO.MAX_UNIFORMS*/this.engine.capbility('MAX_UNIFORMS'));
         this.uniformCount = 0;
-        this.uniformBuffers = new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS);
-        this.uniformBlockNames = new Array(WEBGL_INFO.MAX_UNIFORM_BUFFERS);
+        this.uniformBuffers = new Array(/*WEBGL_INFO.MAX_UNIFORM_BUFFERS*/this.engine.capbility('MAX_UNIFORM_BUFFERS'));
+        this.uniformBlockNames = new Array(/*WEBGL_INFO.MAX_UNIFORM_BUFFERS*/this.engine.capbility('MAX_UNIFORM_BUFFERS'));
         this.uniformBlockCount = 0;
-        this.textures = new Array(WEBGL_INFO.MAX_TEXTURE_UNITS);
+        this.textures = new Array(/*WEBGL_INFO.MAX_TEXTURE_UNITS*/this.engine.capbility('MAX_TEXTURE_UNITS'));
         this.textureCount = 0;
         this.offsets = new Int32Array(1);
         this.numElements = new Int32Array(1);
@@ -52,6 +52,8 @@ class WebGL2DrawCall extends WebGL2Object {
             console.warn("Primitive argument to 'App.createDrawCall' is deprecated and will be removed. Use 'DrawCall.primitive' instead.");
             this.primitive(primitive);
         }
+
+        this.MULTI_DRAW_INSTANCED = this.engine.capbility('MULTI_DRAW_INSTANCED');
     }
 
     public primitive(primitive: number): WebGL2DrawCall {
@@ -59,7 +61,7 @@ class WebGL2DrawCall extends WebGL2Object {
         return this;
     }
 
-    transformFeedback(transformFeedback) {
+    public transformFeedback(transformFeedback: WebGL2TransformFeedback): WebGL2DrawCall {
         this.currentTransformFeedback = transformFeedback;
         return this;
     }
@@ -72,87 +74,74 @@ class WebGL2DrawCall extends WebGL2Object {
             this.uniformNames[index] = name;
         }
         this.uniformValues[index] = value;
-
         return this;
     }
 
-    texture(name, texture) {
-        let unit = this.currentProgram.samplers[name];
+    public texture(name: string, texture: WebGL2Texture): WebGL2DrawCall  {
+        const unit = this.currentProgram.samplers[name];
         this.textures[unit] = texture;
         return this;
     }
 
-    uniformBlock(name, buffer) {
-        let base = this.currentProgram.uniformBlocks[name];
+    public uniformBlock(name: string, buffer: WebGL2UniformBuffer): WebGL2DrawCall {
+        const base = this.currentProgram.uniformBlocks[name];
         this.uniformBuffers[base] = buffer;
-
         return this;
     }
 
-    drawRanges(...counts) {
+    public drawRanges(...counts: any[]): WebGL2DrawCall {
         this.numDraws = counts.length;
-
         if (this.offsets.length < this.numDraws) {
             this.offsets = new Int32Array(this.numDraws);
         }
-
         if (this.numElements.length < this.numDraws) {
             this.numElements = new Int32Array(this.numDraws);
         }
-
         if (this.numInstances.length < this.numDraws) {
             this.numInstances = new Int32Array(this.numDraws);
         }
-
         for (let i = 0; i < this.numDraws; ++i) {
-            let count = counts[i];
-
+            const count = counts[i];
             this.offsets[i] = count[0];
             this.numElements[i] = count[1];
             this.numInstances[i] = count[2] || 1;
         }
-
         return this;
     }
 
-    draw() {
-        let uniformNames = this.uniformNames;
-        let uniformValues = this.uniformValues;
-        let uniformBuffers = this.uniformBuffers;
-        let uniformBlockCount = this.currentProgram.uniformBlockCount;
-        let textures = this.textures;
-        let textureCount = this.currentProgram.samplerCount;
+    public draw(): WebGL2DrawCall {
+        const uniformNames = this.uniformNames;
+        const uniformValues = this.uniformValues;
+        const uniformBuffers = this.uniformBuffers;
+        const uniformBlockCount = this.currentProgram.uniformBlockCount;
+        const textures = this.textures;
+        const textureCount = this.currentProgram.samplerCount;
         let indexed = false;
-
+        ///
         this.currentProgram.bind();
-
         if (this.currentVertexArray) {
             this.currentVertexArray.bind();
             indexed = this.currentVertexArray.indexed;
         }
-
         for (let uIndex = 0; uIndex < this.uniformCount; ++uIndex) {
             this.currentProgram.uniform(uniformNames[uIndex], uniformValues[uIndex]);
         }
-
         for (let base = 0; base < uniformBlockCount; ++base) {
             uniformBuffers[base].bind(base);
         }
-
         for (let tIndex = 0; tIndex < textureCount; ++tIndex) {
             textures[tIndex].bind(tIndex);
         }
-
+        const gl = this.gl;
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
-            this.gl.beginTransformFeedback(this.drawPrimitive);
+            gl.beginTransformFeedback(this.drawPrimitive);
         } else if (this.state.transformFeedback) {
-            this.gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
+            gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
             this.state.transformFeedback = null;
         }
-
-        if (WEBGL_INFO.MULTI_DRAW_INSTANCED) {
-            let ext = this.state.extensions.multiDrawInstanced;
+        if (this.MULTI_DRAW_INSTANCED/*WEBGL_INFO.MULTI_DRAW_INSTANCED*/) {
+            const ext = this.state.extensions.multiDrawInstanced;
             if (indexed) {
                 ext.multiDrawElementsInstancedWEBGL(this.drawPrimitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
             } else {
@@ -160,16 +149,15 @@ class WebGL2DrawCall extends WebGL2Object {
             }
         } else if (indexed) {
             for (let i = 0; i < this.numDraws; ++i) {
-                this.gl.drawElementsInstanced(this.drawPrimitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
+                gl.drawElementsInstanced(this.drawPrimitive, this.numElements[i], this.currentVertexArray.indexType, this.offsets[i], this.numInstances[i]);
             }
         } else {
             for (let i = 0; i < this.numDraws; ++i) {
-                this.gl.drawArraysInstanced(this.drawPrimitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
+                gl.drawArraysInstanced(this.drawPrimitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
             }
         }
-
         if (this.currentTransformFeedback) {
-            this.gl.endTransformFeedback();
+            gl.endTransformFeedback();
         }
         return this;
     }
