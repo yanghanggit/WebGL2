@@ -2,7 +2,7 @@
 class EmptyScene extends WebGL2DemoScene {
     
     public enter(): WebGL2DemoScene {
-        console.log('-----------EmptyScene-----------');
+        //console.log('-----------EmptyScene-----------');
         return this;
     }
 

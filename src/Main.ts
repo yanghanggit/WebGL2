@@ -53,13 +53,33 @@ function runApp(app: Application): void {
     stop = requestAnimationFrame(updateApp);
 }
 
+function getQualifiedClassName(value: any): string {
+    let type = typeof value;
+    if (!value || (type != "object" && !value.prototype)) {
+        return type;
+    }
+    let prototype: any = value.prototype ? value.prototype : Object.getPrototypeOf(value);
+    if (prototype.hasOwnProperty("__class__")) {
+        return prototype["__class__"];
+    }
+    let constructorString: string = prototype.constructor.toString().trim();
+    let index: number = constructorString.indexOf("(");
+    let className: string = constructorString.substring(9, index);
+    Object.defineProperty(prototype, "__class__", {
+        value: className,
+        enumerable: false,
+        writable: true
+    });
+    return className;
+}
+
 /////////
-const sceneClasses = [
+const __SceneClasses__ = [
     OITScene,
     EmptyScene
-]
-let currentSceneIndex = 0;
-let webGL2DemoPlayer: WebGL2DemoPlayer = null;
+];
+let __currentSceneIndex__ = 0;
+let __webGL2DemoPlayer__: WebGL2DemoPlayer = null;
 ///////////
 function main(): void {
     //
@@ -71,25 +91,29 @@ function main(): void {
     attachCanvasToContainer(container, canvas);
     //
     const webgl2Engine = new WebGL2Engine(canvas, null);
-    webGL2DemoPlayer = new WebGL2DemoPlayer(webgl2Engine);
-    const app: Application = new Application(webgl2Engine, webGL2DemoPlayer);
+    __webGL2DemoPlayer__ = new WebGL2DemoPlayer(webgl2Engine);
+    const app: Application = new Application(webgl2Engine, __webGL2DemoPlayer__);
     runApp(app);
     //第一个场景
-    changeSceneByIndex(currentSceneIndex, sceneClasses);
+    gotoScene(__webGL2DemoPlayer__, __currentSceneIndex__, __SceneClasses__);
 }
 
 
-function changeSceneByIndex(index: number, scenes: any[]): void {
+function gotoScene(webGL2DemoPlayer: WebGL2DemoPlayer, index: number, scenes: any[]): void {
+    if (!webGL2DemoPlayer) {
+        return;
+    }
     if (index < scenes.length) {
         const clazz = scenes[index] as any;
+        console.log(`[${index}] => ` + getQualifiedClassName(clazz));
         webGL2DemoPlayer.changeScene(new clazz(webGL2DemoPlayer));
     }
 }
 
 function nextScene(): void {
-    ++currentSceneIndex;
-    currentSceneIndex = currentSceneIndex % (sceneClasses.length);
-    changeSceneByIndex(currentSceneIndex, sceneClasses);
+    ++__currentSceneIndex__;
+    __currentSceneIndex__ = __currentSceneIndex__ % (__SceneClasses__.length);
+    gotoScene(__webGL2DemoPlayer__, __currentSceneIndex__, __SceneClasses__);
 }
 
 
