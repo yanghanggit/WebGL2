@@ -31,28 +31,23 @@ class WebGL2DrawCall extends WebGL2Object {
         this.uniformIndices = {};
         this.uniformNames = new Array(/*WEBGL_INFO.MAX_UNIFORMS*/this.engine.capbility('MAX_UNIFORMS'));
         this.uniformValues = new Array(/*WEBGL_INFO.MAX_UNIFORMS*/this.engine.capbility('MAX_UNIFORMS'));
-        this.uniformCount = 0;
+        //this.uniformCount = 0;
         this.uniformBuffers = new Array(/*WEBGL_INFO.MAX_UNIFORM_BUFFERS*/this.engine.capbility('MAX_UNIFORM_BUFFERS'));
         this.uniformBlockNames = new Array(/*WEBGL_INFO.MAX_UNIFORM_BUFFERS*/this.engine.capbility('MAX_UNIFORM_BUFFERS'));
-        this.uniformBlockCount = 0;
+        //this.uniformBlockCount = 0;
         this.textures = new Array(/*WEBGL_INFO.MAX_TEXTURE_UNITS*/this.engine.capbility('MAX_TEXTURE_UNITS'));
-        this.textureCount = 0;
+        //this.textureCount = 0;
         this.offsets = new Int32Array(1);
         this.numElements = new Int32Array(1);
         this.numInstances = new Int32Array(1);
-
         if (this.currentVertexArray) {
             this.numElements[0] = this.currentVertexArray.numElements;
             this.numInstances[0] = this.currentVertexArray.numInstances;
         }
-
         this.numDraws = 1;
-
         if (primitive !== undefined) {
-            console.warn("Primitive argument to 'App.createDrawCall' is deprecated and will be removed. Use 'DrawCall.primitive' instead.");
             this.primitive(primitive);
         }
-
         this.MULTI_DRAW_INSTANCED = this.engine.capbility('MULTI_DRAW_INSTANCED');
     }
 

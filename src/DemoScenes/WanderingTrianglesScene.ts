@@ -30,7 +30,7 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        engine.clearColor(0.0, 0.0, 0.0, 1.0);
+        engine.clearColor(0.5, 0.5, 0.5, 1.0);
         //
         const NUM_INSTANCES = 50000;
         const offsetData = new Float32Array(NUM_INSTANCES * 2);
