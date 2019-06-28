@@ -294,7 +294,7 @@ class WebGL2Engine implements System {
                http.open('GET', urls[i], true);
                http.onload = function (e) {
                   if (this["status"] == 200 || this["status"] === 0) {
-                     texts[i] = http.responseText;
+                     texts[i] = http.responseText.trim();
                      onload();
                   }
                };
