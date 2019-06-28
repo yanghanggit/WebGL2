@@ -432,7 +432,7 @@ class WebGL2Engine implements System {
       } as SphereModel;
    }
 
-   public createVertexBuffer(type: number, itemSize: number, data: Float32Array | Uint8Array, usage?: number): WebGL2VertexBuffer {
+   public createVertexBuffer(type: number, itemSize: number, data: Float32Array | Uint8Array | number, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, itemSize, data, usage);
    }
 
@@ -497,6 +497,20 @@ class WebGL2Engine implements System {
 
    public blendFunc(src: number, dest: number): WebGL2Engine {
       this.gl.blendFunc(src, dest);
+      return this;
+   }
+
+   public createTransformFeedback(): WebGL2TransformFeedback {
+      return new WebGL2TransformFeedback(this);
+   }
+
+   public noRasterize(): WebGL2Engine {
+      this.gl.enable(this.gl.RASTERIZER_DISCARD);
+      return this;
+   }
+
+   public rasterize(): WebGL2Engine {
+      this.gl.disable(this.gl.RASTERIZER_DISCARD);
       return this;
    }
 }

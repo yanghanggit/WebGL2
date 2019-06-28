@@ -6,13 +6,13 @@ class EmptyScene extends WebGL2DemoScene {
         this.start().catch(e => {
             console.error(e);
         });
-        this._ready = true; 
         return this;
     }
 
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
+        this._ready = true; 
     }
 
     private createScene(): void {
