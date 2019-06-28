@@ -115,7 +115,6 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
                 'resource/assets/vs-update.vertex.glsl',
                 'resource/assets/fs-update.fragment.glsl'
             ];
-
             //
             const txts = await this.engine.loadText(ress);
             this.drawVsSource = txts[0];
@@ -123,8 +122,10 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
             this.updateVsSource = txts[2];
             this.updateFsSource = txts[3];
             //
-            const programs = await this.engine.createPrograms([this.drawVsSource, this.drawFsSource],
-                [this.updateVsSource, this.updateFsSource, ["vOffset", "vRotation"]]);
+            const programs = await this.engine.createPrograms(
+                [this.drawVsSource, this.drawFsSource],
+                [this.updateVsSource, this.updateFsSource, ["vOffset", "vRotation"]]
+            );
             this.drawProgram = programs[0];
             this.updateProgram = programs[1];
         }
@@ -142,6 +143,7 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
         this.updateDrawCall.draw();
         engine.rasterize().clear();
         this.mainDrawCall.draw();
+        ///
         this.updateDrawCall = this.updateDrawCall === this.updateDrawCallA ? this.updateDrawCallB : this.updateDrawCallA;
         this.mainDrawCall = this.mainDrawCall === this.drawCallA ? this.drawCallB : this.drawCallA;
         return this;

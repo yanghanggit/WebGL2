@@ -39,12 +39,12 @@ class WebGL2VertexArray {
     private readonly appState: WebGL2State;
 
     private vertexArray;//= null;
-    private indexType;// = null;
-    private indexed;// = false;
-    private numElements;// = 0;
-    private numInstances;// = 1;
-    private offsets;// = 0;
-    private numDraws;// = 1;
+    public indexType: number;// = null;
+    public indexed: boolean;// = false;
+    public numElements: number;// = 0;
+    public numInstances: number;// = 1;
+    private offsets: number;// = 0;
+    private numDraws: number;// = 1;
 
     constructor(/*gl, appState,*/ _engine: WebGL2Engine) {
         this._engine = _engine;

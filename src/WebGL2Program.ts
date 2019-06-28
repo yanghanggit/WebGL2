@@ -49,10 +49,10 @@ class WebGL2Program {
     private program = null;
     private transformFeedbackVaryings = null;
     private uniforms = {};
-    private uniformBlocks = {};
-    private uniformBlockCount = 0;
-    private samplers = {};
-    private samplerCount = 0;
+    public uniformBlocks = {};
+    public uniformBlockCount = 0;
+    public samplers = {};
+    public samplerCount = 0;
     private vertexSource = null;
     private vertexShader = null;
     private fragmentSource = null;
