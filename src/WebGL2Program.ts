@@ -37,7 +37,7 @@ class WebGL2Program extends WebGL2Object {
         return this;
     }
 
-    translatedVertexSource() {
+    public translatedVertexSource(): string {
         if (this.vertexShader) {
             return this.vertexShader.translatedSource();
         } else {
@@ -48,7 +48,7 @@ class WebGL2Program extends WebGL2Object {
         }
     }
 
-    translatedFragmentSource() {
+    public translatedFragmentSource(): string {
         if (this.fragmentShader) {
             return this.fragmentShader.translatedSource();
         } else {
