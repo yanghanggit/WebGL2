@@ -1,18 +1,15 @@
 
 class UBOScene extends WebGL2DemoScene {
 
-    private updateDrawCallA: WebGL2DrawCall;
-    private updateDrawCallB: WebGL2DrawCall;
-    private drawCallA: WebGL2DrawCall;
-    private drawCallB: WebGL2DrawCall;
-    private updateDrawCall: WebGL2DrawCall;
-    private mainDrawCall: WebGL2DrawCall;
-    private drawVsSource: string;
-    private drawFsSource: string;
-    private updateVsSource: string;
-    private updateFsSource: string;
-    private drawProgram: WebGL2Program;
-    private updateProgram: WebGL2Program;
+    private vsSource: string;
+    private fsSource: string;
+    private program: WebGL2Program;
+    private drawCall1: WebGL2DrawCall;
+    private drawCall2: WebGL2DrawCall;
+    private positions: WebGL2VertexBuffer;
+    private triangleArray: WebGL2VertexArray;
+    private uniformBuffer1: WebGL2UniformBuffer;
+    private uniformBuffer2: WebGL2UniformBuffer;
 
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
@@ -30,105 +27,45 @@ class UBOScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        engine.clearColor(0.5, 0.5, 0.5, 1.0);
+        engine.clearColor(0.0, 0.0, 0.0, 1.0);
         //
-        const NUM_INSTANCES = 50000;
-        const offsetData = new Float32Array(NUM_INSTANCES * 2);
-        const rotationData = new Float32Array(NUM_INSTANCES);
-        const colorData = new Uint8Array(NUM_INSTANCES * 3);
-        const positionData = new Float32Array([
-            0.012, 0.0,
-            -0.008, 0.008,
-            -0.008, -0.008,
-        ]);
-        for (let i = 0; i < NUM_INSTANCES; ++i) {
-            const oi = i * 2;
-            const ri = i;
-            const ci = i * 3;
-            offsetData[oi] = Math.random() * 2.0 - 1.0;
-            offsetData[oi + 1] = Math.random() * 2.0 - 1.0;
-            rotationData[i] = Math.random() * 2 * Math.PI;
-            colorData[ci] = Math.floor(Math.random() * 256);
-            colorData[ci + 1] = Math.floor(Math.random() * 256);
-            colorData[ci + 2] = Math.floor(Math.random() * 256);
-        }
+        this.positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
+            -0.4, -0.5,
+            0.4, -0.5,
+            0.0, 0.5
+        ]));
         //
-        const offsetsA = engine.createVertexBuffer(GL.FLOAT, 2, offsetData);
-        const offsetsB = engine.createVertexBuffer(GL.FLOAT, 2, offsetData.length);
-        const rotationsA = engine.createVertexBuffer(GL.FLOAT, 1, rotationData);
-        const rotationsB = engine.createVertexBuffer(GL.FLOAT, 1, rotationData.length);
+        this.triangleArray = engine.createVertexArray().vertexAttributeBuffer(0, this.positions);
         //
-        const positions = engine.createVertexBuffer(GL.FLOAT, 2, positionData);
-        const colors = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 3, colorData);
+        this.uniformBuffer1 = engine.createUniformBuffer([
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC2
+        ]).set(0, new Float32Array([1.0, 0.0, 0.0, 1.0])).set(1, new Float32Array([-0.5, 0.0])).update();
         //
-        const updateArrayA = engine.createVertexArray()
-            .vertexAttributeBuffer(0, offsetsA)
-            .vertexAttributeBuffer(1, rotationsA);
-
-        const updateArrayB = engine.createVertexArray()
-            .vertexAttributeBuffer(0, offsetsB)
-            .vertexAttributeBuffer(1, rotationsB);
-
-        const transformFeedbackA = engine.createTransformFeedback()
-            .feedbackBuffer(0, offsetsA)
-            .feedbackBuffer(1, rotationsA);
-
-        const transformFeedbackB = engine.createTransformFeedback()
-            .feedbackBuffer(0, offsetsB)
-            .feedbackBuffer(1, rotationsB);
-
-        ///
-        const drawArrayA = engine.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
-            .instanceAttributeBuffer(1, colors, { normalized: true })
-            .instanceAttributeBuffer(2, offsetsA)
-            .instanceAttributeBuffer(3, rotationsA);
-
-        const drawArrayB = engine.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
-            .instanceAttributeBuffer(1, colors, { normalized: true })
-            .instanceAttributeBuffer(2, offsetsB)
-            .instanceAttributeBuffer(3, rotationsB);
+        this.uniformBuffer2 = engine.createUniformBuffer([
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC2
+        ]).set(0, new Float32Array([0.0, 0.0, 1.0, 1.0])).set(1, new Float32Array([0.5, 0.0])).update();
         //
-        this.drawCallA = engine.createDrawCall(this.drawProgram, drawArrayA);
-        this.drawCallB = engine.createDrawCall(this.drawProgram, drawArrayB);
-
-        //
-        this.updateDrawCallA = engine.createDrawCall(this.updateProgram, updateArrayA)
-            .primitive(GL.POINTS)
-            .transformFeedback(transformFeedbackB);
-
-        //
-        this.updateDrawCallB = engine.createDrawCall(this.updateProgram, updateArrayB)
-            .primitive(GL.POINTS)
-            .transformFeedback(transformFeedbackA);
-        //
-        this.updateDrawCall = this.updateDrawCallA;
-        this.mainDrawCall = this.drawCallB;
+        this.drawCall1 = engine.createDrawCall(this.program, this.triangleArray).uniformBlock("TriangleUniforms", this.uniformBuffer1);
+        this.drawCall2 = engine.createDrawCall(this.program, this.triangleArray).uniformBlock("TriangleUniforms", this.uniformBuffer2);
     }
 
     private async loadResource(): Promise<void> {
         try {
-            ///
+            ////
             const ress: string[] = [
-                'resource/assets/vs-draw.vertex.glsl',
-                'resource/assets/fs-draw.fragment.glsl',
-                'resource/assets/vs-update.vertex.glsl',
-                'resource/assets/fs-update.fragment.glsl'
+                'resource/assets/vs-ubo.vertex.glsl',
+                'resource/assets/fs-ubo.fragment.glsl',
             ];
-            //
             const txts = await this.engine.loadText(ress);
-            this.drawVsSource = txts[0];
-            this.drawFsSource = txts[1];
-            this.updateVsSource = txts[2];
-            this.updateFsSource = txts[3];
-            //
+            this.vsSource = txts[0];
+            this.fsSource = txts[1];
+            /////
             const programs = await this.engine.createPrograms(
-                [this.drawVsSource, this.drawFsSource],
-                [this.updateVsSource, this.updateFsSource, ["vOffset", "vRotation"]]
+                [this.vsSource, this.fsSource]
             );
-            this.drawProgram = programs[0];
-            this.updateProgram = programs[1];
+            this.program = programs[0];
         }
         catch (e) {
             console.error(e);
@@ -140,21 +77,18 @@ class UBOScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-        //
-        engine.no_rasterize();
-        this.updateDrawCall.draw();
-        engine.rasterize().clear();
-        //
-        this.mainDrawCall.draw();
-        ///
-        this.updateDrawCall = this.updateDrawCall === this.updateDrawCallA ? this.updateDrawCallB : this.updateDrawCallA;
-        this.mainDrawCall = this.mainDrawCall === this.drawCallA ? this.drawCallB : this.drawCallA;
+        engine.clear()
+        this.drawCall1.draw();
+        this.drawCall2.draw();
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        this.drawProgram.delete();
-        this.updateProgram.delete();
+        this.program.delete();
+        this.positions.delete();
+        this.triangleArray.delete();
+        this.uniformBuffer1.delete();
+        this.uniformBuffer2.delete();
         return this;
     }
 
