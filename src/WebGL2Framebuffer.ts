@@ -1,113 +1,50 @@
 
-// import { GL } from "./constants.js";
-// import { Texture } from "./texture.js";
-// import { Renderbuffer } from "./renderbuffer.js";
+class WebGL2Framebuffer extends WebGL2Object {
 
-/**
-    Offscreen drawing surface.
+    private framebuffer: WebGLFramebuffer = null;
+    private numColorTargets: number = 0;
+    public colorAttachments: WebGL2Texture[] = [];
+    private colorAttachmentEnums: number[] = [];
+    private colorAttachmentTargets: number[] = [];
+    private depthAttachment;
+    private depthAttachmentTarget;
+    private width: number = 0;
+    private height: number = 0;
 
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLFramebuffer} framebuffer Handle to the framebuffer.
-    @prop {number} width Framebuffer width.
-    @prop {number} height Framebuffer height.
-    @prop {Array} colorAttachments Array of color attachments.
-    @prop {Texture|Renderbuffer} depthAttachment Depth attachment.
-    @prop {Object} appState Tracked GL state.
-*/
-class WebGL2Framebuffer {
-
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private readonly appState: WebGL2State;
-
-    private framebuffer = null;
-    private numColorTargets = 0;
-    public colorAttachments = [];
-    private colorAttachmentEnums = [];
-    private colorAttachmentTargets = [];
-    private depthAttachment = null;
-    private depthAttachmentTarget = null;
-    private width = 0;
-    private height = 0;
-
-    constructor(/*gl, appState*/ _engine: WebGL2Engine) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        this.appState = _engine.state;//appState;
-
-        //this.gl = gl;
-        this.framebuffer = null;
-        //this.appState = appState;
-
-        this.numColorTargets = 0;
-
-        this.colorAttachments = [];
-        this.colorAttachmentEnums = [];
-        this.colorAttachmentTargets = [];
-        this.depthAttachment = null;
-        this.depthAttachmentTarget = null;
-
-        this.width = 0;
-        this.height = 0;
-
+    constructor(_engine: WebGL2Engine) {
+        super(_engine);
         this.restore();
     }
 
-    /**
-        Restore framebuffer after context loss.
-
-        @method
-        @return {Framebuffer} The Framebuffer object.
-    */
-    restore() {
-        if (this.appState.drawFramebuffer === this) {
-            this.appState.drawFramebuffer = null;
+    public restore(): WebGL2Framebuffer {
+        if (this.state.drawFramebuffer === this) {
+            this.state.drawFramebuffer = null;
         }
-
-        if (this.appState.readFramebuffer === this) {
-            this.appState.readFramebuffer = null;
+        if (this.state.readFramebuffer === this) {
+            this.state.readFramebuffer = null;
         }
-
         this.framebuffer = this.gl.createFramebuffer();
-
         return this;
     }
 
-    /**
-        Attach a color target to this framebuffer.
-
-        @method
-        @param {number} index Color attachment index.
-        @param {Texture|Cubemap|Renderbuffer} attachment The texture, cubemap or renderbuffer to attach.
-        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array,
-            defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
-        @return {Framebuffer} The Framebuffer object.
-    */
-    colorTarget(index, attachment, target = attachment.is3D ? 0 : GL.TEXTURE_2D) {
-
+    public colorTarget(index: number, attachment: WebGL2Texture, target: number = attachment.is3D ? 0 : GL.TEXTURE_2D): WebGL2Framebuffer {
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
             this.colorAttachmentEnums.length = numColorTargets;
             this.colorAttachments.length = numColorTargets;
             this.colorAttachmentTargets.length = numColorTargets;
-
             for (let i = this.numColorTargets; i < numColorTargets - 1; ++i) {
                 this.colorAttachmentEnums[i] = GL.NONE;
                 this.colorAttachments[i] = null;
                 this.colorAttachmentTargets[i] = 0;
             }
-
             this.numColorTargets = numColorTargets;
-        }        
-
+        }
         this.colorAttachmentEnums[index] = GL.COLOR_ATTACHMENT0 + index;
         this.colorAttachments[index] = attachment;
         this.colorAttachmentTargets[index] = target;
-
-        let currentFramebuffer = this.bindAndCaptureState();
-
-
+        //
+        const currentFramebuffer = this.bindAndCaptureState();
         if (attachment instanceof WebGL2Renderbuffer) {
             this.gl.framebufferRenderbuffer(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], GL.RENDERBUFFER, attachment.renderbuffer);
         } else if (attachment.is3D) {
@@ -115,33 +52,18 @@ class WebGL2Framebuffer {
         } else {
             this.gl.framebufferTexture2D(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[index], target, attachment.texture, 0);
         }
-
+        //
         this.gl.drawBuffers(this.colorAttachmentEnums);
-
         this.width = attachment.width;
         this.height = attachment.height;
-
         this.restoreState(currentFramebuffer);
-
         return this;
     }
 
-    /**
-        Attach a depth target to this framebuffer.
-
-        @method
-        @param {Texture|Cubemap|Renderbuffer} texture The texture, cubemap or renderbuffer to attach.
-        @param {GLEnum} [target] The texture target or layer to attach. If the texture is 3D or a texture array or renderbuffer,
-            defaults to 0, otherwise to TEXTURE_2D. Ignored for renderbuffers.
-        @return {Framebuffer} The Framebuffer object.
-    */
-    depthTarget(attachment, target = attachment.is3D ? 0 : GL.TEXTURE_2D) {
-
-        let currentFramebuffer = this.bindAndCaptureState();
-
+    public depthTarget(attachment, target = attachment.is3D ? 0 : GL.TEXTURE_2D): WebGL2Framebuffer {
+        const currentFramebuffer = this.bindAndCaptureState();
         this.depthAttachment = attachment;
         this.depthAttachmentTarget = target;
-
         if (attachment instanceof WebGL2Renderbuffer) {
             this.gl.framebufferRenderbuffer(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, GL.RENDERBUFFER, attachment.renderbuffer);
         } else if (attachment.is3D) {
@@ -149,37 +71,21 @@ class WebGL2Framebuffer {
         } else {
             this.gl.framebufferTexture2D(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, target, attachment.texture, 0);
         }
-
         this.width = attachment.width;
         this.height = attachment.height;
-
         this.restoreState(currentFramebuffer);
-
         return this;
     }
 
-    /**
-        Resize all attachments.
-
-        @method
-        @param {number} [width=app.width] New width of the framebuffer.
-        @param {number} [height=app.height] New height of the framebuffer.
-        @return {Framebuffer} The Framebuffer object.
-    */
-    resize(width = this.gl.drawingBufferWidth, height = this.gl.drawingBufferHeight) {
-
+    public resize(width: number = this.gl.drawingBufferWidth, height: number = this.gl.drawingBufferHeight): WebGL2Framebuffer {
         let currentFramebuffer = this.bindAndCaptureState();
-
         for (let i = 0; i < this.numColorTargets; ++i) {
             let attachment = this.colorAttachments[i];
-
             if (!attachment) {
                 continue;
             }
-
             attachment.resize(width, height);
             if (attachment instanceof WebGL2Texture) {
-                // Texture resizing recreates the texture object.
                 if (attachment.is3D) {
                     this.gl.framebufferTextureLayer(GL.DRAW_FRAMEBUFFER, this.colorAttachmentEnums[i], attachment.texture, 0, this.colorAttachmentTargets[i]);
                 } else {
@@ -187,11 +93,9 @@ class WebGL2Framebuffer {
                 }
             }
         }
-
         if (this.depthAttachment) {
             this.depthAttachment.resize(width, height);
             if (this.depthAttachment instanceof WebGL2Texture) {
-                // Texture resizing recreates the texture object.
                 if (this.depthAttachment.is3D) {
                     this.gl.framebufferTextureLayer(GL.DRAW_FRAMEBUFFER, GL.DEPTH_ATTACHMENT, this.depthAttachment.texture, 0, this.depthAttachmentTarget);
                 } else {
@@ -199,128 +103,74 @@ class WebGL2Framebuffer {
                 }
             }
         }
-
         this.width = width;
         this.height = height;
-
         this.restoreState(currentFramebuffer);
-
         return this;
     }
 
-    /**
-        Delete this framebuffer.
-
-        @method
-        @return {Framebuffer} The Framebuffer object.
-    */
-    delete() {
+    public delete(): WebGL2Framebuffer {
         if (this.framebuffer) {
             this.gl.deleteFramebuffer(this.framebuffer);
             this.framebuffer = null;
-
-            if (this.appState.drawFramebuffer === this) {
+            if (this.state.drawFramebuffer === this) {
                 this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, null);
-                this.appState.drawFramebuffer = null;
+                this.state.drawFramebuffer = null;
             }
-
-            if (this.appState.readFramebuffer === this) {
+            if (this.state.readFramebuffer === this) {
                 this.gl.bindFramebuffer(GL.READ_FRAMEBUFFER, null);
-                this.appState.readFramebuffer = null;
+                this.state.readFramebuffer = null;
             }
         }
-
         return this;
     }
 
-    /**
-        Get the current status of this framebuffer.
-
-        @method
-        @return {GLEnum} The current status of this framebuffer.
-    */
-    getStatus() {
+    public getStatus(): number {
         let currentFramebuffer = this.bindAndCaptureState();
         let status = this.gl.checkFramebufferStatus(GL.DRAW_FRAMEBUFFER);
         this.restoreState(currentFramebuffer);
-
         return status;
     }
 
-    /**
-        Bind as the draw framebuffer
-
-        @method
-        @ignore
-        @return {Framebuffer} The Framebuffer object.
-    */
-    bindForDraw() {
-        if (this.appState.drawFramebuffer !== this) {
+    public bindForDraw(): WebGL2Framebuffer {
+        if (this.state.drawFramebuffer !== this) {
             this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, this.framebuffer);
-            this.appState.drawFramebuffer = this;
+            this.state.drawFramebuffer = this;
         }
-
         return this;
     }
 
-    /**
-        Bind as the read framebuffer
-
-        @method
-        @ignore
-        @return {Framebuffer} The Framebuffer object.
-    */
-    bindForRead() {
-        if (this.appState.readFramebuffer !== this) {
+    public bindForRead(): WebGL2Framebuffer {
+        if (this.state.readFramebuffer !== this) {
             this.gl.bindFramebuffer(this.gl.READ_FRAMEBUFFER, this.framebuffer);
-            this.appState.readFramebuffer = this;
+            this.state.readFramebuffer = this;
         }
-
         return this;
     }
 
-    /**
-        Bind for a framebuffer state update.
-        Capture current binding so we can restore it later.
-
-        @method
-        @ignore
-        @return {Framebuffer} The Framebuffer object.
-    */
-    bindAndCaptureState() {
-        let currentFramebuffer = this.appState.drawFramebuffer;
-
+    public bindAndCaptureState(): WebGL2Framebuffer {
+        const currentFramebuffer = this.state.drawFramebuffer;
         if (currentFramebuffer !== this) {
             this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, this.framebuffer);
         }
-
         return currentFramebuffer;
     }
 
-    /**
-        Bind restore previous binding after state update
-
-        @method
-        @ignore
-        @return {Framebuffer} The Framebuffer object.
-    */
-    restoreState(framebuffer) {
+    public restoreState(framebuffer: WebGL2Framebuffer): WebGL2Framebuffer {
         if (framebuffer !== this) {
             this.gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, framebuffer ? framebuffer.framebuffer : null);
         }
-
         return this;
     }
 
-    // TODO(Tarek): Transitional support for deprecated properties.
-    get colorTextures() {
-        console.error("Framebuffer.colorTextures is deprecated and will be removed. Please use Framebuffer.colorAttachments.");
-        return this.colorAttachments;
-    }
+    // public get colorTextures() {
+    //     console.error("Framebuffer.colorTextures is deprecated and will be removed. Please use Framebuffer.colorAttachments.");
+    //     return this.colorAttachments;
+    // }
 
-    get depthTexture() {
-        console.error("Framebuffer.depthTexture is deprecated and will be removed. Please use Framebuffer.depthAttachment.");
-        return this.depthAttachment;
-    }
+    // public get depthTexture() {
+    //     console.error("Framebuffer.depthTexture is deprecated and will be removed. Please use Framebuffer.depthAttachment.");
+    //     return this.depthAttachment;
+    // }
 
 }

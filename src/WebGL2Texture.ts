@@ -39,8 +39,8 @@ class WebGL2Texture {
 
     private binding;// = binding;
     public texture;// = null;
-    private width;// = width || 0;
-    private height;// = height || 0;
+    public width;// = width || 0;
+    public height;// = height || 0;
     private depth;// = depth || 0;
     public is3D;// = is3D;
     private compressed;// = Boolean(COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
@@ -181,7 +181,7 @@ class WebGL2Texture {
         @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
         @return {Texture} The Texture object.
     */
-    resize(width, height, depth) {
+    resize(width, height, depth?: number) {
         depth = depth || 0;
 
         if (this.texture && width === this.width && height === this.height && depth === this.depth) {

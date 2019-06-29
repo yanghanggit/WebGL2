@@ -1,14 +1,10 @@
 
-
-
-class WebGL2Capability {
+class WebGL2Capability extends WebGL2Object {
    
-   private readonly _engine: WebGL2Engine;
    public readonly cap: { [index: string]: any } = {};
    private initialized: boolean = false;
-
    constructor(engine: WebGL2Engine) {
-      this._engine = engine;
+      super(engine);
       this.initialize();
    }
 
@@ -18,7 +14,7 @@ class WebGL2Capability {
       }
       this.initialized = true;
 
-      const gl = this._engine.gl;
+      const gl = this.gl;
       const cap = this.cap;
 
       cap.MAX_TEXTURE_UNITS = gl.getParameter(GL.MAX_COMBINED_TEXTURE_IMAGE_UNITS);

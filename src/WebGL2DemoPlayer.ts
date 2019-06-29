@@ -1,19 +1,14 @@
 
 
-class WebGL2DemoPlayer implements System {
+class WebGL2DemoPlayer extends WebGL2Object implements System {
 
+    //
     private _application: Application = null;
-    private readonly _engine: WebGL2Engine = null;
     private _currentScene: WebGL2DemoScene = null;
     private _nextScene: WebGL2DemoScene = null;
-
+    //
     constructor(_engine: WebGL2Engine) {
-        //super();
-        this._engine = _engine;
-    }
-
-    public get engine(): WebGL2Engine {
-        return this._engine;
+        super(_engine);
     }
 
     public get application(): Application {
