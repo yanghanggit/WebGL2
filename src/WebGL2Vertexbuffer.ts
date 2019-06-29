@@ -3,15 +3,15 @@
 class WebGL2VertexBuffer extends WebGL2Object {
 
     public buffer: WebGLBuffer = null;
-    private readonly type: number = 0;
-    private readonly itemSize: number = 0;
-    private readonly numItems: number = 0;
-    private readonly numColumns: number = 0;
+    public readonly type: number = 0;
+    public readonly itemSize: number = 0;
+    public readonly numItems: number = 0;
+    public readonly numColumns: number = 0;
     private readonly byteLength: number = 0;
     private readonly dataLength: number = 0;
     private readonly usage: number = 0;
     private readonly indexArray: boolean = false;
-    private readonly integer: boolean = false;
+    public readonly integer: boolean = false;
     private readonly binding: number = 0;
 
     constructor(_engine: WebGL2Engine, type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array, usage: number = GL.STATIC_DRAW, indexArray: boolean = false) {
