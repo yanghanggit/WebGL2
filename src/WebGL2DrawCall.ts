@@ -5,7 +5,6 @@ class WebGL2DrawCall extends WebGL2Object {
     private drawPrimitive: number;
     private currentVertexArray: WebGL2VertexArray;
     private currentTransformFeedback: WebGL2TransformFeedback;
-
     private uniformIndices;
     private uniformNames;
     private uniformValues;
@@ -27,16 +26,12 @@ class WebGL2DrawCall extends WebGL2Object {
         this.currentProgram = program;
         this.drawPrimitive = GL.TRIANGLES;
         this.currentVertexArray = vertexArray;
-        //this.currentTransformFeedback = null;
         this.uniformIndices = {};
-        this.uniformNames = new Array(/*WEBGL_INFO.MAX_UNIFORMS*/this.engine.capbility('MAX_UNIFORMS'));
-        this.uniformValues = new Array(/*WEBGL_INFO.MAX_UNIFORMS*/this.engine.capbility('MAX_UNIFORMS'));
-        //this.uniformCount = 0;
-        this.uniformBuffers = new Array(/*WEBGL_INFO.MAX_UNIFORM_BUFFERS*/this.engine.capbility('MAX_UNIFORM_BUFFERS'));
-        this.uniformBlockNames = new Array(/*WEBGL_INFO.MAX_UNIFORM_BUFFERS*/this.engine.capbility('MAX_UNIFORM_BUFFERS'));
-        //this.uniformBlockCount = 0;
-        this.textures = new Array(/*WEBGL_INFO.MAX_TEXTURE_UNITS*/this.engine.capbility('MAX_TEXTURE_UNITS'));
-        //this.textureCount = 0;
+        this.uniformNames = new Array(this.engine.capbility('MAX_UNIFORMS'));
+        this.uniformValues = new Array(this.engine.capbility('MAX_UNIFORMS'));
+        this.uniformBuffers = new Array(this.engine.capbility('MAX_UNIFORM_BUFFERS'));
+        this.uniformBlockNames = new Array(this.engine.capbility('MAX_UNIFORM_BUFFERS'));
+        this.textures = new Array(this.engine.capbility('MAX_TEXTURE_UNITS'));
         this.offsets = new Int32Array(1);
         this.numElements = new Int32Array(1);
         this.numInstances = new Int32Array(1);
@@ -61,7 +56,7 @@ class WebGL2DrawCall extends WebGL2Object {
         return this;
     }
 
-    uniform(name, value) {
+    public uniform(name, value): WebGL2DrawCall {
         let index = this.uniformIndices[name];
         if (index === undefined) {
             index = this.uniformCount++;
@@ -135,7 +130,7 @@ class WebGL2DrawCall extends WebGL2Object {
             gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
             this.state.transformFeedback = null;
         }
-        if (this.MULTI_DRAW_INSTANCED/*WEBGL_INFO.MULTI_DRAW_INSTANCED*/) {
+        if (this.MULTI_DRAW_INSTANCED) {
             const ext = this.state.extensions.multiDrawInstanced;
             if (indexed) {
                 ext.multiDrawElementsInstancedWEBGL(this.drawPrimitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
