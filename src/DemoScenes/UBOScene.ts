@@ -27,7 +27,7 @@ class UBOScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        engine.clearColor(0.0, 0.0, 0.0, 1.0);
+        engine.clearColor(0.5, 0.5, 0.5, 1.0);
         //
         this.positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -0.4, -0.5,
@@ -77,7 +77,7 @@ class UBOScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-        engine.clear()
+        engine.clear();
         this.drawCall1.draw();
         this.drawCall2.draw();
         return this;

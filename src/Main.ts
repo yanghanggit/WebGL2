@@ -75,10 +75,10 @@ function getQualifiedClassName(value: any): string {
 
 /////////
 const __SceneClasses__ = [
+    TriangleScene,
     UBOScene,
     OITScene,
     WanderingTrianglesScene,
-    
     EmptyScene
 ];
 let __currentSceneIndex__ = 0;
