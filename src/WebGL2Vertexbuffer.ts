@@ -1,59 +1,22 @@
 
-// import { GL, TYPE_SIZE } from "./constants.js";
 
-const INTEGER_TYPES = {
-    [GL.BYTE]: true,
-    [GL.UNSIGNED_BYTE]: true,
-    [GL.SHORT]: true,
-    [GL.UNSIGNED_SHORT]: true,
-    [GL.INT]: true,
-    [GL.UNSIGNED_INT]: true
-};
+class WebGL2VertexBuffer extends WebGL2Object {
 
-/**
-    Storage for vertex data.
+    public buffer: WebGLBuffer = null;
+    private readonly type: number = 0;
+    private readonly itemSize: number = 0;
+    private readonly numItems: number = 0;
+    private readonly numColumns: number = 0;
+    private readonly byteLength: number = 0;
+    private readonly dataLength: number = 0;
+    private readonly usage: number = 0;
+    private readonly indexArray: boolean = false;
+    private readonly integer: boolean = false;
+    private readonly binding: number = 0;
 
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLBuffer} buffer Allocated buffer storage.
-    @prop {GLEnum} type The type of data stored in the buffer.
-    @prop {number} itemSize Number of array elements per vertex.
-    @prop {number} numItems Number of vertices represented.
-    @prop {GLEnum} usage The usage pattern of the buffer.
-    @prop {boolean} indexArray Whether this is an index array.
-    @prop {GLEnum} binding GL binding point (ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER).
-    @prop {Object} appState Tracked GL state.
-*/
-class WebGL2VertexBuffer {
-
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private readonly appState: WebGL2State;
-
-    public buffer;// = null;
-    private type;// = type;
-    private itemSize;// = itemSize;  // In bytes for interleaved arrays.
-    private numItems;// = type ? dataLength / (itemSize * numColumns) : byteLength / itemSize;
-    private numColumns;// = numColumns;
-    private byteLength;// = byteLength;
-    private dataLength;// = dataLength;
-    private usage;// = usage;
-    private indexArray;// = Boolean(indexArray);
-    private integer;// = Boolean(INTEGER_TYPES[this.type]);
-    private binding;// = this.indexArray ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
-
-
-
-    //    createVertexBuffer(type, itemSize, data, usage) {
-    //     return new WebGL2VertexBuffer(/*this.gl, this.state,*/this, type, itemSize, data, usage);
-    //  }
-
-    constructor(/*gl, appState,*/_engine: WebGL2Engine, type, itemSize, data, usage: number = GL.STATIC_DRAW, indexArray: boolean = false) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        this.appState = _engine.state;//appState;
-        //
-        let numColumns;
+    constructor(_engine: WebGL2Engine, type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array, usage: number = GL.STATIC_DRAW, indexArray: boolean = false) {
+        super(_engine);
+        let numColumns = 0;
         switch (type) {
             case GL.FLOAT_MAT4:
             case GL.FLOAT_MAT4x2:
@@ -73,7 +36,6 @@ class WebGL2VertexBuffer {
             default:
                 numColumns = 1;
         }
-
         switch (type) {
             case GL.FLOAT_MAT4:
             case GL.FLOAT_MAT3x4:
@@ -94,9 +56,8 @@ class WebGL2VertexBuffer {
                 type = GL.FLOAT;
                 break;
         }
-
-        let dataLength;
-        let byteLength;
+        let dataLength = 0;
+        let byteLength = 0;
         if (typeof data === "number") {
             dataLength = data;
             if (type) {
@@ -107,12 +68,8 @@ class WebGL2VertexBuffer {
             dataLength = data.length;
             byteLength = data.byteLength;
         }
-
-        //this.gl = gl;
-        this.buffer = null;
-        //this.appState = appState;
         this.type = type;
-        this.itemSize = itemSize;  // In bytes for interleaved arrays.
+        this.itemSize = itemSize;
         this.numItems = type ? dataLength / (itemSize * numColumns) : byteLength / itemSize;
         this.numColumns = numColumns;
         this.byteLength = byteLength;
@@ -121,72 +78,40 @@ class WebGL2VertexBuffer {
         this.indexArray = Boolean(indexArray);
         this.integer = Boolean(INTEGER_TYPES[this.type]);
         this.binding = this.indexArray ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
-
         this.restore(data);
     }
 
-    /**
-        Restore vertex buffer after context loss.
-
-        @method
-        @param {ArrayBufferView|number} data Buffer data itself or the total 
-            number of elements to be allocated.
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    restore(data) {
+    public restore(data: number | Float32Array | Uint16Array | Uint8Array): WebGL2VertexBuffer {
         if (!data) {
             data = this.byteLength;
         }
-
-        // Don't want to update vertex array bindings
-        if (this.appState.vertexArray) {
+        if (this.state.vertexArray) {
             this.gl.bindVertexArray(null);
-            this.appState.vertexArray = null;
+            this.state.vertexArray = null;
         }
-
         this.buffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferData(this.binding, data, this.usage);
+        this.gl.bufferData(this.binding, (data as any), this.usage);
         this.gl.bindBuffer(this.binding, null);
-
         return this;
     }
 
-    /**
-        Update data in this buffer. NOTE: the data must fit
-        the originally-allocated buffer!
-
-        @method
-        @param {VertexBufferView} data Data to store in the buffer.
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    data(data) {
-        // Don't want to update vertex array bindings
-        if (this.appState.vertexArray) {
+    public data(data: Float32Array | Uint16Array | Uint8Array): WebGL2VertexBuffer {
+        if (this.state.vertexArray) {
             this.gl.bindVertexArray(null);
-            this.appState.vertexArray = null;
+            this.state.vertexArray = null;
         }
-
         this.gl.bindBuffer(this.binding, this.buffer);
         this.gl.bufferSubData(this.binding, 0, data);
         this.gl.bindBuffer(this.binding, null);
-
         return this;
     }
 
-    /**
-        Delete this array buffer.
-
-        @method
-        @return {VertexBuffer} The VertexBuffer object.
-    */
-    delete() {
+    public delete(): WebGL2VertexBuffer {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
             this.buffer = null;
         }
-
         return this;
     }
-
 }

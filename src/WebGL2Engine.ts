@@ -504,7 +504,7 @@ class WebGL2Engine implements System {
       return new WebGL2TransformFeedback(this);
    }
 
-   public noRasterize(): WebGL2Engine {
+   public no_rasterize(): WebGL2Engine {
       this.gl.enable(this.gl.RASTERIZER_DISCARD);
       return this;
    }

@@ -139,11 +139,12 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        //
         const engine = this.engine;
-        engine.noRasterize();
+        //
+        engine.no_rasterize();
         this.updateDrawCall.draw();
         engine.rasterize().clear();
+        //
         this.mainDrawCall.draw();
         ///
         this.updateDrawCall = this.updateDrawCall === this.updateDrawCallA ? this.updateDrawCallB : this.updateDrawCallA;

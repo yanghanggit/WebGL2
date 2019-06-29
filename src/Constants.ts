@@ -790,3 +790,12 @@ const TEXTURE_FORMAT_DEFAULTS = {
         [GL.DEPTH_COMPONENT]: GL.DEPTH_COMPONENT32F
     }
 };
+
+const INTEGER_TYPES = {
+    [GL.BYTE]: true,
+    [GL.UNSIGNED_BYTE]: true,
+    [GL.SHORT]: true,
+    [GL.UNSIGNED_SHORT]: true,
+    [GL.INT]: true,
+    [GL.UNSIGNED_INT]: true
+};
