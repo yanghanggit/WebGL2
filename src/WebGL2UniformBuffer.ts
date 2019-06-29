@@ -175,7 +175,7 @@ class WebGL2UniformBuffer extends WebGL2Object {
         return this;
     }
 
-    public bind(base): WebGL2UniformBuffer {
+    public bind(base: number): WebGL2UniformBuffer {
         const currentBuffer = this.state.uniformBuffers[base];
         if (currentBuffer !== this) {
             if (currentBuffer) {

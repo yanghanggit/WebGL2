@@ -1,7 +1,7 @@
 
 
 class WebGL2TransformFeedback extends WebGL2Object {
-    //
+    
     private transformFeedback: WebGLTransformFeedback;
 
     constructor(engine: WebGL2Engine) {

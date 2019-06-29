@@ -307,18 +307,12 @@ class WebGL2Engine implements System {
       );
    }
 
-   public createTexture2D(image: number | HTMLImageElement, width: number | Object, height?: number | Object, options?: Object): WebGL2Texture {
-      if (typeof image === "number") {
-         options = height;
-         height = width;
-         width = image;
-         image = null;
-      } else if (height === undefined) {
-         options = width;
-         width = image.width;
-         height = image.height;
-      }
-      return new WebGL2Texture(this, this.gl.TEXTURE_2D, image, width, height, undefined, false, options);
+   public createTexture2DByImage(image: HTMLImageElement, options: CreateTextureOptions): WebGL2Texture {
+      return new WebGL2Texture(this, this.gl.TEXTURE_2D, image, image.width, image.height, undefined, false, options);
+   }
+
+   public createTexture2DBySize(width: number, height: number, options: CreateTextureOptions): WebGL2Texture {
+      return new WebGL2Texture(this, this.gl.TEXTURE_2D, null, width, height, undefined, false, options);
    }
 
    public createFramebuffer(): WebGL2Framebuffer {

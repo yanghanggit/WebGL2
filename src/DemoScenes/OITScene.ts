@@ -109,7 +109,7 @@ class OITScene extends WebGL2DemoScene {
             GL.FLOAT_VEC4
         ]).set(0, viewProjMatrix).set(1, eyePosition).set(2, vec3.fromValues(0.5, 1, 2)).update();
         //
-        const texture = engine.createTexture2D(this.image, {
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
@@ -117,10 +117,10 @@ class OITScene extends WebGL2DemoScene {
             .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("uTexture", texture);
         //
-        const accumulateTarget = engine.createTexture2D(engine.width, engine.height, {
+        const accumulateTarget = engine.createTexture2DBySize(engine.width, engine.height, {
             internalFormat: GL.RGBA16F
         });
-        const accumulateAlphaTarget = engine.createTexture2D(engine.width, engine.height, {
+        const accumulateAlphaTarget = engine.createTexture2DBySize(engine.width, engine.height, {
             internalFormat: GL.RGBA16F
         });
         this.accumBuffer = engine.createFramebuffer()

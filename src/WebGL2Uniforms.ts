@@ -1,10 +1,5 @@
 
-//import { GL } from "./constants.js";
-
-// Classes to manage uniform value updates, including
-// caching current values.
-
-const UNIFORM_FUNC_NAME = {};
+const UNIFORM_FUNC_NAME: { [index: number]: string } = {};
 UNIFORM_FUNC_NAME[GL.BOOL] = "uniform1i";
 UNIFORM_FUNC_NAME[GL.INT] = "uniform1i";
 UNIFORM_FUNC_NAME[GL.SAMPLER_2D] = "uniform1i";
@@ -46,7 +41,7 @@ UNIFORM_FUNC_NAME[GL.FLOAT_MAT3x4] = "uniformMatrix3x4fv";
 UNIFORM_FUNC_NAME[GL.FLOAT_MAT4x2] = "uniformMatrix4x2fv";
 UNIFORM_FUNC_NAME[GL.FLOAT_MAT4x3] = "uniformMatrix4x3fv";
 
-const UNIFORM_COMPONENT_COUNT = {};
+const UNIFORM_COMPONENT_COUNT: { [index: number]: number } = {};
 UNIFORM_COMPONENT_COUNT[GL.BOOL] = 1;
 UNIFORM_COMPONENT_COUNT[GL.INT] = 1;
 UNIFORM_COMPONENT_COUNT[GL.SAMPLER_2D] = 1;
@@ -88,7 +83,7 @@ UNIFORM_COMPONENT_COUNT[GL.FLOAT_MAT3x4] = 12;
 UNIFORM_COMPONENT_COUNT[GL.FLOAT_MAT4x2] = 8;
 UNIFORM_COMPONENT_COUNT[GL.FLOAT_MAT4x3] = 12;
 
-const UNIFORM_CACHE_CLASS = {};
+const UNIFORM_CACHE_CLASS: { [index: number]: Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor } = {};
 UNIFORM_CACHE_CLASS[GL.INT] = Int32Array;
 UNIFORM_CACHE_CLASS[GL.SAMPLER_2D] = Int32Array;
 UNIFORM_CACHE_CLASS[GL.INT_SAMPLER_2D] = Int32Array;
@@ -117,52 +112,44 @@ UNIFORM_CACHE_CLASS[GL.UNSIGNED_INT_VEC2] = Uint32Array;
 UNIFORM_CACHE_CLASS[GL.UNSIGNED_INT_VEC3] = Uint32Array;
 UNIFORM_CACHE_CLASS[GL.UNSIGNED_INT_VEC4] = Uint32Array;
 
-class SingleComponentUniform {
+class SingleComponentUniform extends WebGL2Object {
 
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private handle = null;
-    private glFuncName = null;
-    private cache = null;
+    private handle: WebGLUniformLocation;
+    private glFuncName: string;
+    private cache: boolean | number;
 
-    constructor(/*gl,*/ _engine: WebGL2Engine, handle, type) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        //this.gl = gl;
+    constructor(_engine: WebGL2Engine, handle: WebGLUniformLocation, type: number) {
+        super(_engine);
         this.handle = handle;
         this.glFuncName = UNIFORM_FUNC_NAME[type];
-        this.cache = type === GL.BOOL ? false : 0;
+        this.cache = (type === GL.BOOL ? false : 0);
     }
 
-    set(value) {
+    public set(value: boolean | number): SingleComponentUniform {
         if (this.cache !== value) {
             this.gl[this.glFuncName](this.handle, value);
             this.cache = value;
         }
+        return this;
     }
-
 }
 
-class MultiNumericUniform {
+class MultiNumericUniform extends WebGL2Object {
 
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private handle = null;
-    private glFuncName = null;
-    private count = null;
-    private cache = null;
+    private handle: WebGLUniformLocation;
+    private glFuncName: string;
+    private count: number;
+    private cache: Int32Array | Uint32Array | Float32Array;
 
-    constructor(/*gl,*/ _engine: WebGL2Engine, handle, type, count) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        //this.gl = gl;
+    constructor(_engine: WebGL2Engine, handle: WebGLUniformLocation, type: number, count: number) {
+        super(_engine);
         this.handle = handle;
         this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
         this.count = count;
         this.cache = new UNIFORM_CACHE_CLASS[type](UNIFORM_COMPONENT_COUNT[type] * count);
     }
 
-    set(value) {
+    public set(value: Int32Array | Uint32Array | Float32Array): MultiNumericUniform {
         for (let i = 0, len = value.length; i < len; ++i) {
             if (this.cache[i] !== value[i]) {
                 this.gl[this.glFuncName](this.handle, value);
@@ -170,70 +157,62 @@ class MultiNumericUniform {
                 return;
             }
         }
+        return this;
     }
-
 }
 
-class MultiBoolUniform {
+class MultiBoolUniform extends WebGL2Object {
 
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private handle = null;
-    private glFuncName= null;
-    private count = null;
-    private cache = null;
+    private handle: WebGLUniformLocation;
+    private glFuncName: string;
+    private count: number;
+    private cache: boolean[];
 
-    constructor(/*gl,*/ _engine: WebGL2Engine, handle, type, count) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        //this.gl = gl;
+    constructor(_engine: WebGL2Engine, handle: WebGLUniformLocation, type: number, count: number) {
+        super(_engine);
         this.handle = handle;
         this.glFuncName = UNIFORM_FUNC_NAME[type] + "v";
         this.count = count;
         this.cache = new Array(UNIFORM_COMPONENT_COUNT[type] * count)/*.fill(false)*/;
     }
 
-    set(value) {
+    public set(value: boolean[]): MultiBoolUniform {
         for (let i = 0, len = value.length; i < len; ++i) {
             if (this.cache[i] !== value[i]) {
                 this.gl[this.glFuncName](this.handle, value);
                 for (let j = i; j < len; j++) {
                     this.cache[j] = value[j];
                 }
-                return;
+                return this;
             }
         }
+        return this;
     }
-
 }
 
-class MatrixUniform {
+class MatrixUniform extends WebGL2Object {
 
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private handle = null;
-    private glFuncName = null;
-    private count = null;
-    private cache = null;
+    private handle: WebGLUniformLocation;
+    private glFuncName: string;
+    private count: number;
+    private cache: Float32Array;
 
-    constructor(/*gl,*/ _engine: WebGL2Engine, handle, type, count) {
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        //this.gl = gl;
+    constructor(_engine: WebGL2Engine, handle: WebGLUniformLocation, type: number, count: number) {
+        super(_engine);
         this.handle = handle;
         this.glFuncName = UNIFORM_FUNC_NAME[type];
         this.count = count;
         this.cache = new Float32Array(UNIFORM_COMPONENT_COUNT[type] * count);
     }
 
-    set(value) {
+    public set(value: Float32Array): MatrixUniform {
         for (let i = 0, len = value.length; i < len; ++i) {
             if (this.cache[i] !== value[i]) {
                 this.gl[this.glFuncName](this.handle, false, value);
                 this.cache.set(value);
-                return;
+                return this;
             }
         }
+        return this;
     }
-
 }

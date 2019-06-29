@@ -1,90 +1,68 @@
 
-// import { 
-//     GL,
-//     WEBGL_INFO,
-//     TEXTURE_FORMATS,
-//     COMPRESSED_TEXTURE_TYPES,
-//     DUMMY_OBJECT,
-//     DUMMY_UNIT_ARRAY,
-//     // DEPRECATED
-//     TEXTURE_FORMAT_DEFAULTS
-// } from "./constants.js";
 
-/**
-    General-purpose texture.
+interface CreateTextureOptions {
+    minFilter?: number;
+    magFilter?: number;
+    wrapS?: number;
+    wrapT?: number;
+    wrapR?: number;
+    compareMode?: number;
+    compareFunc?: number;
+    minLOD?: number;
+    maxLOD?: number;
+    baseLevel?: number;
+    maxLevel?: number;
+    maxAnisotropy?: number;
+    flipY?: boolean;
+    premultiplyAlpha?: boolean;
+    internalFormat?: number;
+    format?: number;
+    type?: number;
+    width?: number;
+    height?: number;
+};
 
-    @class
-    @prop {WebGLRenderingContext} gl The WebGL context.
-    @prop {WebGLTexture} texture Handle to the texture.
-    @prop {number} width Texture width.
-    @prop {number} height Texture height.
-    @prop {number} depth Texture depth.
-    @prop {GLEnum} binding Binding point for the texture.
-    @prop {GLEnum} type Type of data stored in the texture.
-    @prop {GLEnum} format Layout of texture data.
-    @prop {GLEnum} internalFormat Internal arrangement of the texture data.
-    @prop {number} currentUnit The current texture unit this texture is bound to.
-    @prop {boolean} is3D Whether this texture contains 3D data.
-    @prop {boolean} flipY Whether the y-axis is flipped for this texture.
-    @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this texture.
-    @prop {boolean} mipmaps Whether this texture is using mipmap filtering 
-        (and thus should have a complete mipmap chain).
-    @prop {Object} appState Tracked GL state.
-*/
-class WebGL2Texture {
+class WebGL2Texture extends WebGL2Object {
 
-    private readonly _engine: WebGL2Engine;
-    private readonly gl: WebGLRenderingContext;
-    private readonly appState: WebGL2State;
+    private readonly binding: number;
+    public texture: WebGLTexture;
+    public width: number;
+    public height: number;
+    private depth: number;
+    public readonly is3D: boolean;
+    private readonly compressed: boolean;
+    private readonly internalFormat: number;
+    private readonly format: number;
+    private readonly type: number;
+    private currentUnit: number;
+    private readonly minFilter: number;
+    private readonly magFilter: number;
+    private readonly wrapS: number;
+    private readonly wrapT: number;
+    private readonly wrapR: number;
+    private readonly compareMode: number;
+    private readonly compareFunc: number;
+    private readonly minLOD: number;
+    private readonly maxLOD: number;
+    private readonly baseLevel: number;
+    private readonly maxLevel: number;
+    private readonly maxAnisotropy: number;
+    private readonly flipY: boolean;
+    private readonly premultiplyAlpha: boolean;
+    private readonly mipmaps: boolean;
 
-    private binding;// = binding;
-    public texture;// = null;
-    public width;// = width || 0;
-    public height;// = height || 0;
-    private depth;// = depth || 0;
-    public is3D;// = is3D;
-    private compressed;// = Boolean(COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
-    private internalFormat;// = options.internalFormat;
-    private format;// = this.internalFormat;
-    private type;// = GL.UNSIGNED_BYTE;
-    private currentUnit;
-    private minFilter;// = minFilter;
-    private magFilter;// = magFilter;
-    private wrapS;// = wrapS;
-    private wrapT;// = wrapT;
-    private wrapR;// = wrapR;
-    private compareMode;// = compareMode;
-    private compareFunc;// = compareFunc;
-    private minLOD;// = minLOD;
-    private maxLOD;// = maxLOD;
-    private baseLevel;// = baseLevel;
-    private maxLevel;// = maxLevel;
-    private maxAnisotropy;// = Math.min(maxAnisotropy, WEBGL_INFO.MAX_TEXTURE_ANISOTROPY);
-    private flipY;// = flipY;
-    private premultiplyAlpha;// = premultiplyAlpha;
-    private mipmaps;// = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
-
-    constructor(/*gl, appState,*/_engine, binding, image, width = image.width, height = image.height, depth, is3D, options: any = DUMMY_OBJECT) {
-
-        this._engine = _engine;
-        this.gl = _engine.gl;//gl;
-        this.appState = _engine.state;//appState;
-        //this.gl = gl;
-
-
-
+    constructor(_engine: WebGL2Engine, binding: number, image: number | HTMLImageElement, width: number, height: number, depth: number, is3D: boolean, options: CreateTextureOptions = DUMMY_OBJECT as CreateTextureOptions) {
+        super(_engine);
+        //
         this.binding = binding;
         this.texture = null;
         this.width = width || 0;
         this.height = height || 0;
         this.depth = depth || 0;
         this.is3D = is3D;
-        //this.appState = appState;
-
         this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.internalFormat]);
-
+        //
         if (options.format !== undefined) {
-            console.warn("Texture option 'format' is deprecated and will be removed. Use 'internalFormat' with a sized format instead.");
             this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
             if (options.type === undefined) {
                 options.type = options.format === GL.DEPTH_COMPONENT ? GL.UNSIGNED_SHORT : GL.UNSIGNED_BYTE;
@@ -97,26 +75,20 @@ class WebGL2Texture {
                 }
             }
         }
-
         if (this.compressed) {
-            // For compressed textures, just need to provide one of format, internalFormat.
-            // The other will be the same.
             this.internalFormat = options.internalFormat;
             this.format = this.internalFormat;
             this.type = GL.UNSIGNED_BYTE;
         } else {
             this.internalFormat = options.internalFormat !== undefined ? options.internalFormat : GL.RGBA8;
-
             let formatInfo = TEXTURE_FORMATS[this.internalFormat];
             this.format = formatInfo[0];
             this.type = options.type !== undefined ? options.type : formatInfo[1];
         }
 
-        // -1 indicates unbound
         this.currentUnit = -1;
 
-        // Sampling parameters
-        let {
+        const {
             minFilter = image ? GL.LINEAR_MIPMAP_NEAREST : GL.NEAREST,
             magFilter = image ? GL.LINEAR : GL.NEAREST,
             wrapS = GL.REPEAT,
@@ -144,44 +116,23 @@ class WebGL2Texture {
         this.maxLOD = maxLOD;
         this.baseLevel = baseLevel;
         this.maxLevel = maxLevel;
-        this.maxAnisotropy = Math.min(maxAnisotropy, WEBGL_INFO.MAX_TEXTURE_ANISOTROPY);
+        this.maxAnisotropy = Math.min(maxAnisotropy, /*WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/this.engine.capbility('MAX_TEXTURE_ANISOTROPY'));
         this.flipY = flipY;
         this.premultiplyAlpha = premultiplyAlpha;
         this.mipmaps = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
-
         this.restore(image);
     }
 
-    /**
-        Restore texture after context loss.
-
-        @method
-        @param {DOMElement|ArrayBufferView|Array} [image] Image data. An array can be passed to manually set all levels 
-            of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-            generateMipmap() will be called to produce the remaining levels.
-        @return {Texture} The Texture object.
-    */
-    restore(image) {
+    public restore(image: HTMLImageElement | number): WebGL2Texture {
         this.texture = null;
         this.resize(this.width, this.height, this.depth);
-
         if (image) {
             this.data(image);
         }
-
         return this;
     }
 
-    /**
-        Re-allocate texture storage.
-
-        @method
-        @param {number} width Image width.
-        @param {number} height Image height.
-        @param {number} [depth] Image depth or number of images. Required when passing 3D or texture array data.
-        @return {Texture} The Texture object.
-    */
-    resize(width, height, depth?: number) {
+    public resize(width: number, height: number, depth?: number): WebGL2Texture {
         depth = depth || 0;
 
         if (this.texture && width === this.width && height === this.height && depth === this.depth) {
@@ -190,7 +141,7 @@ class WebGL2Texture {
 
         this.gl.deleteTexture(this.texture);
         if (this.currentUnit !== -1) {
-            this.appState.textures[this.currentUnit] = null;
+            this.state.textures[this.currentUnit] = null;
         }
 
         this.texture = this.gl.createTexture();
@@ -230,7 +181,7 @@ class WebGL2Texture {
             this.gl.texParameteri(this.binding, GL.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy);
         }
 
-        let levels;
+        let levels: number;
         if (this.is3D) {
             if (this.mipmaps) {
                 levels = Math.floor(Math.log2(Math.max(Math.max(this.width, this.height), this.depth))) + 1;
@@ -250,32 +201,18 @@ class WebGL2Texture {
         return this;
     }
 
-    /**
-        Set the image data for the texture. An array can be passed to manually set all levels 
-        of the mipmap chain. If a single level is passed and mipmap filtering is being used,
-        generateMipmap() will be called to produce the remaining levels.
-        NOTE: the data must fit the currently-allocated storage!
-
-        @method
-        @param {ImageElement|ArrayBufferView|Array} data Image data. If an array is passed, it will be 
-            used to set mip map levels.
-        @return {Texture} The Texture object.
-    */
-    data(data) {
+    public data(data: HTMLImageElement | number | any[]): WebGL2Texture {
         if (!Array.isArray(data)) {
             DUMMY_UNIT_ARRAY[0] = data;
             data = DUMMY_UNIT_ARRAY;
         }
-
         let numLevels = this.mipmaps ? data.length : 1;
         let width = this.width;
         let height = this.height;
         let depth = this.depth;
         let generateMipmaps = this.mipmaps && data.length === 1;
-        let i;
-
+        let i: number;
         this.bind(Math.max(this.currentUnit, 0));
-
         if (this.compressed) {
             if (this.is3D) {
                 for (i = 0; i < numLevels; ++i) {
@@ -305,60 +242,38 @@ class WebGL2Texture {
                 height = Math.max(height >> 1, 1);
             }
         }
-
         if (generateMipmaps) {
             this.gl.generateMipmap(this.binding);
         }
-
         return this;
     }
 
-    /**
-        Delete this texture.
-
-        @method
-        @return {Texture} The Texture object.
-    */
-    delete() {
+    public delete(): WebGL2Texture {
         if (this.texture) {
             this.gl.deleteTexture(this.texture);
             this.texture = null;
-
-            if (this.currentUnit !== -1 && this.appState.textures[this.currentUnit] === this) {
-                this.appState.textures[this.currentUnit] = null;
+            if (this.currentUnit !== -1 && this.state.textures[this.currentUnit] === this) {
+                this.state.textures[this.currentUnit] = null;
                 this.currentUnit = -1;
             }
         }
-
         return this;
     }
 
-    /**
-        Bind this texture to a texture unit.
-
-        @method
-        @ignore
-        @return {Texture} The Texture object.
-    */
-    bind(unit) {
-        let currentTexture = this.appState.textures[unit];
-
+    public bind(unit: number): WebGL2Texture {
+        let currentTexture = this.state.textures[unit];
         if (currentTexture !== this) {
             if (currentTexture) {
                 currentTexture.currentUnit = -1;
             }
-
             if (this.currentUnit !== -1) {
-                this.appState.textures[this.currentUnit] = null;
+                this.state.textures[this.currentUnit] = null;
             }
-
             this.gl.activeTexture(GL.TEXTURE0 + unit);
             this.gl.bindTexture(this.binding, this.texture);
-
-            this.appState.textures[unit] = this;
+            this.state.textures[unit] = this;
             this.currentUnit = unit;
         }
-
         return this;
     }
 
