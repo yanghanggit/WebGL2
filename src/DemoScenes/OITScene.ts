@@ -1,6 +1,6 @@
 
 
-interface Transform {
+interface SphereTransform {
     scale: Float32Array,
     rotate: Float32Array,
     translate: Float32Array,
@@ -24,7 +24,7 @@ class OITScene extends WebGL2DemoScene {
     private accumDrawCall: WebGL2DrawCall;
     private blendDrawCall: WebGL2DrawCall;
     private rotationMatrix: Float32Array = mat4.create();
-    private spheresTransform: Transform[] = [];
+    private spheresTransform: SphereTransform[] = [];
     private modelMatrixData: Float32Array;
     private modelMatrices: WebGL2VertexBuffer;
 
@@ -70,7 +70,7 @@ class OITScene extends WebGL2DemoScene {
                 rotate: vec3.fromValues(0, 0, 0),
                 translate: vec3.fromValues(x, y, z),
                 modelMatrix: mat4.create()
-            } as Transform;
+            } as SphereTransform;
             sphereColorData.set(vec4.fromValues(
                 Math.floor(Math.sqrt(Math.random()) * 256),
                 Math.floor(Math.sqrt(Math.random()) * 256),
@@ -177,7 +177,7 @@ class OITScene extends WebGL2DemoScene {
         const rotationMatrix = this.rotationMatrix;
         const engine = this.engine;
         //
-        let sphereTrans: Transform = null;
+        let sphereTrans: SphereTransform = null;
         let modelMatrix: Float32Array = null;
         for (let i = 0, len = spheresTransform.length; i < len; ++i) {
             sphereTrans = spheresTransform[i];

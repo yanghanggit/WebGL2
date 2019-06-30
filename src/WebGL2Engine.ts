@@ -67,6 +67,7 @@ class WebGL2Engine implements System {
    private clearBits: number = 0;
    private contextLostExt: any = null;
    private contextRestoredHandler: Function = null;
+   public drawCalls: number;
 
    constructor(canvas: HTMLCanvasElement, contextAttributes: any) {
       //

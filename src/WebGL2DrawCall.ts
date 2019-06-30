@@ -100,6 +100,11 @@ class WebGL2DrawCall extends WebGL2Object {
     }
 
     public draw(): WebGL2DrawCall {
+
+        ///
+        ++this.engine.drawCalls;
+        ///
+
         const uniformNames = this.uniformNames;
         const uniformValues = this.uniformValues;
         const uniformBuffers = this.uniformBuffers;

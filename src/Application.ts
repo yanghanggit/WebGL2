@@ -23,7 +23,7 @@ class Application implements System {
         this._player = _player;
         this._player.attachApplication(this);
         //
-        this._profile = new WebGL2Profile(this.engine.createTimer());
+        this._profile = new WebGL2Profile(engine);
         //
         this.addSystem(this._player);
         this.addSystem(this._engine);
@@ -96,6 +96,7 @@ class Application implements System {
 
     public update(): Application {
         this._profile.profileStart();
+        this._engine.drawCalls = 0;
         ////////////////////////////
         for (const sys of this.subsystems) {
             sys.update();

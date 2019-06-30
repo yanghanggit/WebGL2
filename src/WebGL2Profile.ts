@@ -5,17 +5,19 @@ let cpuTimeSum = 0;
 let gpuTimeSum = 0;
 let timeSampleCount = NUM_TIMING_SAMPLES - 1;
 
-class WebGL2Profile implements System {
+class WebGL2Profile extends WebGL2Object implements System {
 
     private _timer: WebGL2Timer = null;
     private _timerDiv: HTMLDivElement = null;
     private _cpuTimeElement: HTMLDivElement = null;
     private _gpuTimeElement: HTMLDivElement = null;
     private _fpsElement: HTMLDivElement = null;
+    private _drawCallsElement: HTMLDivElement = null;
     private _titleElement: HTMLDivElement = null;
 
-    constructor(timer: WebGL2Timer) {
-        this._timer = timer;
+    constructor(_engine: WebGL2Engine) {
+        super(_engine);
+        this._timer = this.engine.createTimer();
     }
 
     public profileStart(): WebGL2Profile {
@@ -51,12 +53,19 @@ class WebGL2Profile implements System {
             //
             this._cpuTimeElement = document.createElement("div");
             timerDiv.appendChild(this._cpuTimeElement);
+            
             this._gpuTimeElement = document.createElement("div");
             timerDiv.appendChild(this._gpuTimeElement);
+            
             this._fpsElement = document.createElement("div");
             timerDiv.appendChild(this._fpsElement);
+            
+            this._drawCallsElement = document.createElement("div");
+            timerDiv.appendChild(this._drawCallsElement);
+            
             this._titleElement = document.createElement("div");
             timerDiv.appendChild(this._titleElement);
+            
             document.body.appendChild(this._timerDiv);
         }
         return this;
@@ -83,6 +92,7 @@ class WebGL2Profile implements System {
                 }
                 // const fps = 1000 / cpuTimeAve;
                 // this.fpsElement.innerText = "FPS: " + (fps).toFixed(3);
+                this._drawCallsElement.innerText = "DrawCalls: " + this.engine.drawCalls;
             }
             cpuTimeSum = 0;
             gpuTimeSum = 0;

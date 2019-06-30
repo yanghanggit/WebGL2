@@ -1,11 +1,18 @@
 
+interface BoxTransform {
+    rotation: Float32Array;
+    rv: Float32Array;
+    translation: Float32Array;
+    modelMatrix: Float32Array;
+};
+
 class TextureArrayScene extends WebGL2DemoScene {
 
     private vsSource: string;
     private fsSource: string;
     private program: WebGL2Program;
     private drawCall: WebGL2DrawCall;
-    private boxes: Object[];
+    private boxes: BoxTransform[];
     private imageArray: TextureArrayData;
     private modelMatrixData: Float32Array;
     private modelMatrices: WebGL2VertexBuffer;
@@ -31,48 +38,41 @@ class TextureArrayScene extends WebGL2DemoScene {
     private createScene(): void {
         //
         const engine = this.engine;
-        engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest();
-
-        // SET UP GEOMETRY
-        let box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] });
+        engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest().depthMask(true);
+        //
+        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] });
         this.modelMatrixData = new Float32Array(8 * 16);
-        let textureIndexData = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
-
-        let positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        let uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
-        let normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
-        let textureIndices = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 1, textureIndexData);
+        const textureIndexData = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
+        //
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        const textureIndices = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 1, textureIndexData);
         this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData.length);
-
-        let boxArray = engine.createVertexArray()
+        //
+        const boxArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals)
             .instanceAttributeBuffer(3, textureIndices)
             .instanceAttributeBuffer(4, this.modelMatrices);
-
-        // SET UP UNIFORM BUFFER
+        //
         this.projMatrix = mat4.create();
         mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(0, 0, 6);
+        const eyePosition = vec3.fromValues(0, 0, 6);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        let lightPosition = vec3.fromValues(0, 0, 2);
-
+        const lightPosition = vec3.fromValues(0, 0, 2);
         this.sceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC4
-        ])
-            .set(0, this.viewProjMatrix)
-            .set(1, eyePosition)
-            .set(2, lightPosition)
-            .update();
+        ]).set(0, this.viewProjMatrix).set(1, eyePosition).set(2, lightPosition).update();
 
         this.boxes = [
             {
@@ -125,9 +125,7 @@ class TextureArrayScene extends WebGL2DemoScene {
             }
         ];
 
-        let texture = engine.createTextureArray(this.imageArray.data, this.imageArray.width, this.imageArray.height, this.imageArray.length, { maxAnisotropy: WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
-
-        // SET UP DRAW CALL
+        const texture = engine.createTextureArray(this.imageArray.data, this.imageArray.width, this.imageArray.height, this.imageArray.length, { maxAnisotropy: WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
         this.drawCall = engine.createDrawCall(this.program, boxArray)
             .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
             .texture("tex", texture);
@@ -173,13 +171,20 @@ class TextureArrayScene extends WebGL2DemoScene {
         }
         const engine = this.engine;
         engine.clear();
-        const boxes = this.boxes as any[];
+        const boxes = this.boxes;
+        const modelMatrices = this.modelMatrices;
+        let box: BoxTransform;
+        let rotation: Float32Array;
+        let rv: Float32Array;
         for (let i = 0, len = boxes.length; i < len; ++i) {
-            boxes[i].rotation[0] += boxes[i].rv[0];
-            boxes[i].rotation[1] += boxes[i].rv[1];
-            boxes[i].rotation[2] += boxes[i].rv[2];
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translation, boxes[i].rotation, null);
-            this.modelMatrices.data(this.modelMatrixData);
+            box = boxes[i];
+            rotation = box.rotation;
+            rv = box.rv;
+            rotation[0] += rv[0];
+            rotation[1] += rv[1];
+            rotation[2] += rv[2];
+            engine.xformMatrix(box.modelMatrix, box.translation, rotation, null);
+            modelMatrices.data(this.modelMatrixData);
         }
         this.drawCall.draw();
         return this;
