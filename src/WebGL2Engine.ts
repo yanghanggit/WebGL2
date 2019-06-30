@@ -21,6 +21,13 @@ interface CreateSphereModelOptions {
    radius: number,
 }
 
+interface TextureArrayData {
+   data: HTMLImageElement;
+   width: number;
+   height: number;
+   length: number;
+}
+
 class WebGL2State {
 
    private readonly _engine: WebGL2Engine = null;
@@ -434,7 +441,7 @@ class WebGL2Engine implements System {
       return new WebGL2VertexBuffer(this, type, itemSize, data, usage, true);
    }
 
-   public createMatrixBuffer(type: number, data: Float32Array, usage?: number): WebGL2VertexBuffer {
+   public createMatrixBuffer(type: number, data: Float32Array | number, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, 0, data, usage);
    }
 
@@ -506,6 +513,231 @@ class WebGL2Engine implements System {
    public rasterize(): WebGL2Engine {
       this.gl.disable(this.gl.RASTERIZER_DISCARD);
       return this;
+   }
+
+   public async loadImageArray(urls: string[]): Promise<any> {
+      const images = await this.loadImages(urls);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const width = images[0].width;
+      const height = images[0].height;
+      canvas.width = width;
+      canvas.height = height * images.length;
+      for (let i = 0, len = images.length; i < len; ++i) {
+         ctx.drawImage(images[i], 0, i * height);
+      }
+      return new Promise((resolve) => {
+         const image = new Image();
+         image.onload = () => {
+            resolve(({
+               data: image,
+               width: width,
+               height: height,
+               length: images.length
+            } as TextureArrayData));
+         };
+         image.src = canvas.toDataURL();
+      });
+   }
+
+   public depthTest(): WebGL2Engine {
+      this.gl.enable(this.gl.DEPTH_TEST);
+      return this;
+   }
+
+   public noDepthTest(): WebGL2Engine {
+      this.gl.disable(this.gl.DEPTH_TEST);
+      return this;
+   }
+
+   public createBox(options) {
+      options = options || {};
+
+      let dimensions = options.dimensions || [1, 1, 1];
+      let position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2];
+      let x = position[0];
+      let y = position[1];
+      let z = position[2];
+      let width = dimensions[0];
+      let height = dimensions[1];
+      let depth = dimensions[2];
+
+      let fbl = { x: x, y: y, z: z + depth };
+      let fbr = { x: x + width, y: y, z: z + depth };
+      let ftl = { x: x, y: y + height, z: z + depth };
+      let ftr = { x: x + width, y: y + height, z: z + depth };
+      let bbl = { x: x, y: y, z: z };
+      let bbr = { x: x + width, y: y, z: z };
+      let btl = { x: x, y: y + height, z: z };
+      let btr = { x: x + width, y: y + height, z: z };
+
+      let positions = new Float32Array([
+         //front
+         fbl.x, fbl.y, fbl.z,
+         fbr.x, fbr.y, fbr.z,
+         ftl.x, ftl.y, ftl.z,
+         ftl.x, ftl.y, ftl.z,
+         fbr.x, fbr.y, fbr.z,
+         ftr.x, ftr.y, ftr.z,
+
+         //right
+         fbr.x, fbr.y, fbr.z,
+         bbr.x, bbr.y, bbr.z,
+         ftr.x, ftr.y, ftr.z,
+         ftr.x, ftr.y, ftr.z,
+         bbr.x, bbr.y, bbr.z,
+         btr.x, btr.y, btr.z,
+
+         //back
+         fbr.x, bbr.y, bbr.z,
+         bbl.x, bbl.y, bbl.z,
+         btr.x, btr.y, btr.z,
+         btr.x, btr.y, btr.z,
+         bbl.x, bbl.y, bbl.z,
+         btl.x, btl.y, btl.z,
+
+         //left
+         bbl.x, bbl.y, bbl.z,
+         fbl.x, fbl.y, fbl.z,
+         btl.x, btl.y, btl.z,
+         btl.x, btl.y, btl.z,
+         fbl.x, fbl.y, fbl.z,
+         ftl.x, ftl.y, ftl.z,
+
+         //top
+         ftl.x, ftl.y, ftl.z,
+         ftr.x, ftr.y, ftr.z,
+         btl.x, btl.y, btl.z,
+         btl.x, btl.y, btl.z,
+         ftr.x, ftr.y, ftr.z,
+         btr.x, btr.y, btr.z,
+
+         //bottom
+         bbl.x, bbl.y, bbl.z,
+         bbr.x, bbr.y, bbr.z,
+         fbl.x, fbl.y, fbl.z,
+         fbl.x, fbl.y, fbl.z,
+         bbr.x, bbr.y, bbr.z,
+         fbr.x, fbr.y, fbr.z
+      ]);
+
+      let uvs = new Float32Array([
+         //front
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1,
+
+         //right
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1,
+
+         //back
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1,
+
+         //left
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1,
+
+         //top
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1,
+
+         //bottom
+         0, 0,
+         1, 0,
+         0, 1,
+         0, 1,
+         1, 0,
+         1, 1
+      ]);
+
+      let normals = new Float32Array([
+         // front
+         0, 0, 1,
+         0, 0, 1,
+         0, 0, 1,
+         0, 0, 1,
+         0, 0, 1,
+         0, 0, 1,
+
+         // right
+         1, 0, 0,
+         1, 0, 0,
+         1, 0, 0,
+         1, 0, 0,
+         1, 0, 0,
+         1, 0, 0,
+
+         // back
+         0, 0, -1,
+         0, 0, -1,
+         0, 0, -1,
+         0, 0, -1,
+         0, 0, -1,
+         0, 0, -1,
+
+         // left
+         -1, 0, 0,
+         -1, 0, 0,
+         -1, 0, 0,
+         -1, 0, 0,
+         -1, 0, 0,
+         -1, 0, 0,
+
+         // top
+         0, 1, 0,
+         0, 1, 0,
+         0, 1, 0,
+         0, 1, 0,
+         0, 1, 0,
+         0, 1, 0,
+
+         // bottom
+         0, -1, 0,
+         0, -1, 0,
+         0, -1, 0,
+         0, -1, 0,
+         0, -1, 0,
+         0, -1, 0
+      ]);
+
+      return {
+         positions: positions,
+         normals: normals,
+         uvs: uvs
+      };
+   }
+
+   public createTextureArray(image, width, height, depth, options) {
+      if (typeof image === "number") {
+         // Create empty texture just give width/height/depth.
+         options = depth;
+         depth = height;
+         height = width;
+         width = image;
+         image = null;
+      }
+      return new WebGL2Texture(this, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
    }
 }
 
