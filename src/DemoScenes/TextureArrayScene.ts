@@ -1,5 +1,5 @@
 
-interface BoxTransform {
+interface TextureArraySceneBoxTransform {
     rotation: Float32Array;
     rv: Float32Array;
     translation: Float32Array;
@@ -12,7 +12,7 @@ class TextureArrayScene extends WebGL2DemoScene {
     private fsSource: string;
     private program: WebGL2Program;
     private drawCall: WebGL2DrawCall;
-    private boxes: BoxTransform[];
+    private boxes: TextureArraySceneBoxTransform[];
     private imageArray: TextureArrayData;
     private modelMatrixData: Float32Array;
     private modelMatrices: WebGL2VertexBuffer;
@@ -171,7 +171,7 @@ class TextureArrayScene extends WebGL2DemoScene {
         engine.clear();
         const boxes = this.boxes;
         const modelMatrices = this.modelMatrices;
-        let box: BoxTransform;
+        let box: TextureArraySceneBoxTransform;
         let rotation: Float32Array;
         let rv: Float32Array;
         for (let i = 0, len = boxes.length; i < len; ++i) {
