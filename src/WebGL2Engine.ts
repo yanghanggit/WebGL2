@@ -729,15 +729,15 @@ class WebGL2Engine implements System {
       };
    }
 
-   public createTextureArray(image, width, height, depth, options) {
-      if (typeof image === "number") {
-         // Create empty texture just give width/height/depth.
-         options = depth;
-         depth = height;
-         height = width;
-         width = image;
-         image = null;
-      }
+   public createTextureArrayByImage(image: HTMLImageElement, width: number, height: number, depth: number, options: CreateTextureOptions) {
+      // if (typeof image === "number") {
+      //    // Create empty texture just give width/height/depth.
+      //    options = depth;
+      //    depth = height;
+      //    height = width;
+      //    width = image;
+      //    image = null;
+      // }
       return new WebGL2Texture(this, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
    }
 }

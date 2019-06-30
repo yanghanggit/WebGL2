@@ -125,10 +125,8 @@ class TextureArrayScene extends WebGL2DemoScene {
             }
         ];
 
-        const texture = engine.createTextureArray(this.imageArray.data, this.imageArray.width, this.imageArray.height, this.imageArray.length, { maxAnisotropy: WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
-        this.drawCall = engine.createDrawCall(this.program, boxArray)
-            .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
-            .texture("tex", texture);
+        const texture = engine.createTextureArrayByImage(this.imageArray.data, this.imageArray.width, this.imageArray.height, this.imageArray.length, { maxAnisotropy: WEBGL_INFO.MAX_TEXTURE_ANISOTROPY });
+        this.drawCall = engine.createDrawCall(this.program, boxArray).uniformBlock("SceneUniforms", this.sceneUniformBuffer).texture("tex", texture);
     }
 
     private async loadResource(): Promise<void> {
