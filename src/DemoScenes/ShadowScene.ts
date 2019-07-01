@@ -182,17 +182,17 @@ class ShadowScene extends WebGL2DemoScene {
     }
 
     public leave(): WebGL2DemoScene {
-        this.program.delete();
-        this.drawCall.delete();
-        this.modelMatrices.delete();
-        this.sceneUniformBuffer.delete();
+        // this.program.delete();
+        // this.drawCall.delete();
+        // this.modelMatrices.delete();
+        // this.sceneUniformBuffer.delete();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
+        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
+        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
+        // this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
         return this;
     }
 }
