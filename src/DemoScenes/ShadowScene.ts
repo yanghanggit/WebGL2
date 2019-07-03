@@ -33,33 +33,16 @@ class ShadowScene extends WebGL2DemoScene {
     private createScene(): void {
         //
         const engine = this.engine;
-
-        // utils.addTimerElement();
-
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-
-        // let app = PicoGL.createApp(canvas)
+        //
         engine.clearColor(0.0, 0.0, 0.0, 1.0)
             .depthTest()
             .cullBackfaces();
-
-        // let timer = app.createTimer();
-
-        // SET UP SHADOW PROGRAM
-        // let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        // let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
 
         let shadowDepthTarget = engine.createTexture2DBySize(engine.width, engine.height, {
             internalFormat: GL.DEPTH_COMPONENT16,
             compareMode: GL.COMPARE_REF_TO_TEXTURE
         });
         this.shadowBuffer = engine.createFramebuffer().depthTarget(shadowDepthTarget);
-
-        // SET UP MAIN PROGRAM
-        // let vsSource =  document.getElementById("main-vs").text.trim();
-        // let fsSource =  document.getElementById("main-fs").text.trim();
 
         // GEOMETRY
         let box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
@@ -113,19 +96,9 @@ class ShadowScene extends WebGL2DemoScene {
             }
         ];
 
-        // window.onresize = function() {
-        //     app.resize(window.innerWidth, window.innerHeight);
-        //     shadowBuffer.resize();
-
-        //     mat4.perspective(projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-        //     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
-        // };
-
-
-
         let texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')/*GL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
         // DRAW CALLS
@@ -142,10 +115,6 @@ class ShadowScene extends WebGL2DemoScene {
 
     private async loadResource(): Promise<void> {
         try {
-
-            // app.createPrograms([vsSource, fsSource], [shadowVsSource, shadowFsSource]),
-            // utils.loadImages(["img/webgl-logo.png"])
-
             ////
             const ress: string[] = [
                 'resource/assets/shader-shadow/shadow-main.vs.glsl',
@@ -158,14 +127,13 @@ class ShadowScene extends WebGL2DemoScene {
             this.fsSource = txts[1];
             this.shadowVsSource = txts[2];
             this.shadowFsSource = txts[3];
-
-            /////
+            ////
             const programs = await this.engine.createPrograms(
                 [this.vsSource, this.fsSource], [this.shadowVsSource, this.shadowFsSource]
             );
             this.mainProgram = programs[0];
             this.shadowProgram = programs[1];
-            //
+            ////
             const texarrays: string[] = [
                 "resource/assets/webgl-logo.png",
             ];
@@ -197,19 +165,16 @@ class ShadowScene extends WebGL2DemoScene {
                 .uniform("uMVPFromLight", boxes[i].lightMvpMatrix);
             boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
         }
-
         // DRAW TO SHADOW BUFFER
         engine.drawFramebuffer(this.shadowBuffer).clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.draw();
         }
-
         // DRAW TO SCREEN     
         engine.defaultDrawFramebuffer().clear()
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].mainDrawCall.draw();
         }
-
         return this;
     }
 
@@ -221,9 +186,9 @@ class ShadowScene extends WebGL2DemoScene {
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        const engine = this.engine;
+        //const engine = this.engine;
         this.shadowBuffer.resize();
-        mat4.perspective(this.projMatrix, Math.PI / 2, engine.width / engine.height, 0.1, 10.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         return this;
     }
