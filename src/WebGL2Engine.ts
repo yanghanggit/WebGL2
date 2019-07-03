@@ -729,7 +729,7 @@ class WebGL2Engine implements System {
       };
    }
 
-   public createTextureArrayByImage(image: HTMLImageElement, width: number, height: number, depth: number, options: CreateTextureOptions) {
+   public createTextureArrayByImage(image: HTMLImageElement, width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture {
       // if (typeof image === "number") {
       //    // Create empty texture just give width/height/depth.
       //    options = depth;
@@ -739,6 +739,11 @@ class WebGL2Engine implements System {
       //    image = null;
       // }
       return new WebGL2Texture(this, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
+   }
+
+   public cullBackfaces(): WebGL2Engine {
+      this.gl.enable(this.gl.CULL_FACE);
+      return this;
    }
 }
 

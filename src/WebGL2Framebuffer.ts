@@ -6,7 +6,7 @@ class WebGL2Framebuffer extends WebGL2Object {
     public colorAttachments: WebGL2Texture[] = [];
     private colorAttachmentEnums: number[] = [];
     private colorAttachmentTargets: number[] = [];
-    private depthAttachment;
+    public depthAttachment;
     private depthAttachmentTarget;
     private width: number = 0;
     private height: number = 0;
@@ -60,7 +60,8 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public depthTarget(attachment, target = attachment.is3D ? 0 : GL.TEXTURE_2D): WebGL2Framebuffer {
+    public depthTarget(attachment: WebGL2Texture/*, target = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
+        const target = attachment.is3D ? 0 : GL.TEXTURE_2D;
         const currentFramebuffer = this.bindAndCaptureState();
         this.depthAttachment = attachment;
         this.depthAttachmentTarget = target;
