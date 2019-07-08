@@ -33,8 +33,9 @@ class ShadowScene extends WebGL2DemoScene {
     private createScene(): void {
         //
         const engine = this.engine;
+        /*
         //
-        engine.clearColor(0.0, 0.0, 0.0, 1.0)
+        engine.clearColor(0.5, 0.5, 0.5, 1.0)
             .depthTest()
             .cullBackfaces();
 
@@ -111,10 +112,12 @@ class ShadowScene extends WebGL2DemoScene {
                 .texture("uTextureMap", texture)
                 .texture("uShadowMap", this.shadowBuffer.depthAttachment);
         }
+        */
     }
 
     private async loadResource(): Promise<void> {
         try {
+            /*
             ////
             const ress: string[] = [
                 'resource/assets/shader-shadow/shadow-main.vs.glsl',
@@ -139,6 +142,7 @@ class ShadowScene extends WebGL2DemoScene {
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];
+            */
         }
         catch (e) {
             console.error(e);
@@ -150,6 +154,7 @@ class ShadowScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
+        /*
         // UPDATE TRANSFORMS
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
@@ -168,28 +173,29 @@ class ShadowScene extends WebGL2DemoScene {
         // DRAW TO SHADOW BUFFER
         engine.drawFramebuffer(this.shadowBuffer).clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
-            boxes[i].shadowDrawCall.draw();
+            //boxes[i].shadowDrawCall.draw();
         }
         // DRAW TO SCREEN     
         engine.defaultDrawFramebuffer().clear()
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].mainDrawCall.draw();
         }
+        */
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        this.mainProgram.delete();
-        this.shadowProgram.delete();
-        this.shadowBuffer.delete();
+        // this.mainProgram.delete();
+        // this.shadowProgram.delete();
+        // this.shadowBuffer.delete();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
         //const engine = this.engine;
-        this.shadowBuffer.resize();
-        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
+        // this.shadowBuffer.resize();
+        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
+        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         return this;
     }
 }
