@@ -3,11 +3,11 @@ class ShadowScene extends WebGL2DemoScene {
 
     private vsSource: string;
     private fsSource: string;
-    // private shadowVsSource: string;
-    // private shadowFsSource: string;
+    private shadowVsSource: string;
+    private shadowFsSource: string;
     private image: HTMLImageElement;
     private mainProgram: WebGL2Program;
-    // private shadowProgram: WebGL2Program;
+    private shadowProgram: WebGL2Program;
     private shadowBuffer: WebGL2Framebuffer;
     private boxes: any[] = [];
     private viewProjMatrix: Float32Array;
@@ -131,7 +131,7 @@ class ShadowScene extends WebGL2DemoScene {
 
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
-            //boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
+            boxes[i].shadowDrawCall = app.createDrawCall(this.shadowProgram, boxArray)
 
             boxes[i].mainDrawCall = app.createDrawCall(this.mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
@@ -149,22 +149,22 @@ class ShadowScene extends WebGL2DemoScene {
             const ress: string[] = [
                 'resource/assets/shader-shadow/shadow-main.vs.glsl',
                 'resource/assets/shader-shadow/shadow-main.fs.glsl',
-                //'resource/assets/shader-shadow/shadow.vs.glsl',
-                //'resource/assets/shader-shadow/shadow.fs.glsl',
+                'resource/assets/shader-shadow/shadow.vs.glsl',
+                'resource/assets/shader-shadow/shadow.fs.glsl',
             ];
 
             const txts = await this.engine.loadText(ress);
             this.vsSource = txts[0];
             this.fsSource = txts[1];
-            // this.shadowVsSource = txts[2];
-            // this.shadowFsSource = txts[3];
+            this.shadowVsSource = txts[2];
+            this.shadowFsSource = txts[3];
             ////
 
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource]/*, [this.shadowVsSource, this.shadowFsSource]*/
+                [this.vsSource, this.fsSource], [this.shadowVsSource, this.shadowFsSource]
             );
             this.mainProgram = programs[0];
-            //this.shadowProgram = programs[1];
+            this.shadowProgram = programs[1];
             ////
 
             const texarrays: string[] = [
@@ -203,14 +203,14 @@ class ShadowScene extends WebGL2DemoScene {
             boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
                 .uniform("uModelMatrix", boxes[i].modelMatrix)
                 .uniform("uMVPFromLight", boxes[i].lightMvpMatrix);
-            //boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
+            boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
         }
 
-        // DRAW TO SHADOW BUFFER
-        // app.drawFramebuffer(shadowBuffer).clear();
-        // for (let i = 0, len = boxes.length; i < len; ++i) {
-        //     boxes[i].shadowDrawCall.draw();
-        // }
+        //DRAW TO SHADOW BUFFER
+        app.drawFramebuffer(this.shadowBuffer).clear();
+        for (let i = 0, len = boxes.length; i < len; ++i) {
+            boxes[i].shadowDrawCall.draw();
+        }
 
         // DRAW TO SCREEN     
         app.defaultDrawFramebuffer().clear()

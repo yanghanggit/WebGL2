@@ -8,10 +8,10 @@ class WebGL2DrawCall extends WebGL2Object {
     private uniformIndices;
     private uniformNames;
     private uniformValues;
-    private uniformCount: number;
+    private uniformCount: number = 0;
     private uniformBuffers: WebGL2UniformBuffer[];
     private uniformBlockNames;
-    private uniformBlockCount: number;
+    private uniformBlockCount: number = 0;
     private textures: WebGL2Texture[];
     private textureCount: number;
     private offsets: Int32Array;

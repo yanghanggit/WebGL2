@@ -201,7 +201,7 @@ class WebGL2Program extends WebGL2Object {
                     break;
             }
             if (UniformClass) {
-                this.uniforms[uniformInfo.name] = new UniformClass(this.gl, uniformHandle, type, numElements);
+                this.uniforms[uniformInfo.name] = new UniformClass(this.engine, uniformHandle, type, numElements);
             }
         }
         const numUniformBlocks = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORM_BLOCKS);
