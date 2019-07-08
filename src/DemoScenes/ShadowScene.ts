@@ -50,6 +50,7 @@ class ShadowScene extends WebGL2DemoScene {
             .depthTest()
             .cullBackfaces();
 
+
         const shadowDepthTarget = engine.createTexture2DBySize(engine.width, engine.height, {
             internalFormat: GL.DEPTH_COMPONENT16,
             compareMode: GL.COMPARE_REF_TO_TEXTURE
@@ -199,6 +200,8 @@ class ShadowScene extends WebGL2DemoScene {
         this.shadowProgram.delete();
         this.shadowBuffer.delete();
         this.texture.delete();
+        const engine = this.engine;
+        engine.noDepthTest().noCullBackfaces();
         return this;
     }
 

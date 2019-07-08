@@ -154,6 +154,11 @@ class WebGL2Engine implements System {
       return this;
    }
 
+   public noBlend(): WebGL2Engine {
+      this.gl.disable(this.gl.BLEND);
+      return this;
+   }
+
    public depthMask(mask: boolean): WebGL2Engine {
       this.gl.depthMask(mask);
       return this;
@@ -743,6 +748,11 @@ class WebGL2Engine implements System {
 
    public cullBackfaces(): WebGL2Engine {
       this.gl.enable(this.gl.CULL_FACE);
+      return this;
+   }
+
+   public noCullBackfaces(): WebGL2Engine {
+      this.gl.disable(this.gl.CULL_FACE);
       return this;
    }
 }

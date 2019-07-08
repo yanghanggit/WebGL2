@@ -208,6 +208,8 @@ class OITScene extends WebGL2DemoScene {
         this.accumProgram.delete();
         this.blendProgram.delete();
         this.modelMatrices.delete();
+        const engine = this.engine;
+        engine.noBlend().depthMask(true);
         return this;
     }
 
