@@ -3,17 +3,18 @@ class ShadowScene extends WebGL2DemoScene {
 
     private vsSource: string;
     private fsSource: string;
-    private shadowVsSource: string;
-    private shadowFsSource: string;
+    // private shadowVsSource: string;
+    // private shadowFsSource: string;
     private image: HTMLImageElement;
     private mainProgram: WebGL2Program;
-    private shadowProgram: WebGL2Program;
+    // private shadowProgram: WebGL2Program;
     private shadowBuffer: WebGL2Framebuffer;
     private boxes: any[] = [];
     private viewProjMatrix: Float32Array;
     private projMatrix: Float32Array;
     private viewMatrix: Float32Array;
     private lightViewProjMatrix: Float32Array;
+    private texture: WebGL2Texture;
 
     //
     public enter(): WebGL2DemoScene {
@@ -33,32 +34,56 @@ class ShadowScene extends WebGL2DemoScene {
     private createScene(): void {
         //
         const engine = this.engine;
-        /*
-        //
-        engine.clearColor(0.5, 0.5, 0.5, 1.0)
+
+
+        // import { PicoGL } from "../src/picogl.js";
+
+        // utils.addTimerElement();
+
+        // let canvas = document.getElementById("gl-canvas");
+        // canvas.width = window.innerWidth;
+        // canvas.height = window.innerHeight;
+
+        //let app = PicoGL.createApp(canvas)
+        engine.clearColor(0.0, 0.0, 0.0, 1.0)
             .depthTest()
             .cullBackfaces();
 
-        let shadowDepthTarget = engine.createTexture2DBySize(engine.width, engine.height, {
-            internalFormat: GL.DEPTH_COMPONENT16,
-            compareMode: GL.COMPARE_REF_TO_TEXTURE
+        //let timer = app.createTimer();
+
+        // SET UP SHADOW PROGRAM
+        // let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
+        // let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
+
+        const app = engine;
+        const PicoGL = GL;
+        const utils = engine;
+        const canvas = engine.canvas;
+
+        let shadowDepthTarget = app.createTexture2DBySize/*createTexture2D*/(app.width, app.height, {
+            internalFormat: PicoGL.DEPTH_COMPONENT16,
+            compareMode: PicoGL.COMPARE_REF_TO_TEXTURE
         });
-        this.shadowBuffer = engine.createFramebuffer().depthTarget(shadowDepthTarget);
+        this.shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
+
+        // SET UP MAIN PROGRAM
+        // let vsSource =  document.getElementById("main-vs").text.trim();
+        // let fsSource =  document.getElementById("main-fs").text.trim();
 
         // GEOMETRY
-        let box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        let positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        let normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
-        let uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+        let box = utils.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
+        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
 
-        let boxArray = engine.createVertexArray()
+        let boxArray = app.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, normals)
             .vertexAttributeBuffer(2, uv);
 
         // UNIFORMS
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 2.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
 
         this.viewMatrix = mat4.create();
         let eyePosition = vec3.fromValues(1, 1, 1);
@@ -97,52 +122,57 @@ class ShadowScene extends WebGL2DemoScene {
             }
         ];
 
-        let texture = engine.createTexture2DByImage(this.image, {
+        //
+        this.texture = app.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY */
         });
 
-        // DRAW CALLS
+
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
-            boxes[i].shadowDrawCall = engine.createDrawCall(this.shadowProgram, boxArray)
-            boxes[i].mainDrawCall = engine.createDrawCall(this.mainProgram, boxArray)
+            //boxes[i].shadowDrawCall = app.createDrawCall(shadowProgram, boxArray)
+
+            boxes[i].mainDrawCall = app.createDrawCall(this.mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
-                .texture("uTextureMap", texture)
+                .texture("uTextureMap", this.texture)
                 .texture("uShadowMap", this.shadowBuffer.depthAttachment);
         }
-        */
+
     }
 
     private async loadResource(): Promise<void> {
         try {
-            /*
+
             ////
             const ress: string[] = [
                 'resource/assets/shader-shadow/shadow-main.vs.glsl',
                 'resource/assets/shader-shadow/shadow-main.fs.glsl',
-                'resource/assets/shader-shadow/shadow.vs.glsl',
-                'resource/assets/shader-shadow/shadow.fs.glsl',
+                //'resource/assets/shader-shadow/shadow.vs.glsl',
+                //'resource/assets/shader-shadow/shadow.fs.glsl',
             ];
+
             const txts = await this.engine.loadText(ress);
             this.vsSource = txts[0];
             this.fsSource = txts[1];
-            this.shadowVsSource = txts[2];
-            this.shadowFsSource = txts[3];
+            // this.shadowVsSource = txts[2];
+            // this.shadowFsSource = txts[3];
             ////
+
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource], [this.shadowVsSource, this.shadowFsSource]
+                [this.vsSource, this.fsSource]/*, [this.shadowVsSource, this.shadowFsSource]*/
             );
             this.mainProgram = programs[0];
-            this.shadowProgram = programs[1];
+            //this.shadowProgram = programs[1];
             ////
+
             const texarrays: string[] = [
                 "resource/assets/webgl-logo.png",
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];
-            */
+
         }
         catch (e) {
             console.error(e);
@@ -154,33 +184,43 @@ class ShadowScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-        /*
+        const app = engine;
+        const utils = engine;
+        const viewProjMatrix = this.viewProjMatrix;
+        const lightViewProjMatrix = this.lightViewProjMatrix;
+
+
         // UPDATE TRANSFORMS
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
 
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
-            mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
-            mat4.multiply(boxes[i].lightMvpMatrix, this.lightViewProjMatrix, boxes[i].modelMatrix);
+            utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+            mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
+            mat4.multiply(boxes[i].lightMvpMatrix, lightViewProjMatrix, boxes[i].modelMatrix);
 
             boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
                 .uniform("uModelMatrix", boxes[i].modelMatrix)
                 .uniform("uMVPFromLight", boxes[i].lightMvpMatrix);
-            boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
+            //boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
         }
+
         // DRAW TO SHADOW BUFFER
-        engine.drawFramebuffer(this.shadowBuffer).clear();
-        for (let i = 0, len = boxes.length; i < len; ++i) {
-            //boxes[i].shadowDrawCall.draw();
-        }
+        // app.drawFramebuffer(shadowBuffer).clear();
+        // for (let i = 0, len = boxes.length; i < len; ++i) {
+        //     boxes[i].shadowDrawCall.draw();
+        // }
+
         // DRAW TO SCREEN     
-        engine.defaultDrawFramebuffer().clear()
+        app.defaultDrawFramebuffer().clear()
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].mainDrawCall.draw();
         }
-        */
+
+        // timer.end();
+
+        // requestAnimationFrame(draw);
         return this;
     }
 
@@ -196,6 +236,11 @@ class ShadowScene extends WebGL2DemoScene {
         // this.shadowBuffer.resize();
         // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
+        const app = this.engine;
+        //app.resize(window.innerWidth, window.innerHeight);
+        this.shadowBuffer.resize();
+        mat4.perspective(this.projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         return this;
     }
 }

@@ -29,5 +29,5 @@ void main() {
     float ambient = 0.2;
     float specular = shadow * pow(max(dot(reflectionDirection, eyeDirection), 0.0), 20.0) * 0.7;
 
-    fragColor = vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
+    fragColor = vec4(1, 0, 0, 1);//vec4((ambient + diffuse + specular) * baseColor.rgb, baseColor.a);
 }
