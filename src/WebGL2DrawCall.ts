@@ -2,7 +2,7 @@
 class WebGL2DrawCall extends WebGL2Object {
 
     private currentProgram: WebGL2Program;
-    private drawPrimitive: number;
+    private drawPrimitive: number = 0;
     private currentVertexArray: WebGL2VertexArray;
     private currentTransformFeedback: WebGL2TransformFeedback;
     private uniformIndices;
@@ -13,11 +13,11 @@ class WebGL2DrawCall extends WebGL2Object {
     private uniformBlockNames;
     private uniformBlockCount: number = 0;
     private textures: WebGL2Texture[];
-    private textureCount: number;
+    private textureCount: number = 0;
     private offsets: Int32Array;
     private numElements: Int32Array;
     private numInstances: Int32Array;
-    private numDraws: number;
+    private numDraws: number = 0;
     private MULTI_DRAW_INSTANCED: boolean = false;
 
     constructor(_engine: WebGL2Engine, program: WebGL2Program, vertexArray: WebGL2VertexArray = null, primitive?: number) {
@@ -154,6 +154,11 @@ class WebGL2DrawCall extends WebGL2Object {
         if (this.currentTransformFeedback) {
             gl.endTransformFeedback();
         }
+        return this;
+    }
+
+    public delete(): WebGL2Object {
+        console.log('draw call delete');
         return this;
     }
 }

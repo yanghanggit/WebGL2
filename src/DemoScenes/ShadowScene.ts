@@ -1,4 +1,16 @@
 
+interface ShadowSceneBoxTransform {
+
+    translate: Float32Array;
+    rotate: Float32Array;
+    scale: Float32Array;
+    mvpMatrix: Float32Array;
+    modelMatrix: Float32Array;
+    lightMvpMatrix: Float32Array;
+    mainDrawCall: WebGL2DrawCall;
+    shadowDrawCall: WebGL2DrawCall;
+}
+
 class ShadowScene extends WebGL2DemoScene {
 
     private vsSource: string;
@@ -9,7 +21,7 @@ class ShadowScene extends WebGL2DemoScene {
     private mainProgram: WebGL2Program;
     private shadowProgram: WebGL2Program;
     private shadowBuffer: WebGL2Framebuffer;
-    private boxes: any[] = [];
+    private boxes: ShadowSceneBoxTransform[] = [];
     private viewProjMatrix: Float32Array;
     private projMatrix: Float32Array;
     private viewMatrix: Float32Array;
@@ -34,76 +46,49 @@ class ShadowScene extends WebGL2DemoScene {
     private createScene(): void {
         //
         const engine = this.engine;
-
-
-        // import { PicoGL } from "../src/picogl.js";
-
-        // utils.addTimerElement();
-
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-
-        //let app = PicoGL.createApp(canvas)
-        engine.clearColor(0.0, 0.0, 0.0, 1.0)
+        engine.clearColor(0.5, 0.5, 0.5, 1.0)
             .depthTest()
             .cullBackfaces();
 
-        //let timer = app.createTimer();
-
-        // SET UP SHADOW PROGRAM
-        // let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        // let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
-
-        const app = engine;
-        const PicoGL = GL;
-        const utils = engine;
-        const canvas = engine.canvas;
-
-        let shadowDepthTarget = app.createTexture2DBySize/*createTexture2D*/(app.width, app.height, {
-            internalFormat: PicoGL.DEPTH_COMPONENT16,
-            compareMode: PicoGL.COMPARE_REF_TO_TEXTURE
+        const shadowDepthTarget = engine.createTexture2DBySize(engine.width, engine.height, {
+            internalFormat: GL.DEPTH_COMPONENT16,
+            compareMode: GL.COMPARE_REF_TO_TEXTURE
         });
-        this.shadowBuffer = app.createFramebuffer().depthTarget(shadowDepthTarget);
+        this.shadowBuffer = engine.createFramebuffer().depthTarget(shadowDepthTarget);
+        //
+        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
 
-        // SET UP MAIN PROGRAM
-        // let vsSource =  document.getElementById("main-vs").text.trim();
-        // let fsSource =  document.getElementById("main-fs").text.trim();
-
-        // GEOMETRY
-        let box = utils.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
-        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-
-        let boxArray = app.createVertexArray()
+        const boxArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, normals)
             .vertexAttributeBuffer(2, uv);
 
-        // UNIFORMS
+        //
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 2.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 2.0);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(1, 1, 1);
+        const eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        let lightPosition = vec3.fromValues(1, 1, 0.5);
-        let lightViewMatrix = mat4.create();
+        const lightPosition = vec3.fromValues(1, 1, 0.5);
+        const lightViewMatrix = mat4.create();
         this.lightViewProjMatrix = mat4.create();
         mat4.lookAt(lightViewMatrix, lightPosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
         mat4.multiply(this.lightViewProjMatrix, this.projMatrix, lightViewMatrix);
 
-        // OBJECT DESCRIPTIONS
+        //
         this.boxes = [
             {
-                translate: [0, 0, 0],
-                rotate: [0, 0, 0],
-                scale: [1, 1, 1],
+                translate: new Float32Array([0, 0, 0]),
+                rotate: new Float32Array([0, 0, 0]),
+                scale: new Float32Array([1, 1, 1]),
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 lightMvpMatrix: mat4.create(),
@@ -111,9 +96,9 @@ class ShadowScene extends WebGL2DemoScene {
                 shadowDrawCall: null
             },
             {
-                translate: [0.8, 0.8, 0.4],
-                rotate: [0, 0, Math.PI / 6],
-                scale: [0.1, 0.1, 0.1],
+                translate: new Float32Array([0.8, 0.8, 0.4]),
+                rotate: new Float32Array([0, 0, Math.PI / 6]),
+                scale: new Float32Array([0.1, 0.1, 0.1]),
                 mvpMatrix: mat4.create(),
                 modelMatrix: mat4.create(),
                 lightMvpMatrix: mat4.create(),
@@ -123,23 +108,22 @@ class ShadowScene extends WebGL2DemoScene {
         ];
 
         //
-        this.texture = app.createTexture2DByImage(this.image, {
+        this.texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY */
         });
 
-
+        //
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
-            boxes[i].shadowDrawCall = app.createDrawCall(this.shadowProgram, boxArray)
+            boxes[i].shadowDrawCall = engine.createDrawCall(this.shadowProgram, boxArray)
 
-            boxes[i].mainDrawCall = app.createDrawCall(this.mainProgram, boxArray)
+            boxes[i].mainDrawCall = engine.createDrawCall(this.mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", this.texture)
                 .texture("uShadowMap", this.shadowBuffer.depthAttachment);
         }
-
     }
 
     private async loadResource(): Promise<void> {
@@ -168,7 +152,8 @@ class ShadowScene extends WebGL2DemoScene {
             ////
 
             const texarrays: string[] = [
-                "resource/assets/webgl-logo.png",
+                //"resource/assets/webgl-logo.png",
+                'resource/assets/bg.jpg',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];
@@ -184,62 +169,42 @@ class ShadowScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-        const app = engine;
-        const utils = engine;
-        const viewProjMatrix = this.viewProjMatrix;
-        const lightViewProjMatrix = this.lightViewProjMatrix;
-
-
-        // UPDATE TRANSFORMS
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
 
-            utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
-            mat4.multiply(boxes[i].mvpMatrix, viewProjMatrix, boxes[i].modelMatrix);
-            mat4.multiply(boxes[i].lightMvpMatrix, lightViewProjMatrix, boxes[i].modelMatrix);
+            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+            mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
+            mat4.multiply(boxes[i].lightMvpMatrix, this.lightViewProjMatrix, boxes[i].modelMatrix);
 
             boxes[i].mainDrawCall.uniform("uMVP", boxes[i].mvpMatrix)
                 .uniform("uModelMatrix", boxes[i].modelMatrix)
                 .uniform("uMVPFromLight", boxes[i].lightMvpMatrix);
             boxes[i].shadowDrawCall.uniform("uMVP", boxes[i].lightMvpMatrix);
         }
-
-        //DRAW TO SHADOW BUFFER
-        app.drawFramebuffer(this.shadowBuffer).clear();
+        engine.drawFramebuffer(this.shadowBuffer).clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.draw();
         }
-
-        // DRAW TO SCREEN     
-        app.defaultDrawFramebuffer().clear()
+        engine.defaultDrawFramebuffer().clear()
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].mainDrawCall.draw();
         }
-
-        // timer.end();
-
-        // requestAnimationFrame(draw);
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        // this.mainProgram.delete();
-        // this.shadowProgram.delete();
-        // this.shadowBuffer.delete();
+        this.mainProgram.delete();
+        this.shadowProgram.delete();
+        this.shadowBuffer.delete();
+        this.texture.delete();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        //const engine = this.engine;
-        // this.shadowBuffer.resize();
-        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        const app = this.engine;
-        //app.resize(window.innerWidth, window.innerHeight);
         this.shadowBuffer.resize();
-        mat4.perspective(this.projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         return this;
     }
