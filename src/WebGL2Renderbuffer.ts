@@ -1,9 +1,10 @@
 
 class WebGL2Renderbuffer extends WebGL2Object {
 
+    public readonly is3D: boolean = false;
     public renderbuffer: WebGLRenderbuffer;
-    private width: number;
-    private height: number;
+    public width: number;
+    public height: number;
     private readonly internalFormat: number;
     private readonly samples: number;
 

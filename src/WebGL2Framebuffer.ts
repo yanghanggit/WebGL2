@@ -60,7 +60,7 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public depthTarget(attachment: WebGL2Texture/*, target = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
+    public depthTarget(attachment: WebGL2Texture | WebGL2Renderbuffer/*, target = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
         const target = attachment.is3D ? 0 : GL.TEXTURE_2D;
         const currentFramebuffer = this.bindAndCaptureState();
         this.depthAttachment = attachment;

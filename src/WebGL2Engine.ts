@@ -16,8 +16,8 @@ interface SphereModel {
 }
 
 interface CreateSphereModelOptions {
-   longBands: number,
-   latBands: number,
+   longBands?: number,
+   latBands?: number,
    radius: number,
 }
 
@@ -318,6 +318,10 @@ class WebGL2Engine implements System {
             }
          }
       );
+   }
+
+   public createTexture2DByData(data: Float32Array, width: number, height: number, options: CreateTextureOptions): WebGL2Texture {
+      return new WebGL2Texture(this, this.gl.TEXTURE_2D, data, width, height, undefined, false, options);
    }
 
    public createTexture2DByImage(image: HTMLImageElement, options: CreateTextureOptions): WebGL2Texture {
@@ -754,6 +758,19 @@ class WebGL2Engine implements System {
    public noCullBackfaces(): WebGL2Engine {
       this.gl.disable(this.gl.CULL_FACE);
       return this;
+   }
+
+   public depthFunc(func: number): WebGL2Engine {
+      this.gl.depthFunc(func);
+      return this;
+   }
+
+   public createRenderbuffer(width: number, height: number, internalFormat: number, samples: number = 0): WebGL2Renderbuffer {
+      return new WebGL2Renderbuffer(this, width, height, internalFormat, samples);
+   }
+
+   public createShader(type: number, source: string): WebGL2Shader {
+      return new WebGL2Shader(this, type, source);
    }
 }
 
