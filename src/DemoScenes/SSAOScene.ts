@@ -13,11 +13,29 @@
 
 class SSAOScene extends WebGL2DemoScene {
 
+    private colorGeoVsSource: string;
+    private colorGeoFsSource: string;
+    private quadShader: string;
+    private ssaoFsSource: string;
+    private aoBlendFsSource: string;
+    private noSSAOFsSource: string;
+
+    private colorGeoProgram: WebGL2Program;
+    private ssaoProgram: WebGL2Program;
+    private aoBlendProgram: WebGL2Program;
+    private noSSAOProgram: WebGL2Program;
+
+
+    // this.colorGeoProgram= programs[0];
+    // this.ssaoProgram= programs[1];
+    // this.aoBlendProgram= programs[2];
+    // this.noSSAOProgram = programs[3];
+
     // private vsSource: string;
     // private fsSource: string;
     // private shadowVsSource: string;
     // private shadowFsSource: string;
-    // private image: HTMLImageElement;
+     private image: HTMLImageElement;
     // private mainProgram: WebGL2Program;
     // private shadowProgram: WebGL2Program;
     // private shadowBuffer: WebGL2Framebuffer;
@@ -131,37 +149,42 @@ class SSAOScene extends WebGL2DemoScene {
 
     private async loadResource(): Promise<void> {
         try {
-            /*
-            ////
+            ///
             const ress: string[] = [
-                'resource/assets/shader-shadow/shadow-main.vs.glsl',
-                'resource/assets/shader-shadow/shadow-main.fs.glsl',
-                'resource/assets/shader-shadow/shadow.vs.glsl',
-                'resource/assets/shader-shadow/shadow.fs.glsl',
+                'resource/assets/shader-ssao/colorgeo.vs.glsl',
+                'resource/assets/shader-ssao/colorgeo.fs.glsl',
+                'resource/assets/shader-ssao/quad.vs.glsl',
+                'resource/assets/shader-ssao/ssao.fs.glsl',
+                'resource/assets/shader-ssao/aoblend.fs.glsl',
+                'resource/assets/shader-ssao/color.fs.glsl',
             ];
-
             const txts = await this.engine.loadText(ress);
-            this.vsSource = txts[0];
-            this.fsSource = txts[1];
-            this.shadowVsSource = txts[2];
-            this.shadowFsSource = txts[3];
-            ////
-
+            this.colorGeoVsSource = txts[0];
+            this.colorGeoFsSource = txts[1];
+            this.quadShader = txts[2];
+            this.ssaoFsSource = txts[3];
+            this.aoBlendFsSource = txts[4];
+            this.noSSAOFsSource = txts[5];
+            //
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource], [this.shadowVsSource, this.shadowFsSource]
+                [this.colorGeoVsSource, this.colorGeoFsSource],
+                [this.quadShader, this.ssaoFsSource],
+                [this.quadShader, this.aoBlendFsSource],
+                [this.quadShader, this.noSSAOFsSource]
             );
-            this.mainProgram = programs[0];
-            this.shadowProgram = programs[1];
-            ////
+            //
+            this.colorGeoProgram = programs[0];
+            this.ssaoProgram = programs[1];
+            this.aoBlendProgram = programs[2];
+            this.noSSAOProgram = programs[3];
 
+            ////
             const texarrays: string[] = [
                 //"resource/assets/webgl-logo.png",
                 'resource/assets/bg.jpg',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];
-            */
-
         }
         catch (e) {
             console.error(e);
