@@ -27,7 +27,8 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public colorTarget(index: number, attachment: WebGL2Texture, target: number = attachment.is3D ? 0 : GL.TEXTURE_2D): WebGL2Framebuffer {
+    public colorTarget(index: number, attachment: WebGL2Texture/*target: number = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
+        let target = attachment.is3D ? 0 : GL.TEXTURE_2D;
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
             this.colorAttachmentEnums.length = numColorTargets;
@@ -78,7 +79,9 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public resize(width: number = this.gl.drawingBufferWidth, height: number = this.gl.drawingBufferHeight): WebGL2Framebuffer {
+    public resize(width?: number /*= this.gl.drawingBufferWidth*/, height?: number /*= this.gl.drawingBufferHeight*/): WebGL2Framebuffer {
+        width = width || this.gl.drawingBufferWidth;
+        height = height || this.gl.drawingBufferHeight;
         let currentFramebuffer = this.bindAndCaptureState();
         for (let i = 0; i < this.numColorTargets; ++i) {
             let attachment = this.colorAttachments[i];

@@ -276,7 +276,7 @@ class SSAOScene extends WebGL2DemoScene {
         ///
         engine.drawFramebuffer(this.colorGeoBuffer).clear();
         this.colorGeoDrawcall.draw();
-        const ssaoEnabled = true;
+        const ssaoEnabled = false;
         if (ssaoEnabled) {
             engine.drawFramebuffer(this.ssaoBuffer).clear()
             this.ssaoDrawCall.draw();
