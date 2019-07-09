@@ -29,15 +29,15 @@ class OITScene extends WebGL2DemoScene {
     private modelMatrices: WebGL2VertexBuffer;
 
     public enter(): WebGL2DemoScene {
+        this.application.profile.setTitle(egret.getQualifiedClassName(this));
         const engine = this.engine;
         if (!engine.getExtension('EXT_color_buffer_float')) {
-            console.error("OITScene: This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
+            console.error(egret.getQualifiedClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
             return this;
         }
         this.start().catch(e => {
             console.error(e);
         });
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
         return this;
     }
 

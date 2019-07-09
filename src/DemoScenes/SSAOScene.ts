@@ -1,16 +1,4 @@
 
-// interface ShadowSceneBoxTransform {
-
-//     translate: Float32Array;
-//     rotate: Float32Array;
-//     scale: Float32Array;
-//     mvpMatrix: Float32Array;
-//     modelMatrix: Float32Array;
-//     lightMvpMatrix: Float32Array;
-//     mainDrawCall: WebGL2DrawCall;
-//     shadowDrawCall: WebGL2DrawCall;
-// }
-
 class SSAOScene extends WebGL2DemoScene {
     ///
     private colorGeoProgram: WebGL2Program;
@@ -39,14 +27,12 @@ class SSAOScene extends WebGL2DemoScene {
     private rotationMatrix: Float32Array;
     private modelMatrixData: Float32Array;
    
-
-
     //
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
         const engine = this.engine;
         if (!engine.getExtension('EXT_color_buffer_float')) {
-            console.error("OITScene: This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
+            console.error(egret.getQualifiedClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
             return this;
         }
         this.start().catch(e => {
@@ -62,46 +48,21 @@ class SSAOScene extends WebGL2DemoScene {
     }
 
     private createScene(): void {
-        //
-        const engine = this.engine;
 
-
-        // import { PicoGL } from "../src/picogl.js";
-
-        // utils.addTimerElement();
-        const app = engine;
-        const PicoGL = GL;
-        const utils = engine;
-        const canvas = engine.canvas
-
-        let ssaoEnabled = true;
-
-        // document.getElementById("ssao-toggle").addEventListener("change", function() {
-        //     ssaoEnabled = this.checked;
-        // });
-
+        ///
         const NEAR = 0.1;
         const FAR = 10.0;
         const SAMPLE_RADIUS = 16.0;
         const BIAS = 0.04;
         const ATTENUATION = vec2.fromValues(1, 1);
         const DEPTH_RANGE = vec2.fromValues(NEAR, FAR);
-
         const NUM_SPHERES = 32;
         const NUM_PER_ROW = 8;
         const SPHERE_RADIUS = 0.6;
 
-        // if (!testExtension("EXT_color_buffer_float")) {
-        //     document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
-        // }
-
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-
+        //
         this.spheres = new Array(NUM_SPHERES);
         this.modelMatrixData = new Float32Array(NUM_SPHERES * 16);
-
         for (let i = 0; i < NUM_SPHERES; ++i) {
             let angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
             let x = Math.sin(angle) * SPHERE_RADIUS;
@@ -109,33 +70,32 @@ class SSAOScene extends WebGL2DemoScene {
             let z = Math.cos(angle) * SPHERE_RADIUS;
             this.spheres[i] = {
                 scale: [0.8, 0.8, 0.8],
-                rotate: [0, 0, 0], // Will be used for global rotation
+                rotate: [0, 0, 0],
                 translate: [x, y, z],
                 modelMatrix: mat4.create()
             };
         }
 
-        //let app = PicoGL.createApp(canvas)
-        app
-            .clearColor(0.0, 0.0, 0.0, 1.0)
+        const engine = this.engine;
+        engine.clearColor(0.5, 0.5, 0.5, 1.0)
             .depthTest()
-            .depthFunc(PicoGL.LEQUAL);
+            .depthFunc(GL.LEQUAL);
 
-        let timer = app.createTimer();
+        //let timer = app.createTimer();
 
         // SET UP COLOR/GEO PROGRAM
         // let colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
         // let colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
 
-        let colorTarget = app.createTexture2DBySize/*createTexture2D*/(app.width, app.height, {});
-        let positionTarget = app.createTexture2DBySize/*createTexture2D*/(app.width, app.height, {
-            internalFormat: PicoGL.RGBA16F
+        let colorTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {});
+        let positionTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {
+            internalFormat: GL.RGBA16F
         });
-        let normalTarget = app.createTexture2DBySize/*createTexture2D*/(app.width, app.height, {
-            internalFormat: PicoGL.RGBA16F
+        let normalTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {
+            internalFormat: GL.RGBA16F
         });
-        let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
-        this.colorGeoBuffer = app.createFramebuffer()
+        let depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16);
+        this.colorGeoBuffer = engine.createFramebuffer()
             .colorTarget(0, colorTarget)
             .colorTarget(1, positionTarget)
             .colorTarget(2, normalTarget)
@@ -143,14 +103,14 @@ class SSAOScene extends WebGL2DemoScene {
 
         // QUAD VERTEX SHADER
         //let quadVsSource =  document.getElementById("vertex-quad").text.trim();
-        let quadShader = app.createShader(PicoGL.VERTEX_SHADER, /*this.quadVsSource*/this.quadShader);
+        //let quadShader = engine.createShader(PicoGL.VERTEX_SHADER, /*this.quadVsSource*/this.quadShader);
 
         // SET UP SSAO PROGRAM
         //let ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
-        let ssaoTarget = app.createTexture2DBySize/*createTexture2D*/(app.width, app.height, {
-            internalFormat: PicoGL.RGBA16F
+        let ssaoTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {
+            internalFormat: GL.RGBA16F
         });
-        this.ssaoBuffer = app.createFramebuffer().colorTarget(0, ssaoTarget);
+        this.ssaoBuffer = engine.createFramebuffer().colorTarget(0, ssaoTarget);
 
         // SET UP AO BLEND PROGRAM
         //let aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
@@ -159,16 +119,16 @@ class SSAOScene extends WebGL2DemoScene {
         //let noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
 
         // INSTANCED SPHERE GEOMETRY
-        let sphere = utils.createSphere({ radius: 0.5 });
-        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
-        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        let sphere = engine.createSphere({ radius: 0.5 });
+        let positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
+        let uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
+        let normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
+        let indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE MODEL MATRICES
-        this.modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, this.modelMatrixData);
+        this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData);
 
-        let sphereArray = app.createVertexArray()
+        let sphereArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals)
@@ -176,7 +136,7 @@ class SSAOScene extends WebGL2DemoScene {
             .indexBuffer(indices);
 
         // QUAD GEOMETRY
-        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        let quadPositions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -185,12 +145,12 @@ class SSAOScene extends WebGL2DemoScene {
             1, 1,
         ]));
 
-        let quadArray = app.createVertexArray()
+        let quadArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, quadPositions);
 
         // UNIFORM DATA
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, NEAR, FAR);
 
         let viewMatrix = mat4.create();
         let eyePosition = vec3.fromValues(0, 0.8, 2);
@@ -199,11 +159,11 @@ class SSAOScene extends WebGL2DemoScene {
         let lightPosition = vec3.fromValues(0.5, 1, 2);
 
         // UNIFORM BUFFERS
-        this.sceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4
+        this.sceneUniforms = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4
         ])
             .set(0, viewMatrix)
             .set(1, this.projMatrix)
@@ -211,11 +171,11 @@ class SSAOScene extends WebGL2DemoScene {
             .set(3, lightPosition)
             .update();
 
-        let ssaoUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT,
-            PicoGL.FLOAT,
-            PicoGL.FLOAT_VEC2,
-            PicoGL.FLOAT_VEC2
+        let ssaoUniforms = engine.createUniformBuffer([
+            GL.FLOAT,
+            GL.FLOAT,
+            GL.FLOAT_VEC2,
+            GL.FLOAT_VEC2
         ])
             .set(0, SAMPLE_RADIUS)
             .set(1, BIAS)
@@ -224,7 +184,7 @@ class SSAOScene extends WebGL2DemoScene {
             .update();
 
         // NOISE TEXTURE TO RADOMIZE SSAO SAMPLING
-        let numNoisePixels = app.gl.drawingBufferWidth * app.gl.drawingBufferHeight;
+        let numNoisePixels = engine.gl.drawingBufferWidth * engine.gl.drawingBufferHeight;
         let noiseTextureData = new Float32Array(numNoisePixels * 2);
 
         for (let i = 0; i < numNoisePixels; ++i) {
@@ -233,16 +193,16 @@ class SSAOScene extends WebGL2DemoScene {
             noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
         }
 
-        this.noiseTexture = app.createTexture2DByData/*.createTexture2D*/(
+        this.noiseTexture = engine.createTexture2DByData/*.createTexture2D*/(
             noiseTextureData,
-            app.gl.drawingBufferWidth,
-            app.gl.drawingBufferHeight,
+            engine.gl.drawingBufferWidth,
+            engine.gl.drawingBufferHeight,
             {
-                internalFormat: PicoGL.RG32F,
-                minFilter: PicoGL.LINEAR,
-                magFilter: PicoGL.LINEAR,
-                wrapS: PicoGL.CLAMP_TO_EDGE,
-                wrapT: PicoGL.CLAMP_TO_EDGE,
+                internalFormat: GL.RG32F,
+                minFilter: GL.LINEAR,
+                magFilter: GL.LINEAR,
+                wrapS: GL.CLAMP_TO_EDGE,
+                wrapT: GL.CLAMP_TO_EDGE,
                 generateMipmaps: false
             }
         );
@@ -254,27 +214,27 @@ class SSAOScene extends WebGL2DemoScene {
         ////
 
 
-        let texture = app.createTexture2DByImage/*createTexture2D*/(this.image, {
+        let texture = engine.createTexture2DByImage/*createTexture2D*/(this.image, {
             flipY: true,
-            maxAnisotropy: /*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY */ app.capbility('MAX_TEXTURE_ANISOTROPY')
+            maxAnisotropy: /*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY */ engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
         // DRAW CALLS
-        this.colorGeoDrawcall = app.createDrawCall(this.colorGeoProgram, sphereArray)
+        this.colorGeoDrawcall = engine.createDrawCall(this.colorGeoProgram, sphereArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("uTexture", texture);
 
-        this.ssaoDrawCall = app.createDrawCall(this.ssaoProgram, quadArray)
+        this.ssaoDrawCall = engine.createDrawCall(this.ssaoProgram, quadArray)
             .uniformBlock("SSAOUniforms", ssaoUniforms)
             .texture("uPositionBuffer", this.colorGeoBuffer.colorAttachments[1])
             .texture("uNormalBuffer", this.colorGeoBuffer.colorAttachments[2])
             .texture("uNoiseBuffer", this.noiseTexture);
 
-        this.aoBlendDrawCall = app.createDrawCall(this.aoBlendProgram, quadArray)
+        this.aoBlendDrawCall = engine.createDrawCall(this.aoBlendProgram, quadArray)
             .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0])
             .texture("uOcclusionBuffer", this.ssaoBuffer.colorAttachments[0]);
 
-        this.noSSAODrawCall = app.createDrawCall(this.noSSAOProgram, quadArray)
+        this.noSSAODrawCall = engine.createDrawCall(this.noSSAOProgram, quadArray)
             .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0]);
 
         this.rotationMatrix = mat4.create();
@@ -335,12 +295,12 @@ class SSAOScene extends WebGL2DemoScene {
 
         // UPDATE TRANSFORMS
         const spheres = this.spheres;
-        const utils = this.engine;
-        const app = this.engine;
+        // const utils = this.engine;
+        // const app = this.engine;
         for (let i = 0, len = spheres.length; i < len; ++i) {
             spheres[i].rotate[1] += 0.002;
 
-            utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);
+            engine.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);
             mat4.fromYRotation(this.rotationMatrix, spheres[i].rotate[1]);
             mat4.multiply(spheres[i].modelMatrix, this.rotationMatrix, spheres[i].modelMatrix)
 
@@ -349,31 +309,22 @@ class SSAOScene extends WebGL2DemoScene {
         this.modelMatrices.data(this.modelMatrixData);
 
         // DRAW TO COLORGEOBUFFER
-        app.drawFramebuffer(this.colorGeoBuffer).clear();
+        engine.drawFramebuffer(this.colorGeoBuffer).clear();
         this.colorGeoDrawcall.draw();
         const ssaoEnabled = true;
         if (ssaoEnabled) {
             // OCCLUSION PASS
-            app.drawFramebuffer(this.ssaoBuffer).clear()
+            engine.drawFramebuffer(this.ssaoBuffer).clear()
             this.ssaoDrawCall.draw();
 
             // OCCLUSION BLEND PASS
-            app.defaultDrawFramebuffer().clear()
+            engine.defaultDrawFramebuffer().clear()
             this.aoBlendDrawCall.draw();
         } else {
             // DRAW WITHOUT SSAO
-            app.defaultDrawFramebuffer().clear();
+            engine.defaultDrawFramebuffer().clear();
             this.noSSAODrawCall.draw();
         }
-
-        // timer.end();
-
-        // requestAnimationFrame(draw);
-
-
-
-
-
 
         return this;
     }
@@ -394,7 +345,7 @@ class SSAOScene extends WebGL2DemoScene {
         this.noSSAODrawCall.delete();
 
         const app = this.engine;
-        app.noDepthTest().depthFunc(GL.LESS);
+        app.noDepthTest().depthFunc(GL.LESS); //depth默认的func是什么？
         return this;
     }
 
