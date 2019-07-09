@@ -81,53 +81,37 @@ class SSAOScene extends WebGL2DemoScene {
             .depthTest()
             .depthFunc(GL.LEQUAL);
 
-        //let timer = app.createTimer();
+        const screenWidth = engine.width;
+        const screenHeight = engine.height;
 
-        // SET UP COLOR/GEO PROGRAM
-        // let colorGeoVsSource =  document.getElementById("vertex-colorgeo").text.trim();
-        // let colorGeoFsSource =  document.getElementById("fragment-colorgeo").text.trim();
-
-        let colorTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {});
-        let positionTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {
+        let colorTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {});
+        let positionTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
             internalFormat: GL.RGBA16F
         });
-        let normalTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {
+        let normalTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
             internalFormat: GL.RGBA16F
         });
-        let depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16);
+        let depthTarget = engine.createRenderbuffer(screenWidth, screenHeight, GL.DEPTH_COMPONENT16);
         this.colorGeoBuffer = engine.createFramebuffer()
             .colorTarget(0, colorTarget)
             .colorTarget(1, positionTarget)
             .colorTarget(2, normalTarget)
             .depthTarget(depthTarget);
 
-        // QUAD VERTEX SHADER
-        //let quadVsSource =  document.getElementById("vertex-quad").text.trim();
-        //let quadShader = engine.createShader(PicoGL.VERTEX_SHADER, /*this.quadVsSource*/this.quadShader);
-
-        // SET UP SSAO PROGRAM
-        //let ssaoFsSource =  document.getElementById("fragment-ssao").text.trim();
-        let ssaoTarget = engine.createTexture2DBySize/*createTexture2D*/(engine.width, engine.height, {
+        ///
+        let ssaoTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
             internalFormat: GL.RGBA16F
         });
         this.ssaoBuffer = engine.createFramebuffer().colorTarget(0, ssaoTarget);
 
-        // SET UP AO BLEND PROGRAM
-        //let aoBlendFsSource =  document.getElementById("fragment-aoblend").text.trim();
-
-        // DRAW WITHOUT SSAO
-        //let noSSAOFsSource =  document.getElementById("fragment-color").text.trim();
-
-        // INSTANCED SPHERE GEOMETRY
+        //
         let sphere = engine.createSphere({ radius: 0.5 });
         let positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
         let uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
         let normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
         let indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
 
-        // PER-INSTANCE MODEL MATRICES
         this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData);
-
         let sphereArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
@@ -135,7 +119,6 @@ class SSAOScene extends WebGL2DemoScene {
             .instanceAttributeBuffer(3, this.modelMatrices)
             .indexBuffer(indices);
 
-        // QUAD GEOMETRY
         let quadPositions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
@@ -148,7 +131,6 @@ class SSAOScene extends WebGL2DemoScene {
         let quadArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, quadPositions);
 
-        // UNIFORM DATA
         this.projMatrix = mat4.create();
         mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, NEAR, FAR);
 
@@ -158,14 +140,12 @@ class SSAOScene extends WebGL2DemoScene {
 
         let lightPosition = vec3.fromValues(0.5, 1, 2);
 
-        // UNIFORM BUFFERS
         this.sceneUniforms = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC4
-        ])
-            .set(0, viewMatrix)
+        ]).set(0, viewMatrix)
             .set(1, this.projMatrix)
             .set(2, eyePosition)
             .set(3, lightPosition)
@@ -183,8 +163,7 @@ class SSAOScene extends WebGL2DemoScene {
             .set(3, DEPTH_RANGE)
             .update();
 
-        // NOISE TEXTURE TO RADOMIZE SSAO SAMPLING
-        let numNoisePixels = engine.gl.drawingBufferWidth * engine.gl.drawingBufferHeight;
+        let numNoisePixels = screenWidth * screenHeight;
         let noiseTextureData = new Float32Array(numNoisePixels * 2);
 
         for (let i = 0; i < numNoisePixels; ++i) {
@@ -193,7 +172,7 @@ class SSAOScene extends WebGL2DemoScene {
             noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
         }
 
-        this.noiseTexture = engine.createTexture2DByData/*.createTexture2D*/(
+        this.noiseTexture = engine.createTexture2DByData(
             noiseTextureData,
             engine.gl.drawingBufferWidth,
             engine.gl.drawingBufferHeight,
@@ -207,19 +186,13 @@ class SSAOScene extends WebGL2DemoScene {
             }
         );
 
-
-
-
-
         ////
-
-
-        let texture = engine.createTexture2DByImage/*createTexture2D*/(this.image, {
+        let texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: /*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY */ engine.capbility('MAX_TEXTURE_ANISOTROPY')
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        // DRAW CALLS
+        //
         this.colorGeoDrawcall = engine.createDrawCall(this.colorGeoProgram, sphereArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("uTexture", texture);
@@ -289,14 +262,7 @@ class SSAOScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-
-
-
-
-        // UPDATE TRANSFORMS
         const spheres = this.spheres;
-        // const utils = this.engine;
-        // const app = this.engine;
         for (let i = 0, len = spheres.length; i < len; ++i) {
             spheres[i].rotate[1] += 0.002;
 
@@ -307,25 +273,19 @@ class SSAOScene extends WebGL2DemoScene {
             this.modelMatrixData.set(spheres[i].modelMatrix, i * 16);
         }
         this.modelMatrices.data(this.modelMatrixData);
-
-        // DRAW TO COLORGEOBUFFER
+        ///
         engine.drawFramebuffer(this.colorGeoBuffer).clear();
         this.colorGeoDrawcall.draw();
         const ssaoEnabled = true;
         if (ssaoEnabled) {
-            // OCCLUSION PASS
             engine.drawFramebuffer(this.ssaoBuffer).clear()
             this.ssaoDrawCall.draw();
-
-            // OCCLUSION BLEND PASS
             engine.defaultDrawFramebuffer().clear()
             this.aoBlendDrawCall.draw();
         } else {
-            // DRAW WITHOUT SSAO
             engine.defaultDrawFramebuffer().clear();
             this.noSSAODrawCall.draw();
         }
-
         return this;
     }
 
@@ -345,7 +305,7 @@ class SSAOScene extends WebGL2DemoScene {
         this.noSSAODrawCall.delete();
 
         const app = this.engine;
-        app.noDepthTest().depthFunc(GL.LESS); //depth默认的func是什么？
+        app.noDepthTest().depthFunc(GL.LESS);
         return this;
     }
 
