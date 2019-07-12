@@ -14,6 +14,7 @@ class SSAOScene extends WebGL2DemoScene {
     private ssaoDrawCall: WebGL2DrawCall;
     private aoBlendDrawCall: WebGL2DrawCall;
     private noSSAODrawCall: WebGL2DrawCall;
+    private ssaoEnableDiv: HTMLDivElement;
     ////
     private colorGeoVsSource: string;
     private colorGeoFsSource: string;
@@ -26,7 +27,8 @@ class SSAOScene extends WebGL2DemoScene {
     private spheres: any[] = [];
     private rotationMatrix: Float32Array;
     private modelMatrixData: Float32Array;
-   
+    private ssaoEnabled: boolean = false;
+    
     //
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
@@ -210,6 +212,9 @@ class SSAOScene extends WebGL2DemoScene {
             .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0]);
 
         this.rotationMatrix = mat4.create();
+
+        //
+        this.openUI();
     }
 
     private async loadResource(): Promise<void> {
@@ -275,8 +280,8 @@ class SSAOScene extends WebGL2DemoScene {
         ///
         engine.drawFramebuffer(this.colorGeoBuffer).clear();
         this.colorGeoDrawcall.draw();
-        const ssaoEnabled = true;
-        if (ssaoEnabled) {
+        //const ssaoEnabled = true;
+        if (this.ssaoEnabled) {
             engine.drawFramebuffer(this.ssaoBuffer).clear()
             this.ssaoDrawCall.draw();
             engine.defaultDrawFramebuffer().clear()
@@ -289,6 +294,7 @@ class SSAOScene extends WebGL2DemoScene {
     }
 
     public leave(): WebGL2DemoScene {
+        //删除对象
         this.colorGeoProgram.delete();
         this.ssaoProgram.delete();
         this.aoBlendProgram.delete();
@@ -302,14 +308,16 @@ class SSAOScene extends WebGL2DemoScene {
         this.ssaoDrawCall.delete();
         this.aoBlendDrawCall.delete();
         this.noSSAODrawCall.delete();
-
+        //还原状态
         const app = this.engine;
         app.noDepthTest().depthFunc(GL.LESS);
+        //删除对象
+        this.closeUI();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        
+
         const app = this.engine;
 
         this.colorGeoBuffer.resize();
@@ -330,5 +338,45 @@ class SSAOScene extends WebGL2DemoScene {
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         this.sceneUniforms.set(1, this.projMatrix).update();
         return this;
+    }
+
+    private openUI(): HTMLDivElement {
+        if (this.ssaoEnableDiv) {
+            return this.ssaoEnableDiv;
+        }
+        ///
+        this.ssaoEnableDiv = document.createElement("div");
+        document.body.appendChild(this.ssaoEnableDiv);
+        const style = this.ssaoEnableDiv.style; //置顶，必须显示在最上面
+        style.setProperty('position', 'absolute');
+        style.setProperty('bottom', '20px');
+        style.setProperty('right', '20px');
+        style.setProperty('color', 'white');
+        style.setProperty('z-index', '999');
+        style.setProperty('top', '0');
+        this.ssaoEnableDiv.innerText = 'ssao';
+        ////
+        const input = document.createElement("input"); 
+        this.ssaoEnableDiv.appendChild(input); 
+        input.setAttribute("type","checkbox");  
+        input.setAttribute("id","inputid");  
+        input.setAttribute("name","inputname");  
+        input.setAttribute("value","inputvalue");  
+        if (this.ssaoEnabled) {
+            input.setAttribute("checked", "checked");  
+        }
+        ///
+        const self = this;
+        input.addEventListener("change", function() {
+            self.ssaoEnabled = this.checked;
+        });
+        return this.ssaoEnableDiv;
+    }
+
+    private closeUI(): void {
+        if (this.ssaoEnableDiv) {
+            document.body.removeChild(this.ssaoEnableDiv);
+            this.ssaoEnableDiv = null;
+        }
     }
 }
