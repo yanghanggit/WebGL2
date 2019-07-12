@@ -64,10 +64,10 @@ class SSAOScene extends WebGL2DemoScene {
         this.spheres = new Array(NUM_SPHERES);
         this.modelMatrixData = new Float32Array(NUM_SPHERES * 16);
         for (let i = 0; i < NUM_SPHERES; ++i) {
-            let angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
-            let x = Math.sin(angle) * SPHERE_RADIUS;
-            let y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
-            let z = Math.cos(angle) * SPHERE_RADIUS;
+            const angle = 2 * Math.PI * (i % NUM_PER_ROW) / NUM_PER_ROW;
+            const x = Math.sin(angle) * SPHERE_RADIUS;
+            const y = Math.floor(i / NUM_PER_ROW) / (NUM_PER_ROW / 4) - 0.75;
+            const z = Math.cos(angle) * SPHERE_RADIUS;
             this.spheres[i] = {
                 scale: [0.8, 0.8, 0.8],
                 rotate: [0, 0, 0],
@@ -84,14 +84,14 @@ class SSAOScene extends WebGL2DemoScene {
         const screenWidth = engine.width;
         const screenHeight = engine.height;
 
-        let colorTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {});
-        let positionTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
+        const colorTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {});
+        const positionTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
             internalFormat: GL.RGBA16F
         });
-        let normalTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
+        const normalTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
             internalFormat: GL.RGBA16F
         });
-        let depthTarget = engine.createRenderbuffer(screenWidth, screenHeight, GL.DEPTH_COMPONENT16);
+        const depthTarget = engine.createRenderbuffer(screenWidth, screenHeight, GL.DEPTH_COMPONENT16);
         this.colorGeoBuffer = engine.createFramebuffer()
             .colorTarget(0, colorTarget)
             .colorTarget(1, positionTarget)
@@ -99,27 +99,27 @@ class SSAOScene extends WebGL2DemoScene {
             .depthTarget(depthTarget);
 
         ///
-        let ssaoTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
+        const ssaoTarget = engine.createTexture2DBySize(screenWidth, screenHeight, {
             internalFormat: GL.RGBA16F
         });
         this.ssaoBuffer = engine.createFramebuffer().colorTarget(0, ssaoTarget);
 
         //
-        let sphere = engine.createSphere({ radius: 0.5 });
-        let positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
-        let uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
-        let normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
-        let indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
+        const sphere = engine.createSphere({ radius: 0.5 });
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
+        const indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
 
         this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData);
-        let sphereArray = engine.createVertexArray()
+        const sphereArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals)
             .instanceAttributeBuffer(3, this.modelMatrices)
             .indexBuffer(indices);
 
-        let quadPositions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
+        const quadPositions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -128,17 +128,17 @@ class SSAOScene extends WebGL2DemoScene {
             1, 1,
         ]));
 
-        let quadArray = engine.createVertexArray()
+        const quadArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, quadPositions);
 
         this.projMatrix = mat4.create();
         mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, NEAR, FAR);
 
-        let viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(0, 0.8, 2);
+        const viewMatrix = mat4.create();
+        const eyePosition = vec3.fromValues(0, 0.8, 2);
         mat4.lookAt(viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        let lightPosition = vec3.fromValues(0.5, 1, 2);
+        const lightPosition = vec3.fromValues(0.5, 1, 2);
 
         this.sceneUniforms = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
@@ -151,23 +151,22 @@ class SSAOScene extends WebGL2DemoScene {
             .set(3, lightPosition)
             .update();
 
-        let ssaoUniforms = engine.createUniformBuffer([
+        const ssaoUniforms = engine.createUniformBuffer([
             GL.FLOAT,
             GL.FLOAT,
             GL.FLOAT_VEC2,
             GL.FLOAT_VEC2
-        ])
-            .set(0, SAMPLE_RADIUS)
+        ]).set(0, SAMPLE_RADIUS)
             .set(1, BIAS)
             .set(2, ATTENUATION)
             .set(3, DEPTH_RANGE)
             .update();
 
-        let numNoisePixels = screenWidth * screenHeight;
-        let noiseTextureData = new Float32Array(numNoisePixels * 2);
+        const numNoisePixels = screenWidth * screenHeight;
+        const noiseTextureData = new Float32Array(numNoisePixels * 2);
 
         for (let i = 0; i < numNoisePixels; ++i) {
-            let index = i * 2;
+            const index = i * 2;
             noiseTextureData[index] = Math.random() * 2.0 - 1.0;
             noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
         }
@@ -187,7 +186,7 @@ class SSAOScene extends WebGL2DemoScene {
         );
 
         ////
-        let texture = engine.createTexture2DByImage(this.image, {
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
@@ -276,7 +275,7 @@ class SSAOScene extends WebGL2DemoScene {
         ///
         engine.drawFramebuffer(this.colorGeoBuffer).clear();
         this.colorGeoDrawcall.draw();
-        const ssaoEnabled = false;
+        const ssaoEnabled = true;
         if (ssaoEnabled) {
             engine.drawFramebuffer(this.ssaoBuffer).clear()
             this.ssaoDrawCall.draw();
@@ -320,7 +319,7 @@ class SSAOScene extends WebGL2DemoScene {
         const noiseTextureData = new Float32Array(numNoisePixels * 2);
 
         for (let i = 0; i < numNoisePixels; ++i) {
-            let index = i * 2;
+            const index = i * 2;
             noiseTextureData[index] = Math.random() * 2.0 - 1.0;
             noiseTextureData[index + 1] = Math.random() * 2.0 - 1.0;
         }
