@@ -1,29 +1,29 @@
 {
-  "engineVersion": "5.2.22",
-  "compilerVersion": "5.2.22",
-  "template": {},
-  "target": {
-    "current": "web"
-  },
-  "modules": [
-    {
-      "name": "egret"
-    },
-    {
-      "name": "game"
-    },
-    {
-      "name": "tween"
-    },
-    {
-      "name": "assetsmanager"
-    },
-    {
-      "name": "promise"
-    },
-    {
-      "name": "gl-matrix",
-      "path": "./libs/gl-matrix"
-    }
-  ]
+	"engineVersion": "5.2.23",
+	"compilerVersion": "5.2.23",
+	"template": {},
+	"target": {
+		"current": "web"
+	},
+	"modules": [
+		{
+			"name": "egret"
+		},
+		{
+			"name": "game"
+		},
+		{
+			"name": "tween"
+		},
+		{
+			"name": "assetsmanager"
+		},
+		{
+			"name": "promise"
+		},
+		{
+			"name": "gl-matrix",
+			"path": "./libs/gl-matrix"
+		}
+	]
 }

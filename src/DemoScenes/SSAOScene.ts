@@ -27,7 +27,7 @@ class SSAOScene extends WebGL2DemoScene {
     private spheres: any[] = [];
     private rotationMatrix: Float32Array;
     private modelMatrixData: Float32Array;
-    private ssaoEnabled: boolean = false;
+    private ssaoEnabled: boolean = true;
     
     //
     public enter(): WebGL2DemoScene {
