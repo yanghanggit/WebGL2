@@ -39,41 +39,35 @@ class MSAAScene extends WebGL2DemoScene {
         //
         const engine = this.engine;
         engine.depthTest().clearColor(0.5, 0.5, 0.5, 1.0);
-
-        // Use maxium number of available samples.
+        //
         const SAMPLES = engine.capbility('SAMPLES');
-        let colorTarget = engine.createRenderbuffer(engine.width, engine.height, GL.RGBA8, SAMPLES);
-        let depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16, SAMPLES);
+        const colorTarget = engine.createRenderbuffer(engine.width, engine.height, GL.RGBA8, SAMPLES);
+        const depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16, SAMPLES);
         this.msaaFramebuffer = engine.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
-
-        let textureColorTarget = engine.createTexture2DBySize(engine.width, engine.height, {});
+        //
+        const textureColorTarget = engine.createTexture2DBySize(engine.width, engine.height, {});
         this.textureFramebuffer = engine.createFramebuffer().colorTarget(0, textureColorTarget);
-
-        // GEOMETRY
-        let box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        let positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        let uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
-        let normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
-
-        let boxArray = engine.createVertexArray()
+        //
+        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        const boxArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals);
-
-        // UNIFORMS
+        //
         this.projMatrix = mat4.create();
         mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(1, 1, 1);
+        const eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        let lightPosition = vec3.fromValues(1, 1, 0.5);
-
-        // UNIFORM BUFFER
+        const lightPosition = vec3.fromValues(1, 1, 0.5);
         this.sceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
@@ -86,7 +80,6 @@ class MSAAScene extends WebGL2DemoScene {
         this.modelMatrix = mat4.create();
         this.rotateXMatrix = mat4.create();
         this.rotateYMatrix = mat4.create();
-
 
         this.texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
@@ -128,31 +121,20 @@ class MSAAScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-
         const engine = this.engine;
-
         this.angleX += 0.01;
         this.angleY += 0.02;
-
         mat4.fromXRotation(this.rotateXMatrix, this.angleX);
         mat4.fromYRotation(this.rotateYMatrix, this.angleY);
         mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
-
         this.drawCall.uniform("uModel", this.modelMatrix);
-
-        // RENDER TO OFFSCREEN TEXTURE
         engine.drawFramebuffer(this.msaaFramebuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
         this.drawCall.texture("tex", this.texture).draw();
-
-        // Can't sample from renderbuffer so blit to a texture for sampling.
         engine.readFramebuffer(this.msaaFramebuffer)
             .drawFramebuffer(this.textureFramebuffer)
             .blitFramebuffer(GL.COLOR_BUFFER_BIT);
-
-        // RENDER TO SCREEN
         engine.defaultDrawFramebuffer().clearColor(0.5, 0.5, 0.5, 1.0).clear()
         this.drawCall.texture("tex", this.textureFramebuffer.colorAttachments[0] as WebGL2Texture).draw();
-
         return this;
     }
 
