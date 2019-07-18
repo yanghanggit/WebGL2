@@ -200,16 +200,16 @@ class SSAOScene extends WebGL2DemoScene {
 
         this.ssaoDrawCall = engine.createDrawCall(this.ssaoProgram, quadArray)
             .uniformBlock("SSAOUniforms", ssaoUniforms)
-            .texture("uPositionBuffer", this.colorGeoBuffer.colorAttachments[1])
-            .texture("uNormalBuffer", this.colorGeoBuffer.colorAttachments[2])
+            .texture("uPositionBuffer", this.colorGeoBuffer.colorAttachments[1] as WebGL2Texture)
+            .texture("uNormalBuffer", this.colorGeoBuffer.colorAttachments[2] as WebGL2Texture)
             .texture("uNoiseBuffer", this.noiseTexture);
 
         this.aoBlendDrawCall = engine.createDrawCall(this.aoBlendProgram, quadArray)
-            .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0])
-            .texture("uOcclusionBuffer", this.ssaoBuffer.colorAttachments[0]);
+            .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0] as WebGL2Texture)
+            .texture("uOcclusionBuffer", this.ssaoBuffer.colorAttachments[0] as WebGL2Texture);
 
         this.noSSAODrawCall = engine.createDrawCall(this.noSSAOProgram, quadArray)
-            .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0]);
+            .texture("uColorBuffer", this.colorGeoBuffer.colorAttachments[0] as WebGL2Texture);
 
         this.rotationMatrix = mat4.create();
 

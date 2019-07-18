@@ -136,8 +136,8 @@ class OITScene extends WebGL2DemoScene {
         ]));
         const quadArray = engine.createVertexArray().vertexAttributeBuffer(0, quadPositions);
         this.blendDrawCall = engine.createDrawCall(this.blendProgram, quadArray)
-            .texture("uAccumulate", this.accumBuffer.colorAttachments[0])
-            .texture("uAccumulateAlpha", this.accumBuffer.colorAttachments[1]);
+            .texture("uAccumulate", this.accumBuffer.colorAttachments[0] as WebGL2Texture)
+            .texture("uAccumulateAlpha", this.accumBuffer.colorAttachments[1] as WebGL2Texture);
     }
 
     private async loadResource(): Promise<void> {

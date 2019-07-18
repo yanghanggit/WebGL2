@@ -772,5 +772,34 @@ class WebGL2Engine implements System {
    public createShader(type: number, source: string): WebGL2Shader {
       return new WebGL2Shader(this, type, source);
    }
+
+   public readFramebuffer(framebuffer: WebGL2Framebuffer): WebGL2Engine {
+      framebuffer.bindForRead();
+      return this;
+   }
+
+   public blitFramebuffer(mask, options = DUMMY_OBJECT) {
+      let readFramebuffer = this.state.readFramebuffer;
+      let drawFramebuffer = this.state.drawFramebuffer;
+      let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
+      let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
+      let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
+      let defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
+
+      let {
+         srcStartX = 0,
+         srcStartY = 0,
+         srcEndX = defaultReadWidth,
+         srcEndY = defaultReadHeight,
+         dstStartX = 0,
+         dstStartY = 0,
+         dstEndX = defaultDrawWidth,
+         dstEndY = defaultDrawHeight,
+         filter = GL.NEAREST
+      } = options as any;
+
+      this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
+      return this;
+   }
 }
 

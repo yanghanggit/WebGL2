@@ -3,13 +3,13 @@ class WebGL2Framebuffer extends WebGL2Object {
 
     private framebuffer: WebGLFramebuffer = null;
     private numColorTargets: number = 0;
-    public colorAttachments: WebGL2Texture[] = [];
+    public colorAttachments: Array<WebGL2Texture | WebGL2Renderbuffer> = [];
     private colorAttachmentEnums: number[] = [];
     private colorAttachmentTargets: number[] = [];
     public depthAttachment;
     private depthAttachmentTarget;
-    private width: number = 0;
-    private height: number = 0;
+    public width: number = 0;
+    public height: number = 0;
 
     constructor(_engine: WebGL2Engine) {
         super(_engine);
@@ -27,7 +27,7 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public colorTarget(index: number, attachment: WebGL2Texture/*target: number = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
+    public colorTarget(index: number, attachment: WebGL2Texture | WebGL2Renderbuffer/*target: number = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
         let target = attachment.is3D ? 0 : GL.TEXTURE_2D;
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
