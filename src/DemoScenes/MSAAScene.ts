@@ -6,7 +6,6 @@ class MSAAScene extends WebGL2DemoScene {
     private fsSource: string;
     private program: WebGL2Program;
     private image: HTMLImageElement;
-    private rttBuffer: WebGL2Framebuffer;
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
     private sceneUniformBuffer: WebGL2UniformBuffer;
@@ -18,11 +17,8 @@ class MSAAScene extends WebGL2DemoScene {
     private modelMatrix: Float32Array;
     private rotateXMatrix: Float32Array;
     private rotateYMatrix: Float32Array;
-
     private msaaFramebuffer: WebGL2Framebuffer;
     private textureFramebuffer: WebGL2Framebuffer;
-
-
 
     //
     public enter(): WebGL2DemoScene {
@@ -44,29 +40,14 @@ class MSAAScene extends WebGL2DemoScene {
         const engine = this.engine;
         engine.depthTest().clearColor(0.5, 0.5, 0.5, 1.0);
 
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-
-        // let app = PicoGL.createApp(canvas)
-        // .depthTest();
-
-        //let timer = app.createTimer();
-
-        // PROGRAM
-        // let vsSource =  document.getElementById("vertex-draw").text.trim();
-        // let fsSource =  document.getElementById("fragment-draw").text.trim();
-
-        // FRAMEBUFFERS
-
         // Use maxium number of available samples.
-        let colorTarget = engine.createRenderbuffer(engine.width, engine.height, GL.RGBA8, GL.SAMPLES);
-        let depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16, GL.SAMPLES);
+        const SAMPLES = engine.capbility('SAMPLES');
+        let colorTarget = engine.createRenderbuffer(engine.width, engine.height, GL.RGBA8, SAMPLES);
+        let depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16, SAMPLES);
         this.msaaFramebuffer = engine.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
 
         let textureColorTarget = engine.createTexture2DBySize(engine.width, engine.height, {});
         this.textureFramebuffer = engine.createFramebuffer().colorTarget(0, textureColorTarget);
-
 
         // GEOMETRY
         let box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
@@ -97,8 +78,7 @@ class MSAAScene extends WebGL2DemoScene {
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC4
-        ])
-            .set(0, this.viewProjMatrix)
+        ]).set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .set(2, lightPosition)
             .update();
@@ -112,9 +92,8 @@ class MSAAScene extends WebGL2DemoScene {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
-        this.drawCall = engine.createDrawCall(this.program, boxArray)
-            .uniformBlock("SceneUniforms", this.sceneUniformBuffer);
 
+        this.drawCall = engine.createDrawCall(this.program, boxArray).uniformBlock("SceneUniforms", this.sceneUniformBuffer);
     }
 
     private async loadResource(): Promise<void> {
@@ -171,57 +150,29 @@ class MSAAScene extends WebGL2DemoScene {
             .blitFramebuffer(GL.COLOR_BUFFER_BIT);
 
         // RENDER TO SCREEN
-        engine.defaultDrawFramebuffer().clearColor(0.0, 0.0, 0.0, 1.0).clear()
+        engine.defaultDrawFramebuffer().clearColor(0.5, 0.5, 0.5, 1.0).clear()
         this.drawCall.texture("tex", this.textureFramebuffer.colorAttachments[0] as WebGL2Texture).draw();
 
-
-
-        /*
-        //
-        const egnine = this.engine;
-        const rotateXMatrix = this.rotateXMatrix;
-        const rotateYMatrix = this.rotateYMatrix;
-        const modelMatrix = this.modelMatrix;
-        const rttBuffer = this.rttBuffer;
-        const drawCall = this.drawCall;
-        //
-        this.angleX += 0.01;
-        this.angleY += 0.02;
-        mat4.fromXRotation(rotateXMatrix, this.angleX);
-        mat4.fromYRotation(rotateYMatrix, this.angleY);
-        mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
-        drawCall.uniform("uModel", modelMatrix);
-        egnine.drawFramebuffer(rttBuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
-        drawCall.texture("tex", this.texture).draw();
-        egnine.defaultDrawFramebuffer().clearColor(0.4, 0.4, 0.4, 1.0).clear();
-        drawCall.texture("tex", rttBuffer.colorAttachments[0]).draw();
-        */
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        // this.program.delete();
-        // this.rttBuffer.delete();
-        // this.sceneUniformBuffer.delete();
-        // this.drawCall.delete();
-        // this.texture.delete();
-        // const engine = this.engine;
-        // engine.noDepthTest();
+        this.program.delete();
+        this.sceneUniformBuffer.delete();
+        this.drawCall.delete();
+        this.texture.delete();
+        this.msaaFramebuffer.delete();
+        this.textureFramebuffer.delete();
+        const engine = this.engine;
+        engine.noDepthTest();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        // this.rttBuffer.resize();
-        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        // this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
-
         this.msaaFramebuffer.resize();
         this.textureFramebuffer.resize();
-
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-
         this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
         return this;
     }
