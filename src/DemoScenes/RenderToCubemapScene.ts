@@ -4,8 +4,8 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     //
     private vsSource: string;
     private fsSource: string;
-    private program: WebGL2Program;
-    private image: HTMLImageElement;
+    //private program: WebGL2Program;
+   
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
     private sceneUniformBuffer: WebGL2UniformBuffer;
@@ -19,6 +19,17 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     private rotateYMatrix: Float32Array;
     private msaaFramebuffer: WebGL2Framebuffer;
     private textureFramebuffer: WebGL2Framebuffer;
+
+
+    private cubemapFsSource: string;
+    private skyboxVsSource: string;
+    private skyboxFsSource: string;
+    private program: WebGL2Program;
+    private cubemapProgram: WebGL2Program;
+    private skyboxProgram: WebGL2Program;
+    private webglImage: HTMLImageElement;
+    private readonly cubemapImages: HTMLImageElement[] = [];
+    
 
     //
     public enter(): WebGL2DemoScene {
@@ -37,6 +48,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
 
     private createScene(): void {
         //
+        /*
         const engine = this.engine;
         engine.depthTest().clearColor(0.5, 0.5, 0.5, 1.0);
         //
@@ -87,30 +99,48 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         });
 
         this.drawCall = engine.createDrawCall(this.program, boxArray).uniformBlock("SceneUniforms", this.sceneUniformBuffer);
+        */
     }
 
     private async loadResource(): Promise<void> {
         try {
             ///
             const ress: string[] = [
-                'resource/assets/shader-rtt/rtt.vs.glsl',
-                'resource/assets/shader-rtt/rtt.fs.glsl',
+                'resource/assets/shader-rtt-cubemap/cube.vs.glsl',
+                'resource/assets/shader-rtt-cubemap/cube.fs.glsl',
+                'resource/assets/shader-rtt-cubemap/cubemap.fs.glsl',
+                'resource/assets/shader-rtt-cubemap/skybox.vs.glsl',
+                'resource/assets/shader-rtt-cubemap/skybox.fs.glsl',
             ];
             const txts = await this.engine.loadText(ress);
             this.vsSource = txts[0];
             this.fsSource = txts[1];
+            this.cubemapFsSource = txts[2];
+            this.skyboxVsSource = txts[3];
+            this.skyboxFsSource = txts[4];
             //
             const programs = await this.engine.createPrograms(
                 [this.vsSource, this.fsSource],
             );
             //
             this.program = programs[0];
+            this.cubemapProgram = programs[1];
+            this.skyboxProgram = programs[2];
             //
             const texarrays: string[] = [
-                'resource/assets/bg.jpg',
+                'resource/assets/webgl-logo.png',
+                'resource/assets/sky-negx.png',
+                'resource/assets/sky-posx.png',
+                'resource/assets/sky-negy.png',
+                'resource/assets/sky-posy.png',
+                'resource/assets/sky-negz.png',
+                'resource/assets/sky-posz.png'
             ];
             const loadImages = await this.engine.loadImages(texarrays);
-            this.image = loadImages[0];
+            this.webglImage = loadImages[0];
+            for (let i = 0; i < 6; ++i) {
+                this.cubemapImages[i] = loadImages[1 + i];
+            } 
         }
         catch (e) {
             console.error(e);
@@ -121,41 +151,41 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        const engine = this.engine;
-        this.angleX += 0.01;
-        this.angleY += 0.02;
-        mat4.fromXRotation(this.rotateXMatrix, this.angleX);
-        mat4.fromYRotation(this.rotateYMatrix, this.angleY);
-        mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
-        this.drawCall.uniform("uModel", this.modelMatrix);
-        engine.drawFramebuffer(this.msaaFramebuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
-        this.drawCall.texture("tex", this.texture).draw();
-        engine.readFramebuffer(this.msaaFramebuffer)
-            .drawFramebuffer(this.textureFramebuffer)
-            .blitFramebuffer(GL.COLOR_BUFFER_BIT);
-        engine.defaultDrawFramebuffer().clearColor(0.5, 0.5, 0.5, 1.0).clear()
-        this.drawCall.texture("tex", this.textureFramebuffer.colorAttachments[0] as WebGL2Texture).draw();
+        // const engine = this.engine;
+        // this.angleX += 0.01;
+        // this.angleY += 0.02;
+        // mat4.fromXRotation(this.rotateXMatrix, this.angleX);
+        // mat4.fromYRotation(this.rotateYMatrix, this.angleY);
+        // mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
+        // this.drawCall.uniform("uModel", this.modelMatrix);
+        // engine.drawFramebuffer(this.msaaFramebuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
+        // this.drawCall.texture("tex", this.texture).draw();
+        // engine.readFramebuffer(this.msaaFramebuffer)
+        //     .drawFramebuffer(this.textureFramebuffer)
+        //     .blitFramebuffer(GL.COLOR_BUFFER_BIT);
+        // engine.defaultDrawFramebuffer().clearColor(0.5, 0.5, 0.5, 1.0).clear()
+        // this.drawCall.texture("tex", this.textureFramebuffer.colorAttachments[0] as WebGL2Texture).draw();
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        this.program.delete();
-        this.sceneUniformBuffer.delete();
-        this.drawCall.delete();
-        this.texture.delete();
-        this.msaaFramebuffer.delete();
-        this.textureFramebuffer.delete();
-        const engine = this.engine;
-        engine.noDepthTest();
+        // this.program.delete();
+        // this.sceneUniformBuffer.delete();
+        // this.drawCall.delete();
+        // this.texture.delete();
+        // this.msaaFramebuffer.delete();
+        // this.textureFramebuffer.delete();
+        // const engine = this.engine;
+        // engine.noDepthTest();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        this.msaaFramebuffer.resize();
-        this.textureFramebuffer.resize();
-        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
+        // this.msaaFramebuffer.resize();
+        // this.textureFramebuffer.resize();
+        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
+        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
+        // this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
         return this;
     }
 }
