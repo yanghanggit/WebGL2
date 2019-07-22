@@ -12,7 +12,7 @@ class WebGL2DrawCall extends WebGL2Object {
     private uniformBuffers: WebGL2UniformBuffer[];
     private uniformBlockNames;
     private uniformBlockCount: number = 0;
-    private textures: WebGL2Texture[];
+    private textures: Array<WebGL2Texture | WebGL2Cubemap> = [];//WebGL2Texture[];
     private textureCount: number = 0;
     private offsets: Int32Array;
     private numElements: Int32Array;
@@ -67,7 +67,7 @@ class WebGL2DrawCall extends WebGL2Object {
         return this;
     }
 
-    public texture(name: string, texture: WebGL2Texture): WebGL2DrawCall  {
+    public texture(name: string, texture: WebGL2Texture | WebGL2Cubemap): WebGL2DrawCall  {
         const unit = this.currentProgram.samplers[name];
         this.textures[unit] = texture;
         return this;

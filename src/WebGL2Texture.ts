@@ -261,7 +261,7 @@ class WebGL2Texture extends WebGL2Object {
         return this;
     }
 
-    public bind(unit: number): WebGL2Texture {
+    public bind(unit: number): any {
         let currentTexture = this.state.textures[unit];
         if (currentTexture !== this) {
             if (currentTexture) {

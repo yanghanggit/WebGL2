@@ -85,7 +85,7 @@ const __SceneClasses__ = [
     UBOScene,
     OITScene,
     WanderingTrianglesScene,
-    EmptyScene
+    //EmptyScene
 ];
 let __currentSceneIndex__ = 0;
 let __webGL2DemoPlayer__: WebGL2DemoPlayer = null;

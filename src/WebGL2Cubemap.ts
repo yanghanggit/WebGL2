@@ -46,14 +46,14 @@
     @prop {boolean} premultiplyAlpha Whether alpha should be pre-multiplied when loading this cubemap.
     @prop {Object} appState Tracked GL state.
 */
- class WebGL2Cubemap extends WebGL2Object {
+class WebGL2Cubemap extends WebGL2Object {
 
     public is3D: boolean = false;
     public texture: any;
     public compressed: any;
     public internalFormat: any;
     public format: any;
-    public type : any;
+    public type: any;
     public currentUnit: any;
     public width;// = width;
     public height;// = height;
@@ -74,16 +74,16 @@
     public miplevelsProvided;// = arrayData && options.negX.length > 1;
     public levels;// = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
 
-    constructor(/*gl, appState,*/engine: WebGL2Engine,  options) {
+    constructor(/*gl, appState,*/engine: WebGL2Engine, options) {
         super(engine);
 
 
-       // this.gl = gl;
+        // this.gl = gl;
         this.texture = null;
         //this.appState = appState;
 
         this.compressed = COMPRESSED_TEXTURE_TYPES[options.internalFormat];
-        
+
         if (options.format !== undefined) {
             console.warn("Cubemap option 'format' is deprecated and will be removed. Use 'internalFormat' with a sized format instead.");
             this.compressed = Boolean(COMPRESSED_TEXTURE_TYPES[options.format]);
@@ -112,7 +112,7 @@
             this.format = formatInfo[0];
             this.type = options.type !== undefined ? options.type : formatInfo[1];
         }
-        
+
         // -1 indicates unbound
         this.currentUnit = -1;
 
@@ -136,7 +136,7 @@
             maxLevel = null,
             maxAnisotropy = 1
         } = options;
-        
+
         this.width = width;
         this.height = height;
         this.flipY = flipY;
@@ -194,19 +194,19 @@
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_T, this.wrapT);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_FUNC, this.compareFunc);
         this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_COMPARE_MODE, this.compareMode);
-        
+
         if (this.baseLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_BASE_LEVEL, this.baseLevel);
         }
-        
+
         if (this.maxLevel !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LEVEL, this.maxLevel);
         }
-        
+
         if (this.minLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_LOD, this.minLOD);
         }
-        
+
         if (this.maxLOD !== null) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_LOD, this.maxLOD);
         }
@@ -282,9 +282,9 @@
     }
 
     // Bind this cubemap to a texture unit.
-    bind(unit) {
+    public bind(unit: number): any {
         let currentTexture = this.state.textures[unit] as any;
-        
+
         if (currentTexture !== this) {
             if (currentTexture) {
                 currentTexture.currentUnit = -1;
