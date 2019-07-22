@@ -3,7 +3,7 @@ class WebGL2Framebuffer extends WebGL2Object {
 
     private framebuffer: WebGLFramebuffer = null;
     private numColorTargets: number = 0;
-    public colorAttachments: Array<WebGL2Texture | WebGL2Renderbuffer> = [];
+    public colorAttachments: Array<WebGL2Texture | WebGL2Renderbuffer | WebGL2Cubemap> = [];
     private colorAttachmentEnums: number[] = [];
     private colorAttachmentTargets: number[] = [];
     public depthAttachment;
@@ -27,8 +27,8 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public colorTarget(index: number, attachment: WebGL2Texture | WebGL2Renderbuffer/*target: number = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
-        let target = attachment.is3D ? 0 : GL.TEXTURE_2D;
+    public colorTarget(index: number, attachment: WebGL2Texture | WebGL2Renderbuffer | WebGL2Cubemap, target: number = 0 /*target: number = attachment.is3D ? 0 : GL.TEXTURE_2D*/): WebGL2Framebuffer {
+        target = target || ( attachment.is3D ? 0 : GL.TEXTURE_2D);
         if (index >= this.numColorTargets) {
             let numColorTargets = index + 1;
             this.colorAttachmentEnums.length = numColorTargets;

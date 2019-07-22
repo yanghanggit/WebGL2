@@ -801,5 +801,9 @@ class WebGL2Engine implements System {
       this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
       return this;
    }
+
+   createCubemap(options) {
+      return new WebGL2Cubemap(/*this.gl, this.state,*/this, options);
+  }
 }
 
