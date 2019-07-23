@@ -803,7 +803,7 @@ class WebGL2Engine implements System {
    }
 
    public createCubemap(options: CreateTextureOptions): WebGL2Cubemap {
-      return new WebGL2Cubemap(/*this.gl, this.state,*/this, options);
+      return new WebGL2Cubemap(this, options);
    }
 
    public defaultViewport(): WebGL2Engine {

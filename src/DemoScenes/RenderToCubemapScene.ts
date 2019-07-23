@@ -25,9 +25,9 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
     private projMatrix: Float32Array;
-    private modelMatrix: Float32Array;
-    private rotateXMatrix: Float32Array;
-    private rotateYMatrix: Float32Array;
+    private modelMatrix: Float32Array = mat4.create();
+    private rotateXMatrix: Float32Array = mat4.create();
+    private rotateYMatrix: Float32Array = mat4.create();
     private readonly CUBEMAP_DIM: number = 2048;
 
     //
@@ -46,60 +46,48 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     }
 
     private createScene(): void {
-
-        const utils = this.engine;
-        const PicoGL = GL;
-        //const CUBEMAP_DIM = 2048;
-
-        let app = this.engine/*PicoGL.createApp(canvas)*/
-            .clearColor(1.0, 1.0, 1.0, 1.0)
+        const engine = this.engine;
+        engine.clearColor(1.0, 1.0, 1.0, 1.0)
             .depthTest();
-
-        //let timer = app.createTimer();
-
-        // FRAMEBUFFER
-        let colorTarget = app.createCubemap({
+        //
+        const colorTarget = engine.createCubemap({
             width: this.CUBEMAP_DIM,
             height: this.CUBEMAP_DIM
         });
-        let depthTarget = app.createRenderbuffer(this.CUBEMAP_DIM, this.CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
-
-        this.cubemapBuffer = app.createFramebuffer()
-            .colorTarget(0, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
-            .colorTarget(1, colorTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_X)
-            .colorTarget(2, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Y)
-            .colorTarget(3, colorTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Y)
-            .colorTarget(4, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_Z)
-            .colorTarget(5, colorTarget, PicoGL.TEXTURE_CUBE_MAP_POSITIVE_Z)
+        const depthTarget = engine.createRenderbuffer(this.CUBEMAP_DIM, this.CUBEMAP_DIM, GL.DEPTH_COMPONENT16);
+        this.cubemapBuffer = engine.createFramebuffer()
+            .colorTarget(0, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_X)
+            .colorTarget(1, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_X)
+            .colorTarget(2, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_Y)
+            .colorTarget(3, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_Y)
+            .colorTarget(4, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_Z)
+            .colorTarget(5, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_Z)
             .depthTarget(depthTarget);
 
-        // GEOMETRY
-        let box = utils.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
-
-        let boxArray = app.createVertexArray()
+        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        const boxArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals);
 
-        // UNIFORMS
-        let cubemapProjMatrix = mat4.create();
+        const cubemapProjMatrix = mat4.create();
         mat4.perspective(cubemapProjMatrix, Math.PI / 2, 1, 0.1, 10.0);
 
-        let cubemapViewMatrix = mat4.create();
-        let cubemapEyePosition = vec3.fromValues(1.2, 0, 1.2);
+        const cubemapViewMatrix = mat4.create();
+        const cubemapEyePosition = vec3.fromValues(1.2, 0, 1.2);
         mat4.lookAt(cubemapViewMatrix, cubemapEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        let cubemapViewProjMatrix = mat4.create();
+        const cubemapViewProjMatrix = mat4.create();
         mat4.multiply(cubemapViewProjMatrix, cubemapProjMatrix, cubemapViewMatrix);
 
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(1.3, -1.3, 1.3);
+        const eyePosition = vec3.fromValues(1.3, -1.3, 1.3);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
@@ -114,68 +102,56 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         this.skyboxViewProjMatrix = mat4.create();
         mat4.multiply(this.skyboxViewProjMatrix, this.projMatrix, this.skyboxViewMatrix);
 
-        // UNIFORM BUFFER
-        let cubemapSceneUniformBuffer = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4
-        ])
-            .set(0, cubemapViewProjMatrix)
+        const cubemapSceneUniformBuffer = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4
+        ]).set(0, cubemapViewProjMatrix)
             .set(1, cubemapEyePosition)
             .update();
 
-        this.sceneUniformBuffer = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4
+        this.sceneUniformBuffer = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4
         ])
             .set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .update();
 
-        this.skyboxSceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4
-        ])
-            .set(0, this.skyboxViewProjMatrix)
+        this.skyboxSceneUniforms = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4
+        ]).set(0, this.skyboxViewProjMatrix)
             .set(1, eyePosition)
             .update();
 
-        this.modelMatrix = mat4.create();
-        this.rotateXMatrix = mat4.create();
-        this.rotateYMatrix = mat4.create();
-
-
-
-        let texture = app.createTexture2DByImage(this.webglImage, {
+        const texture = engine.createTexture2DByImage(this.webglImage, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        let skyCubemap = app.createCubemap({
+        const skyCubemap = engine.createCubemap({
             negX: this.cubemapImages[0],
             posX: this.cubemapImages[1],
             negY: this.cubemapImages[2],
             posY: this.cubemapImages[3],
             negZ: this.cubemapImages[4],
             posZ: this.cubemapImages[5],
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        this.cubemapDrawCall = app.createDrawCall(this.cubemapProgram, boxArray)
+        this.cubemapDrawCall = engine.createDrawCall(this.cubemapProgram, boxArray)
             .texture("tex", texture)
             .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
 
-        this.cubeDrawCall = app.createDrawCall(this.program, boxArray)
+        this.cubeDrawCall = engine.createDrawCall(this.program, boxArray)
             .texture("renderCubemap", colorTarget)
             .texture("skyCubemap", skyCubemap)
             .uniformBlock("SceneUniforms", this.sceneUniformBuffer);
 
-        this.skyboxDrawcall = app.createDrawCall(this.skyboxProgram, boxArray)
+        this.skyboxDrawcall = engine.createDrawCall(this.skyboxProgram, boxArray)
             .texture("renderCubemap", colorTarget)
             .texture("skyCubemap", skyCubemap)
             .uniformBlock("SceneUniforms", this.skyboxSceneUniforms)
-
-        this.angleX = 0;
-        this.angleY = 0;
     }
 
     private async loadResource(): Promise<void> {
@@ -231,29 +207,21 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-    
-        const app = this.engine;
+        const engine = this.engine;
         this.angleX += 0.01;
         this.angleY += 0.02;
-
         mat4.fromXRotation(this.rotateXMatrix, this.angleX);
         mat4.fromYRotation(this.rotateYMatrix, this.angleY);
         mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
-
         this.cubemapDrawCall.uniform("uModel", this.modelMatrix);
         this.cubeDrawCall.uniform("uModel", this.modelMatrix);
-
-        //const CUBEMAP_DIM = 2048;
-        // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
-        app
-            .drawFramebuffer(this.cubemapBuffer)
+        //
+        engine.drawFramebuffer(this.cubemapBuffer)
             .viewport(0, 0, this.CUBEMAP_DIM, this.CUBEMAP_DIM)
             .clear();
         this.cubemapDrawCall.draw();
-
-        // RENDER TO SCREEN
-        // Multi draw seems to require a clear here?
-        app.defaultDrawFramebuffer().defaultViewport().clear();
+        //
+        engine.defaultDrawFramebuffer().defaultViewport().clear();
         this.skyboxDrawcall.draw();
         this.cubeDrawCall.draw();
         return this;
