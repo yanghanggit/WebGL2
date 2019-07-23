@@ -173,7 +173,7 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
             this.program = programs[1];
             //
             const texarrays: string[] = [
-                'resource/assets/webgl-logo.png',
+                'resource/assets/bg.jpg',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];
