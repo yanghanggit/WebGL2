@@ -1,46 +1,18 @@
 
 class RenderTo3DTextureScene extends WebGL2DemoScene {
 
-    /*
-    //
-    private cubemapDrawCall: WebGL2DrawCall;
-    private cubeDrawCall: WebGL2DrawCall;
-    private skyboxDrawcall: WebGL2DrawCall;
-    private angleX: number = 0;
-    private angleY: number = 0;
-    private cubemapBuffer: WebGL2Framebuffer;
-    private cubemapFsSource: string;
-    private skyboxVsSource: string;
-    private skyboxFsSource: string;
-    private program: WebGL2Program;
-    private cubemapProgram: WebGL2Program;
-    private skyboxProgram: WebGL2Program;
-    
-    private readonly cubemapImages: HTMLImageElement[] = [];
-    private skyboxViewMatrix: Float32Array;
-    private skyboxViewProjMatrix: Float32Array;
-    private sceneUniformBuffer: WebGL2UniformBuffer;
-    private skyboxSceneUniforms: WebGL2UniformBuffer;
-    private vsSource: string;
-    private fsSource: string;
-    private viewMatrix: Float32Array;
-    private viewProjMatrix: Float32Array;
     private projMatrix: Float32Array;
-    private modelMatrix: Float32Array = mat4.create();
-    private rotateXMatrix: Float32Array = mat4.create();
-    private rotateYMatrix: Float32Array = mat4.create();
-    private readonly cubemapDim: number = 2048;
-    private debugColorEnableDiv: HTMLDivElement;
-    private debugColorEnabled: boolean = false;
-    */
-
+    private viewMatrix: Float32Array;
+    private mvpMatrix: Float32Array;
+    private drawCall: WebGL2DrawCall;
     private tex3DVsSource: string;
     private tex3DFsSource: string;
     private vsSource: string;
     private fsSource: string;
     private tex3DProgram: WebGL2Program;
     private program: WebGL2Program;
-    private webglImage: HTMLImageElement;
+    private image: HTMLImageElement;
+    private startTime: number = 0;
 
     //
     public enter(): WebGL2DemoScene {
@@ -59,24 +31,16 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        /*
-        engine.clearColor(1.0, 1.0, 1.0, 1.0)
-            .depthTest();
+        const DIMENSIONS = 128;
+        engine.clearColor(0.5, 0.5, 0.5, 1.0)
+            .blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA)
+            .cullBackfaces()
+            .clear();
         //
-        const colorTarget = engine.createCubemap({
-            width: this.cubemapDim,
-            height: this.cubemapDim
+        const colorTarget = engine.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS, {
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
-        const depthTarget = engine.createRenderbuffer(this.cubemapDim, this.cubemapDim, GL.DEPTH_COMPONENT16);
-        this.cubemapBuffer = engine.createFramebuffer()
-            .colorTarget(0, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_X)
-            .colorTarget(1, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_X)
-            .colorTarget(2, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_Y)
-            .colorTarget(3, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_Y)
-            .colorTarget(4, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_Z)
-            .colorTarget(5, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_Z)
-            .depthTarget(depthTarget);
-
+        const framebuffer = engine.createFramebuffer().colorTarget(0, colorTarget);
         const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
@@ -86,90 +50,102 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals);
 
-        const cubemapProjMatrix = mat4.create();
-        mat4.perspective(cubemapProjMatrix, Math.PI / 2, 1, 0.1, 10.0);
+        // 
+        const INCREMENT = 1 / DIMENSIONS;
+        const positionData = new Float32Array(DIMENSIONS * DIMENSIONS * DIMENSIONS * 3);
+        let positionIndex = 0;
+        let x = -0.5;
+        for (let i = 0; i < DIMENSIONS; ++i) {
+            let y = -0.5;
+            for (let j = 0; j < DIMENSIONS; ++j) {
+                let z = -0.5;
+                for (let k = 0; k < DIMENSIONS; ++k) {
+                    positionData[positionIndex++] = x + (Math.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = y + (Math.random() - 0.5) / (DIMENSIONS);
+                    positionData[positionIndex++] = z + (Math.random() - 0.5) / (DIMENSIONS);
+                    z += INCREMENT;
+                }
+                y += INCREMENT;
+            }
+            x += INCREMENT;
+        }
+        const pointPositions = engine.createVertexBuffer(GL.FLOAT, 3, positionData)
+        const pointArray = engine.createVertexArray().vertexAttributeBuffer(0, pointPositions);
 
-        const cubemapViewMatrix = mat4.create();
-        const cubemapEyePosition = vec3.fromValues(1.2, 0, 1.2);
-        mat4.lookAt(cubemapViewMatrix, cubemapEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+        const tex3DViewMatrix = mat4.create();
+        const tex3DEyePosition = vec3.fromValues(0.7, 0.7, 0.7);
+        mat4.lookAt(tex3DViewMatrix, tex3DEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        const cubemapViewProjMatrix = mat4.create();
-        mat4.multiply(cubemapViewProjMatrix, cubemapProjMatrix, cubemapViewMatrix);
+        this.viewMatrix = mat4.create();
+        const eyePosition = vec3.fromValues(0.6, 0.6, 0.6);
+        mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+
+        const tex3DProjMatrix = mat4.create();
+        mat4.perspective(tex3DProjMatrix, Math.PI / 2, 1, 0.1, 10.0);
 
         this.projMatrix = mat4.create();
         mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
 
-        this.viewMatrix = mat4.create();
-        const eyePosition = vec3.fromValues(1.2, -1.3, 1.3);
-        mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+        const tex3DViewProjMatrix = mat4.create();
+        mat4.multiply(tex3DViewProjMatrix, tex3DProjMatrix, tex3DViewMatrix);
 
-        this.viewProjMatrix = mat4.create();
-        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
+        this.mvpMatrix = mat4.create();
+        mat4.multiply(this.mvpMatrix, this.projMatrix, this.viewMatrix);
 
-        this.skyboxViewMatrix = mat4.create();
-        this.skyboxViewMatrix.set(this.viewMatrix);
-        this.skyboxViewMatrix[12] = 0;
-        this.skyboxViewMatrix[13] = 0;
-        this.skyboxViewMatrix[14] = 0;
-
-        this.skyboxViewProjMatrix = mat4.create();
-        mat4.multiply(this.skyboxViewProjMatrix, this.projMatrix, this.skyboxViewMatrix);
-
-        const cubemapSceneUniformBuffer = engine.createUniformBuffer([
+        const lightPosition = vec3.fromValues(1, 1, 0.5);
+        const sceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
-        ]).set(0, cubemapViewProjMatrix)
-            .set(1, cubemapEyePosition)
-            .update();
-
-        this.sceneUniformBuffer = engine.createUniformBuffer([
-            GL.FLOAT_MAT4,
             GL.FLOAT_VEC4
-        ]).set(0, this.viewProjMatrix)
-            .set(1, eyePosition)
+        ]).set(0, tex3DViewProjMatrix)
+            .set(1, tex3DEyePosition)
+            .set(2, lightPosition)
             .update();
 
-        this.skyboxSceneUniforms = engine.createUniformBuffer([
-            GL.FLOAT_MAT4,
-            GL.FLOAT_VEC4, 
-            GL.BOOL
-        ]).set(0, this.skyboxViewProjMatrix)
-            .set(1, eyePosition)
-            .set(2, this.debugColorEnabled)
-            .update();
-
-        const texture = engine.createTexture2DByImage(this.webglImage, {
+        //
+        const modelMatrix = mat4.create();
+        const rotateXMatrix = mat4.create();
+        const rotateYMatrix = mat4.create();
+        let angleX = 0;
+        let angleY = 0;
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        const skyCubemap = engine.createCubemap({
-            negX: this.cubemapImages[0],
-            posX: this.cubemapImages[1],
-            negY: this.cubemapImages[2],
-            posY: this.cubemapImages[3],
-            negZ: this.cubemapImages[4],
-            posZ: this.cubemapImages[5],
-            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
-        });
+        const tex3DDrawCall = engine.createDrawCall(this.tex3DProgram, boxArray)
+            .uniformBlock("SceneUniforms", sceneUniformBuffer)
+            .texture("tex", texture);
 
-        this.cubemapDrawCall = engine.createDrawCall(this.cubemapProgram, boxArray)
-            .texture("tex", texture)
-            .uniformBlock("SceneUniforms", cubemapSceneUniformBuffer);
+        this.startTime = performance.now();
 
-        this.cubeDrawCall = engine.createDrawCall(this.program, boxArray)
-            .texture("renderCubemap", colorTarget)
-            .texture("skyCubemap", skyCubemap)
-            .uniformBlock("SceneUniforms", this.sceneUniformBuffer);
+        this.drawCall = engine.createDrawCall(this.program, pointArray)
+            .primitive(GL.POINTS)
+            .texture("tex", colorTarget)
+            .uniform("uMVP", this.mvpMatrix);
 
-        this.skyboxDrawcall = engine.createDrawCall(this.skyboxProgram, boxArray)
-            .texture("renderCubemap", colorTarget)
-            .texture("skyCubemap", skyCubemap)
-            .uniformBlock("SceneUniforms", this.skyboxSceneUniforms);
+        engine.drawFramebuffer(framebuffer)
+            .viewport(0, 0, DIMENSIONS, DIMENSIONS)
+            .depthTest()
+            .clearColor(0.0, 0.0, 0.0, 0.0);
 
+        for (let i = 0; i < DIMENSIONS; ++i) {
+            angleX += Math.PI / DIMENSIONS;
+            angleY += 0.5 * Math.PI / DIMENSIONS;
+            mat4.fromXRotation(rotateXMatrix, angleX);
+            mat4.fromYRotation(rotateYMatrix, angleY);
+            mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
+            tex3DDrawCall.uniform("uModel", modelMatrix);
+            framebuffer.colorTarget(0, colorTarget, i);
+            engine.clear();
+            tex3DDrawCall.draw();
+        }
 
-        this.openUI();
-        */
+        engine.defaultDrawFramebuffer()
+            .defaultViewport()
+            .noDepthTest()
+            .blend()
+            .clearColor(0.0, 0.0, 0.0, 1.0);
     }
 
     private async loadResource(): Promise<void> {
@@ -199,7 +175,7 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
                 'resource/assets/webgl-logo.png',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
-            this.webglImage = loadImages[0];
+            this.image = loadImages[0];
         }
         catch (e) {
             console.error(e);
@@ -210,96 +186,25 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        /*
-        const engine = this.engine;
-        this.angleX += 0.01;
-        this.angleY += 0.02;
-        mat4.fromXRotation(this.rotateXMatrix, this.angleX);
-        mat4.fromYRotation(this.rotateYMatrix, this.angleY);
-        mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
-        this.cubemapDrawCall.uniform("uModel", this.modelMatrix);
-        this.cubeDrawCall.uniform("uModel", this.modelMatrix);
-        //
-        engine.drawFramebuffer(this.cubemapBuffer)
-            .viewport(0, 0, this.cubemapDim, this.cubemapDim)
-            .clear();
-        this.cubemapDrawCall.draw();
-        //
-        engine.defaultDrawFramebuffer().defaultViewport().clear();
-        this.skyboxDrawcall.draw();
-        this.cubeDrawCall.draw();
-        */
+        this.drawCall.uniform("uTime", (performance.now() - this.startTime) / 1000);
+        this.engine.clear();
+        this.drawCall.draw();
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        /*
-        this.cubemapDrawCall.delete();
-        this.cubeDrawCall.delete();
-        this.skyboxDrawcall.delete();
-        this.cubemapBuffer.delete();
+        this.drawCall.delete();
+        this.tex3DProgram.delete();
         this.program.delete();
-        this.cubemapProgram.delete();
-        this.skyboxProgram.delete();
-        this.sceneUniformBuffer.delete();
-        this.skyboxSceneUniforms.delete();
+        //
         const engine = this.engine;
-        engine.noDepthTest();
-        this.closeUI();
-        */
+        engine.noBlend().noCullBackfaces()
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        // mat4.multiply(this.skyboxViewProjMatrix, this.projMatrix, this.skyboxViewMatrix);
-        // this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
-        // this.skyboxSceneUniforms.set(0, this.skyboxViewProjMatrix).update();
+        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
+        mat4.multiply(this.mvpMatrix, this.projMatrix, this.viewMatrix);
         return this;
-    }
-
-    private openUI(): HTMLDivElement {
-        /*
-        if (this.debugColorEnableDiv) {
-            return this.debugColorEnableDiv;
-        }
-        ///
-        this.debugColorEnableDiv = document.createElement("div");
-        document.body.appendChild(this.debugColorEnableDiv);
-        const style = this.debugColorEnableDiv.style; //置顶，必须显示在最上面
-        style.setProperty('position', 'absolute');
-        style.setProperty('bottom', '20px');
-        style.setProperty('right', '20px');
-        style.setProperty('color', 'white');
-        style.setProperty('z-index', '999');
-        style.setProperty('top', '0');
-        this.debugColorEnableDiv.innerText = 'debug-color';
-        ////
-        const input = document.createElement("input"); 
-        this.debugColorEnableDiv.appendChild(input); 
-        input.setAttribute("type","checkbox");  
-        input.setAttribute("id","inputid");  
-        input.setAttribute("name","inputname");  
-        input.setAttribute("value","inputvalue");  
-        if (this.debugColorEnabled) {
-            input.setAttribute("checked", "checked");  
-        }
-        ///
-        const self = this;
-        input.addEventListener("change", function() {
-            self.debugColorEnabled = this.checked;
-            self.skyboxSceneUniforms.set(2, self.debugColorEnabled).update();
-        });
-        return this.debugColorEnableDiv;
-        */
-        return null;
-    }
-
-    private closeUI(): void {
-        // if (this.debugColorEnableDiv) {
-        //     document.body.removeChild(this.debugColorEnableDiv);
-        //     this.debugColorEnableDiv = null;
-        // }
     }
 }

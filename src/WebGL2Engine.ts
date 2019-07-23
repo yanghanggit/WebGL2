@@ -810,5 +810,17 @@ class WebGL2Engine implements System {
       this.viewport(0, 0, this.width, this.height);
       return this;
    }
+
+   public createTexture3D(width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture{
+      // if (typeof image === "number") {
+      //     // Create empty texture just give width/height/depth.
+      //     options = depth;
+      //     depth = height;
+      //     height = width;
+      //     width = image;
+      //     image = null;
+      // }
+      return new WebGL2Texture(/*this.gl, this.state,*/this, this.gl.TEXTURE_3D, null, width, height, depth, true, options);
+  }
 }
 
