@@ -7,6 +7,7 @@ layout(std140, column_major) uniform;
 uniform SceneUniforms {
     mat4 uViewProj;
     vec4 uEyePosition;
+    bool useDebugColor;
 };
 
 uniform samplerCube renderCubemap;
@@ -27,5 +28,5 @@ void main() {
         debugColor = vPosition.z > 0.0 ? vec3(0.0, 0.2, 0.2) : vec3(0.2, 0.0, 0.2); 
     }
     vec3 color = texture(renderCubemap, vPosition).rgb * texture(skyCubemap, vPosition).rgb;
-    fragColor = vec4(color, 1.0);
+    fragColor = useDebugColor ? vec4(color * debugColor, 1.0) : vec4(color, 1.0);
 }

@@ -87,7 +87,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
 
         this.viewMatrix = mat4.create();
-        const eyePosition = vec3.fromValues(1.3, -1.3, 1.3);
+        const eyePosition = vec3.fromValues(1.2, -1.3, 1.3);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
@@ -104,7 +104,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
 
         const cubemapSceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
-            GL.FLOAT_VEC4
+            GL.FLOAT_VEC4,
         ]).set(0, cubemapViewProjMatrix)
             .set(1, cubemapEyePosition)
             .update();
@@ -118,9 +118,11 @@ class RenderToCubemapScene extends WebGL2DemoScene {
 
         this.skyboxSceneUniforms = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
-            GL.FLOAT_VEC4
+            GL.FLOAT_VEC4, 
+            GL.BOOL
         ]).set(0, this.skyboxViewProjMatrix)
             .set(1, eyePosition)
+            .set(2, false)
             .update();
 
         const texture = engine.createTexture2DByImage(this.webglImage, {

@@ -8,6 +8,7 @@ layout(location=1) in vec2 uv;
 uniform SceneUniforms {
     mat4 uViewProj;
     vec4 uEyePosition;
+    bool useDebugColor;
 };
 
 out vec3 vPosition;

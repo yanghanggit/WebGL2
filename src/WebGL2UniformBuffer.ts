@@ -132,7 +132,7 @@ class WebGL2UniformBuffer extends WebGL2Object {
         return this;
     }
 
-    public set(index: number, value: Float32Array | number): WebGL2UniformBuffer {
+    public set(index: number, value: Float32Array | number | boolean): WebGL2UniformBuffer {
         const view = this.dataViews[this.types[index]];
         const offset = this.offsets[index];
         const size = this.sizes[index];
