@@ -28,7 +28,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     private modelMatrix: Float32Array = mat4.create();
     private rotateXMatrix: Float32Array = mat4.create();
     private rotateYMatrix: Float32Array = mat4.create();
-    private readonly CUBEMAP_DIM: number = 2048;
+    private readonly cubemapDim: number = 2048;
 
     //
     public enter(): WebGL2DemoScene {
@@ -51,10 +51,10 @@ class RenderToCubemapScene extends WebGL2DemoScene {
             .depthTest();
         //
         const colorTarget = engine.createCubemap({
-            width: this.CUBEMAP_DIM,
-            height: this.CUBEMAP_DIM
+            width: this.cubemapDim,
+            height: this.cubemapDim
         });
-        const depthTarget = engine.createRenderbuffer(this.CUBEMAP_DIM, this.CUBEMAP_DIM, GL.DEPTH_COMPONENT16);
+        const depthTarget = engine.createRenderbuffer(this.cubemapDim, this.cubemapDim, GL.DEPTH_COMPONENT16);
         this.cubemapBuffer = engine.createFramebuffer()
             .colorTarget(0, colorTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_X)
             .colorTarget(1, colorTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_X)
@@ -112,8 +112,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         this.sceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4
-        ])
-            .set(0, this.viewProjMatrix)
+        ]).set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .update();
 
@@ -172,7 +171,6 @@ class RenderToCubemapScene extends WebGL2DemoScene {
             this.skyboxFsSource = txts[4];
             //
             const programs = await this.engine.createPrograms(
-                // [this.vsSource, this.fsSource],
                 [this.vsSource, this.fsSource],
                 [this.vsSource, this.cubemapFsSource],
                 [this.skyboxVsSource, this.skyboxFsSource]
@@ -183,7 +181,6 @@ class RenderToCubemapScene extends WebGL2DemoScene {
             this.skyboxProgram = programs[2];
             //
             const texarrays: string[] = [
-                //'resource/assets/webgl-logo.png',
                 'resource/assets/bg.jpg',
                 'resource/assets/sky-negx.png',
                 'resource/assets/sky-posx.png',
@@ -217,7 +214,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         this.cubeDrawCall.uniform("uModel", this.modelMatrix);
         //
         engine.drawFramebuffer(this.cubemapBuffer)
-            .viewport(0, 0, this.CUBEMAP_DIM, this.CUBEMAP_DIM)
+            .viewport(0, 0, this.cubemapDim, this.cubemapDim)
             .clear();
         this.cubemapDrawCall.draw();
         //
