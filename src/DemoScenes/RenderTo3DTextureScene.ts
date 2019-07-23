@@ -141,6 +141,7 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
             tex3DDrawCall.draw();
         }
         framebuffer.resize(DIMENSIONS, DIMENSIONS);//???
+        
         engine.defaultDrawFramebuffer()
             .defaultViewport()
             .noDepthTest()
