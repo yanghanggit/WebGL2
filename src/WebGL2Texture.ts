@@ -20,7 +20,13 @@ interface CreateTextureOptions {
     type?: number;
     width?: number;
     height?: number;
-    generateMipmaps?: boolean
+    generateMipmaps?: boolean;
+    negX?: HTMLImageElement[] | HTMLImageElement;
+    posX?: HTMLImageElement[] | HTMLImageElement;
+    negY?: HTMLImageElement[] | HTMLImageElement;
+    posY?: HTMLImageElement[] | HTMLImageElement;
+    negZ?: HTMLImageElement[] | HTMLImageElement;
+    posZ?: HTMLImageElement[] | HTMLImageElement;
 };
 
 class WebGL2Texture extends WebGL2Object {

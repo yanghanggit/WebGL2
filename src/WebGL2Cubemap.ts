@@ -74,7 +74,7 @@ class WebGL2Cubemap extends WebGL2Object {
     public miplevelsProvided;// = arrayData && options.negX.length > 1;
     public levels;// = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
 
-    constructor(/*gl, appState,*/engine: WebGL2Engine, options) {
+    constructor(/*gl, appState,*/engine: WebGL2Engine, options: CreateTextureOptions) {
         super(engine);
 
 
@@ -153,7 +153,7 @@ class WebGL2Cubemap extends WebGL2Object {
         this.maxLevel = maxLevel;
         this.maxAnisotropy = Math.min(maxAnisotropy, WEBGL_INFO.MAX_TEXTURE_ANISOTROPY);
         this.mipmaps = (minFilter === GL.LINEAR_MIPMAP_NEAREST || minFilter === GL.LINEAR_MIPMAP_LINEAR);
-        this.miplevelsProvided = arrayData && options.negX.length > 1;
+        this.miplevelsProvided = arrayData && (Array.isArray(options.negX) && options.negX.length > 1);
         this.levels = this.mipmaps ? Math.floor(Math.log2(Math.min(this.width, this.height))) + 1 : 1;
 
         this.restore(options);

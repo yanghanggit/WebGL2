@@ -28,6 +28,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     private modelMatrix: Float32Array;
     private rotateXMatrix: Float32Array;
     private rotateYMatrix: Float32Array;
+    private readonly CUBEMAP_DIM: number = 2048;
 
     //
     public enter(): WebGL2DemoScene {
@@ -48,20 +49,20 @@ class RenderToCubemapScene extends WebGL2DemoScene {
 
         const utils = this.engine;
         const PicoGL = GL;
-        const CUBEMAP_DIM = 2048;
+        //const CUBEMAP_DIM = 2048;
 
         let app = this.engine/*PicoGL.createApp(canvas)*/
             .clearColor(1.0, 1.0, 1.0, 1.0)
             .depthTest();
 
-        let timer = app.createTimer();
+        //let timer = app.createTimer();
 
         // FRAMEBUFFER
         let colorTarget = app.createCubemap({
-            width: CUBEMAP_DIM,
-            height: CUBEMAP_DIM
+            width: this.CUBEMAP_DIM,
+            height: this.CUBEMAP_DIM
         });
-        let depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
+        let depthTarget = app.createRenderbuffer(this.CUBEMAP_DIM, this.CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
 
         this.cubemapBuffer = app.createFramebuffer()
             .colorTarget(0, colorTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
@@ -242,11 +243,11 @@ class RenderToCubemapScene extends WebGL2DemoScene {
         this.cubemapDrawCall.uniform("uModel", this.modelMatrix);
         this.cubeDrawCall.uniform("uModel", this.modelMatrix);
 
-        const CUBEMAP_DIM = 2048;
+        //const CUBEMAP_DIM = 2048;
         // DRAW SAME IMAGE TO ALL SIX FACES OF CUBEMAP
         app
             .drawFramebuffer(this.cubemapBuffer)
-            .viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM)
+            .viewport(0, 0, this.CUBEMAP_DIM, this.CUBEMAP_DIM)
             .clear();
         this.cubemapDrawCall.draw();
 

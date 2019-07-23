@@ -30,7 +30,7 @@ interface TextureArrayData {
 
 class WebGL2State {
 
-   private readonly _engine: WebGL2Engine = null;
+   private readonly engine: WebGL2Engine = null;
    public program: any = null;
    public vertexArray: any = null;
    public transformFeedback: any = null;
@@ -42,10 +42,10 @@ class WebGL2State {
    public readFramebuffer: WebGL2Framebuffer = null;
    public readonly extensions: any = {};
 
-   constructor(_engine: WebGL2Engine) {
-      this._engine = _engine;
-      this.textures = new Array(this._engine.capbility('MAX_TEXTURE_UNITS'));
-      this.uniformBuffers = new Array(this._engine.capbility('MAX_UNIFORM_BUFFERS'));
+   constructor(engine: WebGL2Engine) {
+      this.engine = engine;
+      this.textures = new Array(this.engine.capbility('MAX_TEXTURE_UNITS'));
+      this.uniformBuffers = new Array(this.engine.capbility('MAX_UNIFORM_BUFFERS'));
    }
 }
 
@@ -802,7 +802,7 @@ class WebGL2Engine implements System {
       return this;
    }
 
-   public createCubemap(options): WebGL2Cubemap {
+   public createCubemap(options: CreateTextureOptions): WebGL2Cubemap {
       return new WebGL2Cubemap(/*this.gl, this.state,*/this, options);
    }
 
