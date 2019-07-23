@@ -140,12 +140,12 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
             engine.clear();
             tex3DDrawCall.draw();
         }
-
+        framebuffer.resize(DIMENSIONS, DIMENSIONS);//???
         engine.defaultDrawFramebuffer()
             .defaultViewport()
             .noDepthTest()
             .blend()
-            .clearColor(0.0, 0.0, 0.0, 1.0);
+            .clearColor(0.5, 0.5, 0.5, 1.0);
     }
 
     private async loadResource(): Promise<void> {

@@ -140,7 +140,7 @@ class WebGL2Texture extends WebGL2Object {
     }
 
     public resize(width: number, height: number, depth?: number): WebGL2Texture {
-        depth = depth || 0;
+        depth = depth || this.depth;
 
         if (this.texture && width === this.width && height === this.height && depth === this.depth) {
             return this;
