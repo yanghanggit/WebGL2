@@ -122,6 +122,27 @@ class WebGL2Cubemap extends WebGL2Object {
         if (this.maxAnisotropy > 1) {
             this.gl.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAX_ANISOTROPY_EXT, this.maxAnisotropy);
         }
+        /*
+        The texture image specification commands in OpenGL allow each level 
+        to be separately specified with different sizes, formats, types and 
+        so on, and only imposes consistency checks at draw time. This adds 
+        overhead for implementations. 
+
+        This extension provides a mechanism for specifying the entire 
+        structure of a texture in a single call, allowing certain 
+        consistency checks and memory allocations to be done up front. Once 
+        specified, the format and dimensions of the image array become 
+        immutable, to simplify completeness checks in the implementation. 
+
+        When using this extension, it is no longer possible to supply texture 
+        data using TexImage*. Instead, data can be uploaded using TexSubImage*, 
+        or produced by other means (such as render-to-texture, mipmap generation, 
+        or rendering to a sibling EGLImage). 
+
+        This extension has complicated interactions with other extensions. 
+        The goal of most of these interactions is to ensure that a texture 
+        is always mipmap complete (and cube complete for cubemap textures). 
+        */
         this.gl.texStorage2D(GL.TEXTURE_CUBE_MAP, this.levels, this.internalFormat, this.width, this.height);
         const { negX, posX, negY, posY, negZ, posZ } = options as CreateTextureOptions;
         if (negX) {
