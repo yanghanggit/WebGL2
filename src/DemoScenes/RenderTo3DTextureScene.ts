@@ -199,7 +199,7 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
         this.program.delete();
         //
         const engine = this.engine;
-        engine.noBlend().noCullBackfaces()
+        engine.noBlend().noCullBackfaces();
         return this;
     }
 
