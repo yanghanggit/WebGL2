@@ -75,9 +75,10 @@ function getQualifiedClassName(value: any): string {
 
 /////////
 const __SceneClasses__ = [
+    RenderTo3DTextureScene,
+    WanderingTrianglesScene,
     CubemapScene,
     CubeScene,
-    RenderTo3DTextureScene,
     RenderToCubemapScene,
     MSAAScene,
     RTTScene,
@@ -87,8 +88,6 @@ const __SceneClasses__ = [
     TriangleScene,
     UBOScene,
     OITScene,
-    WanderingTrianglesScene,
-    //EmptyScene
 ];
 let __currentSceneIndex__ = 0;
 let __webGL2DemoPlayer__: WebGL2DemoPlayer = null;

@@ -111,7 +111,7 @@ class ShadowScene extends WebGL2DemoScene {
         //
         this.texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY */
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
         //
