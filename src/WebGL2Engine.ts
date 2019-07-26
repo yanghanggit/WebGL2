@@ -28,6 +28,18 @@ interface TextureArrayData {
    length: number;
 }
 
+interface BlitFramebufferOptions {
+   srcStartX?: number,
+   srcStartY?: number,
+   srcEndX?: number,
+   srcEndY?: number,
+   dstStartX?: number,
+   dstStartY?: number,
+   dstEndX?: number,
+   dstEndY?: number,
+   filter?: number,
+};
+
 class WebGL2State {
 
    private readonly engine: WebGL2Engine = null;
@@ -739,14 +751,6 @@ class WebGL2Engine implements System {
    }
 
    public createTextureArrayByImage(image: HTMLImageElement, width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture {
-      // if (typeof image === "number") {
-      //    // Create empty texture just give width/height/depth.
-      //    options = depth;
-      //    depth = height;
-      //    height = width;
-      //    width = image;
-      //    image = null;
-      // }
       return new WebGL2Texture(this, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
    }
 
@@ -778,15 +782,14 @@ class WebGL2Engine implements System {
       return this;
    }
 
-   public blitFramebuffer(mask, options = DUMMY_OBJECT) {
-      let readFramebuffer = this.state.readFramebuffer;
-      let drawFramebuffer = this.state.drawFramebuffer;
-      let defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
-      let defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
-      let defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
-      let defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
-
-      let {
+   public blitFramebuffer(mask: number, options: BlitFramebufferOptions = {}): WebGL2Engine {
+      const readFramebuffer = this.state.readFramebuffer;
+      const drawFramebuffer = this.state.drawFramebuffer;
+      const defaultReadWidth = readFramebuffer ? readFramebuffer.width : this.width;
+      const defaultReadHeight = readFramebuffer ? readFramebuffer.height : this.height;
+      const defaultDrawWidth = drawFramebuffer ? drawFramebuffer.width : this.width;
+      const defaultDrawHeight = drawFramebuffer ? drawFramebuffer.height : this.height;
+      const {
          srcStartX = 0,
          srcStartY = 0,
          srcEndX = defaultReadWidth,
@@ -796,8 +799,7 @@ class WebGL2Engine implements System {
          dstEndX = defaultDrawWidth,
          dstEndY = defaultDrawHeight,
          filter = GL.NEAREST
-      } = options as any;
-
+      } = options;
       this.gl.blitFramebuffer(srcStartX, srcStartY, srcEndX, srcEndY, dstStartX, dstStartY, dstEndX, dstEndY, mask, filter);
       return this;
    }
@@ -817,6 +819,10 @@ class WebGL2Engine implements System {
 
    public createTexture3DByData(data: Uint8Array, width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture {
       return new WebGL2Texture(this, this.gl.TEXTURE_3D, data, width, height, depth, true, options);
+   }
+
+   public createInterleavedBuffer(bytesPerVertex, data, usage?) {
+      return new WebGL2VertexBuffer(this, null, bytesPerVertex, data, usage);
    }
 }
 
