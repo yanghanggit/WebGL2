@@ -75,6 +75,7 @@ function getQualifiedClassName(value: any): string {
 
 /////////
 const __SceneClasses__ = [
+    _64CubesScene,
     InstancedScene,
     _3DTextureScene,
     RenderTo3DTextureScene,
