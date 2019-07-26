@@ -811,16 +811,12 @@ class WebGL2Engine implements System {
       return this;
    }
 
-   public createTexture3D(width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture{
-      // if (typeof image === "number") {
-      //     // Create empty texture just give width/height/depth.
-      //     options = depth;
-      //     depth = height;
-      //     height = width;
-      //     width = image;
-      //     image = null;
-      // }
-      return new WebGL2Texture(/*this.gl, this.state,*/this, this.gl.TEXTURE_3D, null, width, height, depth, true, options);
-  }
+   public createTexture3DBySize(width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture {
+      return new WebGL2Texture(this, this.gl.TEXTURE_3D, null, width, height, depth, true, options);
+   }
+
+   public createTexture3DByData(data: Uint8Array, width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture {
+      return new WebGL2Texture(this, this.gl.TEXTURE_3D, data, width, height, depth, true, options);
+   }
 }
 

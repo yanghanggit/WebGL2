@@ -24,6 +24,10 @@
 		{
 			"name": "gl-matrix",
 			"path": "./libs/gl-matrix"
+		},
+		{
+			"name": "noise3d",
+			"path": "./libs/noise3d"
 		}
 	]
 }

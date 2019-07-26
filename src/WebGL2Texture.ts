@@ -58,7 +58,7 @@ class WebGL2Texture extends WebGL2Object {
     private readonly premultiplyAlpha: boolean;
     private readonly mipmaps: boolean;
 
-    constructor(_engine: WebGL2Engine, binding: number, image: number | HTMLImageElement | Float32Array, width: number, height: number, depth: number, is3D: boolean, options: CreateTextureOptions = DUMMY_OBJECT as CreateTextureOptions) {
+    constructor(_engine: WebGL2Engine, binding: number, image: number | HTMLImageElement | Float32Array | Uint8Array, width: number, height: number, depth: number, is3D: boolean, options: CreateTextureOptions = DUMMY_OBJECT as CreateTextureOptions) {
         super(_engine);
         //
         this.binding = binding;
@@ -130,7 +130,7 @@ class WebGL2Texture extends WebGL2Object {
         this.restore(image);
     }
 
-    public restore(image: HTMLImageElement | number | Float32Array): WebGL2Texture {
+    public restore(image: HTMLImageElement | number | Float32Array | Uint8Array): WebGL2Texture {
         this.texture = null;
         this.resize(this.width, this.height, this.depth);
         if (image) {
@@ -229,7 +229,7 @@ class WebGL2Texture extends WebGL2Object {
         return this;
     }
 
-    public data(data: HTMLImageElement | number | any[] | Float32Array): WebGL2Texture {
+    public data(data: HTMLImageElement | number | any[] | Float32Array | Uint8Array): WebGL2Texture {
         if (!Array.isArray(data)) {
             DUMMY_UNIT_ARRAY[0] = data;
             data = DUMMY_UNIT_ARRAY;

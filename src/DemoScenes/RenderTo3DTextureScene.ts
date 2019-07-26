@@ -37,7 +37,7 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
             .cullBackfaces()
             .clear();
         //
-        const colorTarget = engine.createTexture3D(DIMENSIONS, DIMENSIONS, DIMENSIONS, {
+        const colorTarget = engine.createTexture3DBySize(DIMENSIONS, DIMENSIONS, DIMENSIONS, {
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
         const framebuffer = engine.createFramebuffer().colorTarget(0, colorTarget);
