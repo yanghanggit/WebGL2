@@ -824,5 +824,16 @@ class WebGL2Engine implements System {
    public createInterleavedBuffer(bytesPerVertex, data, usage?) {
       return new WebGL2VertexBuffer(this, null, bytesPerVertex, data, usage);
    }
+
+   readPixel(x, y, outColor, options = DUMMY_OBJECT) {
+      let {
+         format = GL.RGBA,
+         type = GL.UNSIGNED_BYTE
+      } = options as any;
+
+      this.gl.readPixels(x, y, 1, 1, format, type, outColor);
+
+      return this;
+   }
 }
 

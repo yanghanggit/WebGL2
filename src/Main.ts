@@ -75,6 +75,7 @@ function getQualifiedClassName(value: any): string {
 
 /////////
 const __SceneClasses__ = [
+    PickingScene,
     InterleavedTriangleScene,
     _125CubesScene,
     _64CubesScene,
