@@ -821,18 +821,16 @@ class WebGL2Engine implements System {
       return new WebGL2Texture(this, this.gl.TEXTURE_3D, data, width, height, depth, true, options);
    }
 
-   public createInterleavedBuffer(bytesPerVertex, data, usage?) {
+   public createInterleavedBuffer(bytesPerVertex: number, data: number | Float32Array | Uint16Array | Uint8Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, null, bytesPerVertex, data, usage);
    }
 
-   readPixel(x, y, outColor, options = DUMMY_OBJECT) {
-      let {
+   public readPixel(x: number, y: number, outColor: Uint8Array, options: any = DUMMY_OBJECT): WebGL2Engine {
+      const {
          format = GL.RGBA,
          type = GL.UNSIGNED_BYTE
       } = options as any;
-
       this.gl.readPixels(x, y, 1, 1, format, type, outColor);
-
       return this;
    }
 }

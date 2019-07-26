@@ -127,7 +127,15 @@ function gotoScene(webGL2DemoPlayer: WebGL2DemoPlayer, index: number, scenes: an
     }
 }
 
+let __lockChangeScene__: boolean = false;
+function lockChangeScene(lock: boolean = true): void {
+    __lockChangeScene__ = lock;
+}
+
 function nextScene(): void {
+    if (__lockChangeScene__) {
+        return;
+    }
     ++__currentSceneIndex__;
     __currentSceneIndex__ = __currentSceneIndex__ % (__SceneClasses__.length);
     gotoScene(__webGL2DemoPlayer__, __currentSceneIndex__, __SceneClasses__);
