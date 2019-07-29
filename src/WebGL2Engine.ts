@@ -40,6 +40,17 @@ interface BlitFramebufferOptions {
    filter?: number,
 };
 
+interface CreateBoxModelOptions {
+   dimensions?: Float32Array | number[],
+   position?: Float32Array,
+};
+
+interface BoxModel {
+   positions?: Float32Array;
+   normals?: Float32Array;
+   uvs?: Float32Array;
+}
+
 class WebGL2State {
 
    private readonly engine: WebGL2Engine = null;
@@ -348,7 +359,7 @@ class WebGL2Engine implements System {
       return new WebGL2Framebuffer(this);
    }
 
-   public createSphere(options: CreateSphereModelOptions): SphereModel {
+   public createSphere(options?: CreateSphereModelOptions): SphereModel {
       options = options || {} as CreateSphereModelOptions;
       let longBands = options.longBands || 32;
       let latBands = options.latBands || 32;
@@ -479,7 +490,7 @@ class WebGL2Engine implements System {
       return new WebGL2DrawCall(this, program, vertexArray, primitive);
    }
 
-   public xformMatrix(xform: Float32Array, translate: Float32Array, rotate: Float32Array, scale: Float32Array): Float32Array {
+   public xformMatrix(xform: Float32Array, translate: Float32Array, rotate?: Float32Array, scale?: Float32Array): Float32Array {
       translate = translate || zeros;
       rotate = rotate || zeros;
       scale = scale || ones;
@@ -572,7 +583,7 @@ class WebGL2Engine implements System {
       return this;
    }
 
-   public createBox(options) {
+   public createBox(options?: CreateBoxModelOptions): BoxModel {
       options = options || {};
 
       let dimensions = options.dimensions || [1, 1, 1];
