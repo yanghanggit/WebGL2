@@ -844,5 +844,36 @@ class WebGL2Engine implements System {
       this.gl.readPixels(x, y, 1, 1, format, type, outColor);
       return this;
    }
+
+   public clearMask(mask: number): WebGL2Engine {
+      this.clearBits = mask;
+      return this;
+   }
+
+   public stencilTest(): WebGL2Engine {
+      this.gl.enable(this.gl.STENCIL_TEST);
+      return this;
+   }
+
+   public noStencilTest(): WebGL2Engine {
+      this.gl.disable(this.gl.STENCIL_TEST);
+      return this;
+   }
+
+   public stencilOp(stencilFail: number, depthFail: number, pass: number): WebGL2Engine {
+      this.gl.stencilOp(stencilFail, depthFail, pass);
+      return this;
+   }
+
+   public stencilFunc(func: number, ref: number, mask: number): WebGL2Engine {
+      this.gl.stencilFunc(func, ref, mask);
+      return this;
+   }
+
+   public stencilMask(mask: number): WebGL2Engine {
+      this.gl.stencilMask(mask);
+      return this;
+   }
+
 }
 
