@@ -40,7 +40,6 @@ class OutlineScene extends WebGL2DemoScene {
         const utils = engine;
         const canvas = engine.canvas;
         const PicoGL = GL;
-        //utils.addTimerElement();
 
         const NUM_SPHERES = 32;
         const NUM_PER_ROW = 8;
@@ -48,12 +47,8 @@ class OutlineScene extends WebGL2DemoScene {
         const NEAR = 0.1;
         const FAR = 10.0;
 
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-
-        this. spheres = new Array(NUM_SPHERES);
-        this. modelMatrixData = new Float32Array(NUM_SPHERES * 16);
+        this.spheres = new Array(NUM_SPHERES);
+        this.modelMatrixData = new Float32Array(NUM_SPHERES * 16);
 
         const spheres = this.spheres;
         for (let i = 0; i < NUM_SPHERES; ++i) {
@@ -81,19 +76,6 @@ class OutlineScene extends WebGL2DemoScene {
             // DEPTH AND STENCIL TESTS PASS
             .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
 
-        // let timer = app.createTimer();
-
-        // // SET UP MAIN DRAW PROGRAM
-        // let mainVsSource =  document.getElementById("vertex-main").text.trim();
-        // let mainFsSource =  document.getElementById("fragment-main").text.trim();
-
-        // // SET UP OUTLINE PROGRAM, WHICH SCALES UP GEOMETRY AND DRAWS
-        // // IN SOLID YELLOW 
-        // let outlineVsSource =  document.getElementById("vertex-outline").text.trim();
-        // let outlineFsSource =  document.getElementById("fragment-outline").text.trim();
-
-
-        // INSTANCED SPHERE GEOMETRY
         let sphere = utils.createSphere({ radius: 0.5 });
         let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
         let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
@@ -101,7 +83,7 @@ class OutlineScene extends WebGL2DemoScene {
         let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
 
         // PER-INSTANCE MODEL MATRICES
-        this. modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, this.modelMatrixData);
+        this.modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, this.modelMatrixData);
 
         let sphereArray = app.createVertexArray()
             .vertexAttributeBuffer(0, positions)
@@ -135,22 +117,20 @@ class OutlineScene extends WebGL2DemoScene {
             .update();
 
 
-            let texture = app.createTexture2DByImage(this.image, { 
-                flipY: true,
-                maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')//PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
-            });
+        let texture = app.createTexture2DByImage(this.image, {
+            flipY: true,
+            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')
+        });
 
-            // DRAW CALLS
-            this. mainDrawcall = app.createDrawCall(this.mainProgram, sphereArray)
+        // DRAW CALLS
+        this.mainDrawcall = app.createDrawCall(this.mainProgram, sphereArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("uTexture", texture);
 
-            this. outlineDrawcall = app.createDrawCall(this.outlineProgram, sphereArray)
+        this.outlineDrawcall = app.createDrawCall(this.outlineProgram, sphereArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms);
 
-            this. rotationMatrix = mat4.create();
-
-
+        this.rotationMatrix = mat4.create();
     }
 
     private async loadResource(): Promise<void> {
@@ -190,9 +170,6 @@ class OutlineScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-
-
-        // UPDATE TRANSFORMS
         const spheres = this.spheres;
         for (let i = 0, len = spheres.length; i < len; ++i) {
             spheres[i].rotate[1] += 0.002;
@@ -207,61 +184,19 @@ class OutlineScene extends WebGL2DemoScene {
         this.modelMatrices.data(this.modelMatrixData);
 
         engine.clear()
-        .depthTest()
-        // SET STENCIL VALUE TO 1 FOR EVERY PIXEL
-        // THAT GETS DRAWN
-        .stencilFunc(GL.ALWAYS, 1, 0xFF)
-        .stencilMask(0xFFFF);
+            .depthTest()
+            .stencilFunc(GL.ALWAYS, 1, 0xFF)
+            .stencilMask(0xFFFF);
         this.mainDrawcall.draw();
-        
+
         engine.noDepthTest()
-        // ONLY DRAW WHERE STENCIL VALUE IS NOT 1
-        // (I.E. WHERE WE DIDN'T DRAW BEFORE)
-        .stencilFunc(GL.NOTEQUAL, 1, 0xFF)
-        .stencilMask(0);
+            .stencilFunc(GL.NOTEQUAL, 1, 0xFF)
+            .stencilMask(0);
         this.outlineDrawcall.draw();
-        
-
-
-
-        // if (this.resized) {
-        //     this.boxBuffer.resize();
-        //     this.hblurBuffer.resize();
-        //     this.blurBuffer.resize();
-        //     mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
-        //     mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        //     this.sceneUniforms.set(0, this.viewProjMatrix).update();
-        //     this.resized = false;
-        // }
-        // const boxes = this.boxes;
-        // for (let i = 0, len = boxes.length; i < len; ++i) {
-        //     boxes[i].rotate[0] += 0.01;
-        //     boxes[i].rotate[1] += 0.02;
-        //     engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
-        //     this.modelMatrixData.set(boxes[i].modelMatrix, i * 16);
-        // }
-        // this.modelMatrices.data(this.modelMatrixData);
-        // engine.drawFramebuffer(this.boxBuffer).clear();
-        // this.boxesDrawCall.draw();
-        // engine.drawFramebuffer(this.hblurBuffer).clear()
-        // this.hBlurDrawCall.draw()
-        // engine.defaultDrawFramebuffer().clear()
-        // this.finalDrawCall.draw();
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        // this.boxProgram.delete();
-        // this.blurProgram.delete();
-        // this.boxBuffer.delete();
-        // this.hblurBuffer.delete();
-        // this.blurBuffer.delete();
-        // this.sceneUniforms.delete();
-        // this.modelMatrices.delete();
-        // this.boxesDrawCall.delete();
-        // this.hBlurDrawCall.delete();
-        // this.finalDrawCall.delete();
-
         this.mainDrawcall.delete();
         this.outlineDrawcall.delete();
         this.mainProgram.delete();
@@ -269,24 +204,11 @@ class OutlineScene extends WebGL2DemoScene {
         this.sceneUniforms.delete();
         this.modelMatrices.delete();
         const engine = this.engine;
-        //engine.noDepthTest();
-
         engine.noDepthTest().noStencilTest();
-        // app.clearColor(0.0, 0.0, 0.0, 1.0)
-        //     .clearMask(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT | PicoGL.STENCIL_BUFFER_BIT)
-        //     .depthTest()
-        //     .depthFunc(PicoGL.LEQUAL)
-        //     // ENABLE STENCIL TESTING
-        //     .stencilTest()
-        //     // SET STENCIL TEST TO UPDATE STENCIL VALUE WHEN 
-        //     // DEPTH AND STENCIL TESTS PASS
-        //     .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        //this.resized = true;
-
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         this.sceneUniforms.set(0, this.viewProjMatrix).update();
