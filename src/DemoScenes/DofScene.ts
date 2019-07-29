@@ -1,5 +1,13 @@
 
+interface DofBoxTransform {
+    scale: Float32Array | number[];
+    rotate: Float32Array | number[];
+    translate: Float32Array | number[];
+    modelMatrix: Float32Array;
+}
+
 class DofScene extends WebGL2DemoScene {
+    
     //
     private projMatrix: Float32Array;
     private viewMatrix: Float32Array;
@@ -11,7 +19,7 @@ class DofScene extends WebGL2DemoScene {
     private blurFsSource: string;
     private resized: boolean;
     private image: HTMLImageElement;
-    private boxes: any[];
+    private boxes: DofBoxTransform[];
     //
     private boxProgram: WebGL2Program;
     private blurProgram: WebGL2Program;
@@ -40,12 +48,8 @@ class DofScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        const app = engine;
-        const canvas = engine.canvas;
-        const PicoGL = GL;
-        const utils = engine;
-
-
+        engine.depthTest().clearColor(0.5, 0.5, 0.5, 1.0);
+        //
         const NEAR = 0.1;
         const FAR = 10.0;
         const FOCAL_LENGTH = 1.0;
@@ -53,42 +57,38 @@ class DofScene extends WebGL2DemoScene {
         const MAGNIFICATION = FOCAL_LENGTH / Math.abs(FOCUS_DISTANCE - FOCAL_LENGTH);
         const FSTOP = 2.8;
         const BLUR_COEFFICIENT = FOCAL_LENGTH * MAGNIFICATION / FSTOP;
-        const PPM = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 35;
-
+        const PPM = Math.sqrt(engine.canvas.width * engine.canvas.width + engine.canvas.height * engine.canvas.height) / 35;
         const NUM_ROWS = 5;
         const BOXES_PER_ROW = 20;
         const NUM_BOXES = BOXES_PER_ROW * NUM_ROWS;
-
-        app.depthTest().clearColor(0.0, 0.0, 0.0, 1.0);
-
-        let depthRange = vec2.fromValues(NEAR, FAR);
-        let colorTargetA = app.createTexture2DBySize(app.width, app.height, {});
-        let colorTargetB = app.createTexture2DBySize(app.width, app.height, {});
-        let depthTarget = app.createTexture2DBySize(app.width, app.height, {
-            internalFormat: PicoGL.DEPTH_COMPONENT16
+        //
+        const depthRange = vec2.fromValues(NEAR, FAR);
+        const colorTargetA = engine.createTexture2DBySize(engine.width, engine.height, {});
+        const colorTargetB = engine.createTexture2DBySize(engine.width, engine.height, {});
+        const depthTarget = engine.createTexture2DBySize(engine.width, engine.height, {
+            internalFormat: GL.DEPTH_COMPONENT16
         });
 
-        this.boxBuffer = app.createFramebuffer().colorTarget(0, colorTargetA).depthTarget(depthTarget);
-        this.hblurBuffer = app.createFramebuffer().colorTarget(0, colorTargetB);
-        this.blurBuffer = app.createFramebuffer().colorTarget(0, colorTargetA);
+        this.boxBuffer = engine.createFramebuffer().colorTarget(0, colorTargetA).depthTarget(depthTarget);
+        this.hblurBuffer = engine.createFramebuffer().colorTarget(0, colorTargetB);
+        this.blurBuffer = engine.createFramebuffer().colorTarget(0, colorTargetA);
 
 
-        let box = utils.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
+        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
 
         this.modelMatrixData = new Float32Array(NUM_BOXES * 16);
-        this.modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, this.modelMatrixData);
+        this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData);
 
-        let boxArray = app.createVertexArray()
+        const boxArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals)
             .instanceAttributeBuffer(3, this.modelMatrices);
 
-        // QUAD GEOMETRY
-        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        const quadPositions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -97,55 +97,50 @@ class DofScene extends WebGL2DemoScene {
             1, 1,
         ]));
 
-        let quadArray = app.createVertexArray()
+        const quadArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, quadPositions);
 
-        // UNIFORM DATA
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, NEAR, FAR);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(1, 1.5, 1);
+        const eyePosition = vec3.fromValues(1, 1.5, 1);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        let lightPosition = vec3.fromValues(1, 1, 0.5);
-
-        let sceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4
-        ])
-            .set(0, this.viewProjMatrix)
+        const lightPosition = vec3.fromValues(1, 1, 0.5);
+        const sceneUniforms = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4
+        ]).set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .set(2, lightPosition)
             .update();
-
-        let dofUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_VEC2,
-            PicoGL.FLOAT,
-            PicoGL.FLOAT,
-            PicoGL.FLOAT
-        ])
-            .set(0, depthRange)
+        const dofUniforms = engine.createUniformBuffer([
+            GL.FLOAT_VEC2,
+            GL.FLOAT,
+            GL.FLOAT,
+            GL.FLOAT
+        ]).set(0, depthRange)
             .set(1, FOCUS_DISTANCE)
             .set(2, BLUR_COEFFICIENT)
             .set(3, PPM)
             .update();
 
 
-        let hTexelOffset = vec2.fromValues(1.0, 0.0);
-        let vTexelOffset = vec2.fromValues(0.0, 1.0);
+        const hTexelOffset = vec2.fromValues(1.0, 0.0);
+        const vTexelOffset = vec2.fromValues(0.0, 1.0);
 
-        let texture = app.createTexture2DByImage(this.image, {
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
         this.boxes = new Array(NUM_BOXES);
-        this.boxesDrawCall = app.createDrawCall(this.boxProgram, boxArray)
+        this.boxesDrawCall = engine.createDrawCall(this.boxProgram, boxArray)
             .uniformBlock("SceneUniforms", sceneUniforms)
             .texture("uTexture", texture);
 
@@ -164,18 +159,17 @@ class DofScene extends WebGL2DemoScene {
             }
         }
 
-        this.hBlurDrawCall = app.createDrawCall(this.blurProgram, quadArray)
+        this.hBlurDrawCall = engine.createDrawCall(this.blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uColor", this.boxBuffer.colorAttachments[0] as WebGL2Texture)
             .texture("uDepth", this.boxBuffer.depthAttachment);
 
-        this.finalDrawCall = app.createDrawCall(this.blurProgram, quadArray)
+        this.finalDrawCall = engine.createDrawCall(this.blurProgram, quadArray)
             .uniformBlock("DOFUniforms", dofUniforms)
-            .uniform("uTexelOffset", hTexelOffset)
+            .uniform("uTexelOffset", vTexelOffset)
             .texture("uColor", this.hblurBuffer.colorAttachments[0] as WebGL2Texture)
             .texture("uDepth", this.boxBuffer.depthAttachment);
-
     }
 
     private async loadResource(): Promise<void> {
@@ -214,12 +208,12 @@ class DofScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        const app = this.engine;
+        const engine = this.engine;
         if (this.resized) {
             this.boxBuffer.resize();
             this.hblurBuffer.resize();
             this.blurBuffer.resize();
-            mat4.perspective(this.projMatrix, Math.PI / 2, app.canvas.width / app.canvas.height, 0.1, 10.0);
+            mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
             mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
             this.sceneUniforms.set(0, this.viewProjMatrix).update();
             this.resized = false;
@@ -228,17 +222,15 @@ class DofScene extends WebGL2DemoScene {
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
-
-            app.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
-
+            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
             this.modelMatrixData.set(boxes[i].modelMatrix, i * 16);
         }
         this.modelMatrices.data(this.modelMatrixData);
-        app.drawFramebuffer(this.boxBuffer).clear();
+        engine.drawFramebuffer(this.boxBuffer).clear();
         this.boxesDrawCall.draw();
-        app.drawFramebuffer(this.hblurBuffer).clear()
+        engine.drawFramebuffer(this.hblurBuffer).clear()
         this.hBlurDrawCall.draw()
-        app.defaultDrawFramebuffer().clear()
+        engine.defaultDrawFramebuffer().clear()
         this.finalDrawCall.draw();
         return this;
     }
