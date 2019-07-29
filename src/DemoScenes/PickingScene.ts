@@ -1,6 +1,18 @@
 
+interface PickingSceneBoxData {
+    translate: Float32Array | number[];
+    rotate: Float32Array | number[];
+    scale: Float32Array | number[];
+    mvpMatrix: Float32Array;
+    modelMatrix: Float32Array;
+    pickColor: Float32Array;
+    frameUniforms: WebGL2UniformBuffer;
+    mainDrawCall: WebGL2DrawCall;
+    pickingDrawCall: WebGL2DrawCall;
+}
+
 class PickingScene extends WebGL2DemoScene {
-    
+
     ///
     private vsSource: string;
     private fsSource: string;
@@ -10,7 +22,7 @@ class PickingScene extends WebGL2DemoScene {
     private projMatrix: Float32Array;
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
-    private boxes: any;
+    private boxes: PickingSceneBoxData[];
     private highlightColor: Float32Array;
     private unhighlightColor: Float32Array;
     private mouseX: number = 0;
@@ -176,7 +188,7 @@ class PickingScene extends WebGL2DemoScene {
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
             mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
             boxes[i].pickingDrawCall.uniform("uMVP", boxes[i].mvpMatrix);
             boxes[i].frameUniforms.set(0, boxes[i].mvpMatrix)
@@ -226,9 +238,9 @@ class PickingScene extends WebGL2DemoScene {
     }
 
     public leave(): WebGL2DemoScene {
-        this. pickingProgram.delete();
-        this. mainProgram.delete();
-        this. pickingBuffer.delete();
+        this.pickingProgram.delete();
+        this.mainProgram.delete();
+        this.pickingBuffer.delete();
         return this;
     }
 
