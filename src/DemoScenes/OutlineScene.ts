@@ -60,7 +60,7 @@ class OutlineScene extends WebGL2DemoScene {
             };
         }
         //
-        engine.clearColor(0.0, 0.0, 0.0, 1.0)
+        engine.clearColor(0.5, 0.5, 0.5, 1.0)
             .clearMask(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT)
             .depthFunc(GL.LEQUAL)
             .stencilTest()

@@ -241,6 +241,8 @@ class PickingScene extends WebGL2DemoScene {
         this.pickingProgram.delete();
         this.mainProgram.delete();
         this.pickingBuffer.delete();
+        const engine = this.engine;
+        engine.noDepthTest().noCullBackfaces();
         return this;
     }
 
