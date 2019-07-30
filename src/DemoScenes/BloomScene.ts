@@ -1,6 +1,20 @@
 
+interface BloomScnBoxTransform {
+    rotation: Float32Array;
+    modelMatrix: Float32Array;
+    mvpMatrix: Float32Array;
+};
+
+interface BloomScnSunData {
+    position: Float32Array;
+    color: Float32Array;
+    modelMatrix: Float32Array;
+    mvpMatrix: Float32Array;
+    uniforms: WebGL2UniformBuffer;
+};
+
 class BloomScene extends WebGL2DemoScene {
-    
+
     //
     private projMatrix: Float32Array;
     private viewMatrix: Float32Array;
@@ -13,8 +27,8 @@ class BloomScene extends WebGL2DemoScene {
     private blurFsSource: string;
     private blendFsSource: string;
     private image: HTMLImageElement;
-    private cube: any;
-    private suns: any[];
+    private cube: BloomScnBoxTransform;
+    private suns: BloomScnSunData[];
     //
     private cubeProgram: WebGL2Program;
     private sunProgram: WebGL2Program;
@@ -55,62 +69,50 @@ class BloomScene extends WebGL2DemoScene {
     }
 
     private createScene(): void {
-        
+
         const engine = this.engine;
-        const utils = this.engine;
-        const app = this.engine;
-        const canvas = engine.canvas;
-        const PicoGL = GL;
+        engine.clearColor(0.0, 0.0, 0.0, 1.0).depthTest();
 
-        let hTexelOffset = new Int32Array([1, 0]);
-        let vTexelOffset = new Int32Array([0, 1]);
+        const hTexelOffset = new Int32Array([1, 0]);
+        const vTexelOffset = new Int32Array([0, 1]);
+        const colorTarget1 = engine.createTexture2DByData(null, engine.width, engine.height, { internalFormat: GL.RGBA16F });
+        const colorTarget2 = engine.createTexture2DByData(null, engine.width, engine.height, { internalFormat: GL.RGBA16F });
+        const depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16);
 
-        app
-            .clearColor(0.0, 0.0, 0.0, 1.0)
-            .depthTest();
-
-        let colorTarget1 = app.createTexture2DByData(null, app.width, app.height, { internalFormat: PicoGL.RGBA16F });
-        let colorTarget2 = app.createTexture2DByData(null, app.width, app.height, { internalFormat: PicoGL.RGBA16F });
-        let depthTarget = app.createRenderbuffer(app.width, app.height, PicoGL.DEPTH_COMPONENT16);
-
-        this.colorBuffer = app.createFramebuffer()
+        this.colorBuffer = engine.createFramebuffer()
             .colorTarget(0, colorTarget1)
             .colorTarget(1, colorTarget2)
             .depthTarget(depthTarget);
 
-        let blurTarget = app.createTexture2DByData(null, app.width, app.height, { type: PicoGL.FLOAT });
+        const blurTarget = engine.createTexture2DByData(null, engine.width, engine.height, { type: GL.FLOAT });
 
-        this. blurBuffer = app.createFramebuffer()
+        this.blurBuffer = engine.createFramebuffer()
             .colorTarget(0, blurTarget);
 
-        let bloomTarget = app.createTexture2DByData(null, app.width, app.height, { type: PicoGL.FLOAT });
+        const bloomTarget = engine.createTexture2DByData(null, engine.width, engine.height, { type: GL.FLOAT });
 
-        this. bloomBuffer = app.createFramebuffer()
+        this.bloomBuffer = engine.createFramebuffer()
             .colorTarget(0, bloomTarget);
 
-        let blankTexture = app.createTexture2DByData(null, 1, 1, {});
+        const cubeData = engine.createBox({ dimensions: [1.0, 1.0, 1.0] });
+        const cubePositions = engine.createVertexBuffer(GL.FLOAT, 3, cubeData.positions);
+        const cubeUVs = engine.createVertexBuffer(GL.FLOAT, 2, cubeData.uvs);
+        const cubeNormals = engine.createVertexBuffer(GL.FLOAT, 3, cubeData.normals);
 
-        // SET UP GEOMETRY
-
-        let cubeData = utils.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        let cubePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, cubeData.positions);
-        let cubeUVs = app.createVertexBuffer(PicoGL.FLOAT, 2, cubeData.uvs);
-        let cubeNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, cubeData.normals);
-
-        let cubeArray = app.createVertexArray()
+        const cubeArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, cubePositions)
             .vertexAttributeBuffer(1, cubeUVs)
             .vertexAttributeBuffer(2, cubeNormals);
 
-        let sun = utils.createSphere({ radius: 0.1 });
-        let sunPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sun.positions);
-        let sunIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sun.indices);
+        const sun = engine.createSphere({ radius: 0.1 });
+        const sunPositions = engine.createVertexBuffer(GL.FLOAT, 3, sun.positions);
+        const sunIndices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sun.indices);
 
-        let sunArray = app.createVertexArray()
+        const sunArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, sunPositions)
             .indexBuffer(sunIndices);
 
-        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+        const quadPositions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -1, 1,
             -1, -1,
             1, -1,
@@ -119,20 +121,18 @@ class BloomScene extends WebGL2DemoScene {
             1, 1,
         ]));
 
-        let quadArray = app.createVertexArray().vertexAttributeBuffer(0, quadPositions);
+        const quadArray = engine.createVertexArray().vertexAttributeBuffer(0, quadPositions);
 
 
-        // SET UP OTHER DATA
+        this.projMatrix = mat4.create();
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.width / engine.height, 0.1, 10.0);
 
-        this. projMatrix = mat4.create();
-        mat4.perspective( this.projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
-
-        this. viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(1, 1, 1);
+        this.viewMatrix = mat4.create();
+        const eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
-        this. viewProjMatrix = mat4.create();
-        mat4.multiply(this.viewProjMatrix,  this.projMatrix, this.viewMatrix);
+        this.viewProjMatrix = mat4.create();
+        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
         this.cube = {
             rotation: vec3.create(),
@@ -146,45 +146,43 @@ class BloomScene extends WebGL2DemoScene {
                 color: vec3.fromValues(1, 1, 1),
                 modelMatrix: mat4.create(),
                 mvpMatrix: mat4.create(),
-                uniforms: app.createUniformBuffer([
-                    PicoGL.FLOAT_MAT4,
-                    PicoGL.FLOAT_VEC4,
+                uniforms: engine.createUniformBuffer([
+                    GL.FLOAT_MAT4,
+                    GL.FLOAT_VEC4,
                 ])
             },
             {
                 position: vec3.fromValues(-4, -1.5, -2),
-                color: vec3.fromValues(0, 0, 1),
+                color: vec3.fromValues(1, 0.5, 0),
                 modelMatrix: mat4.create(),
                 mvpMatrix: mat4.create(),
-                uniforms: app.createUniformBuffer([
-                    PicoGL.FLOAT_MAT4,
-                    PicoGL.FLOAT_VEC4,
+                uniforms: engine.createUniformBuffer([
+                    GL.FLOAT_MAT4,
+                    GL.FLOAT_VEC4,
                 ])
             }
-
         ];
 
-        utils.xformMatrix(suns[0].modelMatrix, suns[0].position, null, null);
+        engine.xformMatrix(suns[0].modelMatrix, suns[0].position, null, null);
         mat4.multiply(suns[0].mvpMatrix, this.viewProjMatrix, suns[0].modelMatrix);
         suns[0].uniforms.set(0, suns[0].mvpMatrix)
             .set(1, suns[0].color)
             .update();
 
-        utils.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(30, 30, 30));
+        engine.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(30, 30, 30));
         mat4.multiply(suns[1].mvpMatrix, this.viewProjMatrix, suns[1].modelMatrix);
         suns[1].uniforms.set(0, suns[1].mvpMatrix)
             .set(1, suns[1].color)
             .update();
 
-        this. sceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4
-        ])
-            .set(0, eyePosition)
+        this.sceneUniforms = engine.createUniformBuffer([
+            GL.FLOAT_VEC4,
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4
+        ]).set(0, eyePosition)
             .set(1, this.viewProjMatrix)
             .set(2, suns[0].position)
             .set(3, suns[0].color)
@@ -193,40 +191,38 @@ class BloomScene extends WebGL2DemoScene {
             .update();
 
 
-        let texture = app.createTexture2DByImage(this.image, {
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        // PREPARE DRAW CALLS
-        this.drawCall = app.createDrawCall(this.cubeProgram, cubeArray)
+        this.drawCall = engine.createDrawCall(this.cubeProgram, cubeArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("tex", texture);
 
-        this.sunDrawCall = app.createDrawCall(this.sunProgram, sunArray)
+        this.sunDrawCall = engine.createDrawCall(this.sunProgram, sunArray)
             .uniformBlock("SunUniforms", suns[0].uniforms);
 
-        this.sun2DrawCall = app.createDrawCall(this.sunProgram, sunArray)
+        this.sun2DrawCall = engine.createDrawCall(this.sunProgram, sunArray)
             .uniformBlock("SunUniforms", suns[1].uniforms);
 
-        this.hBlurDrawCall = app.createDrawCall(this.blurProgram, quadArray)
+        this.hBlurDrawCall = engine.createDrawCall(this.blurProgram, quadArray)
             .uniform("uTexelOffset", hTexelOffset)
             .texture("uTexture", this.colorBuffer.colorAttachments[1] as WebGL2Texture);
 
-        this.vBlurDrawCall = app.createDrawCall(this.blurProgram, quadArray)
+        this.vBlurDrawCall = engine.createDrawCall(this.blurProgram, quadArray)
             .uniform("uTexelOffset", vTexelOffset)
             .texture("uTexture", this.blurBuffer.colorAttachments[0] as WebGL2Texture);
 
-        this.blendDrawCall = app.createDrawCall(this.blendProgram, quadArray)
+        this.blendDrawCall = engine.createDrawCall(this.blendProgram, quadArray)
             .texture("uColor", this.colorBuffer.colorAttachments[0] as WebGL2Texture)
             .texture("uBloom", this.bloomBuffer.colorAttachments[0] as WebGL2Texture);
 
-        // TEXTURES FOR PING PONGING THE BLUR
+        //
         this.blurTextureA = this.colorBuffer.colorAttachments[1] as WebGL2Texture;
         this.blurTextureB = this.bloomBuffer.colorAttachments[0] as WebGL2Texture;
         this.blurReadTexture = this.blurTextureA;
         this.blurWriteTexture = this.blurTextureB;
-
     }
 
     private async loadResource(): Promise<void> {
@@ -276,22 +272,20 @@ class BloomScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-
+        const engine = this.engine;
         const bloomEnabled = true;
         const cube = this.cube;
-        const utils = this.engine;
-        const app = this.engine;
 
         cube.rotation[0] += 0.01;
         cube.rotation[1] += 0.02;
 
-        utils.xformMatrix(cube.modelMatrix, null, cube.rotation, null);
+        engine.xformMatrix(cube.modelMatrix, null, cube.rotation, null);
         this.drawCall.uniform("uModel", cube.modelMatrix);
 
         this.colorBuffer.colorTarget(1, this.blurReadTexture);
 
 
-        app.drawFramebuffer(this.colorBuffer).clear();
+        engine.drawFramebuffer(this.colorBuffer).clear();
         this.drawCall.draw();
         this.sunDrawCall.draw();
         this.sun2DrawCall.draw();
@@ -301,10 +295,10 @@ class BloomScene extends WebGL2DemoScene {
                 this.hBlurDrawCall.texture("uTexture", this.blurReadTexture);
                 this.bloomBuffer.colorTarget(0, this.blurWriteTexture);
 
-                app.drawFramebuffer(this.blurBuffer).clear();
+                engine.drawFramebuffer(this.blurBuffer).clear();
                 this.hBlurDrawCall.draw()
 
-                app.drawFramebuffer(this.bloomBuffer).clear();
+                engine.drawFramebuffer(this.bloomBuffer).clear();
                 this.vBlurDrawCall.draw();
 
                 if (this.blurReadTexture === this.blurTextureA) {
@@ -320,12 +314,8 @@ class BloomScene extends WebGL2DemoScene {
         } else {
             //blendDrawCall.texture("uBloom", blankTexture);
         }
-
-
-
-        app.defaultDrawFramebuffer().clear();
+        engine.defaultDrawFramebuffer().clear();
         this.blendDrawCall.draw();
-
         return this;
     }
 
@@ -354,24 +344,20 @@ class BloomScene extends WebGL2DemoScene {
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-    
+        //
         this.colorBuffer.resize(width, height);
         this.blurBuffer.resize(width, height);
         this.bloomBuffer.resize(width, height);
-
-        // Make sure both targets are correct size.
         this.blurTextureA.resize(width, height);
         this.blurTextureB.resize(width, height);
-
+        //
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         this.sceneUniforms.set(1, this.viewProjMatrix).update();
-
+        //
         const suns = this.suns;
-
         mat4.multiply(suns[0].mvpMatrix, this.viewProjMatrix, suns[0].modelMatrix);
         suns[0].uniforms.set(0, suns[0].mvpMatrix).update();
-
         mat4.multiply(suns[1].mvpMatrix, this.viewProjMatrix, suns[1].modelMatrix);
         suns[1].uniforms.set(0, suns[1].mvpMatrix).update();
         return this;
