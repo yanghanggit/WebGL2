@@ -206,7 +206,7 @@ class ShadowScene extends WebGL2DemoScene {
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        this.shadowBuffer.resize();
+        this.shadowBuffer.resize(width, height);
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         return this;

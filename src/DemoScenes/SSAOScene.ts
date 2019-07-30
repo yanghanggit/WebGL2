@@ -320,8 +320,8 @@ class SSAOScene extends WebGL2DemoScene {
 
         const app = this.engine;
 
-        this.colorGeoBuffer.resize();
-        this.ssaoBuffer.resize();
+        this.colorGeoBuffer.resize(width, height);
+        this.ssaoBuffer.resize(width, height);
 
         const numNoisePixels = app.gl.drawingBufferWidth * app.gl.drawingBufferHeight;
         const noiseTextureData = new Float32Array(numNoisePixels * 2);

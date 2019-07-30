@@ -111,7 +111,7 @@ class DofScene extends WebGL2DemoScene {
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
         const lightPosition = vec3.fromValues(1, 1, 0.5);
-        const sceneUniforms = engine.createUniformBuffer([
+        this.sceneUniforms = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC4
@@ -141,7 +141,7 @@ class DofScene extends WebGL2DemoScene {
 
         this.boxes = new Array(NUM_BOXES);
         this.boxesDrawCall = engine.createDrawCall(this.boxProgram, boxArray)
-            .uniformBlock("SceneUniforms", sceneUniforms)
+            .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("uTexture", texture);
 
         let boxI = 0;
@@ -210,9 +210,9 @@ class DofScene extends WebGL2DemoScene {
         }
         const engine = this.engine;
         if (this.resized) {
-            this.boxBuffer.resize();
-            this.hblurBuffer.resize();
-            this.blurBuffer.resize();
+            this.boxBuffer.resize(engine.width, engine.width);
+            this.hblurBuffer.resize(engine.width, engine.width);
+            this.blurBuffer.resize(engine.width, engine.width);
             mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
             mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
             this.sceneUniforms.set(0, this.viewProjMatrix).update();
@@ -245,6 +245,7 @@ class DofScene extends WebGL2DemoScene {
         this.boxesDrawCall.delete();
         this.hBlurDrawCall.delete();
         this.finalDrawCall.delete();
+        this.sceneUniforms.delete();
         const engine = this.engine;
         engine.noDepthTest();
         return this;

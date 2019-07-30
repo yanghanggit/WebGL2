@@ -278,7 +278,7 @@ class DeferredScene extends WebGL2DemoScene {
     public resize(width: number, height: number): WebGL2DemoScene {
         const engine = this.engine;
         
-        this.gBuffer.resize();
+        this.gBuffer.resize(width, height);
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         let lightMatrix: Float32Array;

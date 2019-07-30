@@ -79,7 +79,7 @@ class WebGL2Framebuffer extends WebGL2Object {
         return this;
     }
 
-    public resize(width?: number /*= this.gl.drawingBufferWidth*/, height?: number /*= this.gl.drawingBufferHeight*/): WebGL2Framebuffer {
+    public resize(width: number /*= this.gl.drawingBufferWidth*/, height: number /*= this.gl.drawingBufferHeight*/): WebGL2Framebuffer {
         width = width || this.gl.drawingBufferWidth;
         height = height || this.gl.drawingBufferHeight;
         let currentFramebuffer = this.bindAndCaptureState();

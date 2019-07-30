@@ -147,7 +147,7 @@ class RTTScene extends WebGL2DemoScene {
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        this.rttBuffer.resize();
+        this.rttBuffer.resize(width, height);
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();

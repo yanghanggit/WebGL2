@@ -1,37 +1,10 @@
 
 class BloomScene extends WebGL2DemoScene {
-    ///
-    // private shadowVsSource: string;
-    // private shadowFsSource: string;
-    // private lightVsSource: string;
-    // private lightFsSource: string;
-    // private vsSource: string;
-    // private fsSource: string;
-    // private lightViewMatrixNegX: Float32Array = mat4.create();
-    // private lightViewMatrixPosX: Float32Array = mat4.create();
-    // private lightViewMatrixNegY: Float32Array = mat4.create();
-    // private lightViewMatrixPosY: Float32Array = mat4.create();
-    // private lightViewMatrixNegZ: Float32Array = mat4.create();
-    // private lightViewMatrixPosZ: Float32Array = mat4.create();
-    // private projMatrix: Float32Array;
-    // private viewMatrix: Float32Array;
-    // private viewProjMatrix: Float32Array;
-    // private boxes: any[];
-    // private webglImage: HTMLImageElement;
-    // private cobblesImage: HTMLImageElement;
-    // ///
-    // private shadowProgram: WebGL2Program;
-    // private lightProgram: WebGL2Program;
-    // private mainProgram: WebGL2Program;
-    // private shadowBuffer: WebGL2Framebuffer;
-    // private shadowTarget: WebGL2Cubemap;
-    // private lightDrawcall: WebGL2DrawCall;
-
-
+    
+    //
     private projMatrix: Float32Array;
-
-
-
+    private viewMatrix: Float32Array;
+    private viewProjMatrix: Float32Array;
     private cubeVsSource: string;
     private cubeFsSource: string;
     private sunVsSource: string;
@@ -40,45 +13,27 @@ class BloomScene extends WebGL2DemoScene {
     private blurFsSource: string;
     private blendFsSource: string;
     private image: HTMLImageElement;
-
-
+    private cube: any;
+    private suns: any[];
+    //
     private cubeProgram: WebGL2Program;
     private sunProgram: WebGL2Program;
     private blurProgram: WebGL2Program;
     private blendProgram: WebGL2Program;
-
-
     private drawCall: WebGL2DrawCall;
     private sunDrawCall: WebGL2DrawCall;
     private sun2DrawCall: WebGL2DrawCall;
-
-
     private hBlurDrawCall: WebGL2DrawCall;
     private vBlurDrawCall: WebGL2DrawCall;
-
     private blendDrawCall: WebGL2DrawCall;
-
     private colorBuffer: WebGL2Framebuffer;
-
-
     private blurTextureA: WebGL2Texture;
     private blurTextureB: WebGL2Texture;
     private blurReadTexture: WebGL2Texture;
     private blurWriteTexture: WebGL2Texture;
-
     private bloomBuffer: WebGL2Framebuffer;
-
     private blurBuffer: WebGL2Framebuffer;
-
     private sceneUniforms: WebGL2UniformBuffer;
-
-    
-
-
-    private cube: any;
-    private suns: any[];
-
-    
 
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
@@ -100,57 +55,19 @@ class BloomScene extends WebGL2DemoScene {
     }
 
     private createScene(): void {
-        //return;
+        
         const engine = this.engine;
         const utils = this.engine;
         const app = this.engine;
         const canvas = engine.canvas;
         const PicoGL = GL;
 
-        // utils.addTimerElement();   
-
-        // let bloomEnabled = true;
-
-        // document.getElementById("bloom-toggle").addEventListener("change", function() {
-        //     bloomEnabled = this.checked;
-        // });
-
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
-
         let hTexelOffset = new Int32Array([1, 0]);
         let vTexelOffset = new Int32Array([0, 1]);
 
-        //let app = PicoGL.createApp(canvas)
         app
             .clearColor(0.0, 0.0, 0.0, 1.0)
             .depthTest();
-
-        // if (!testExtension("EXT_color_buffer_float")) {
-        //     document.body.innerHTML = "This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system."
-        // }
-
-        // let timer = app.createTimer();
-
-        // let resolution = new Int32Array([app.width, app.height]);
-
-        // SET UP PROGRAMS
-
-        // let cubeVsSource =  document.getElementById("vertex-cube").text.trim();
-        // let cubeFsSource =  document.getElementById("fragment-cube").text.trim();
-
-        // let sunVsSource =  document.getElementById("vertex-sun").text.trim();
-        // let sunFsSource =  document.getElementById("fragment-sun").text.trim();
-
-        // let quadVsSource =  document.getElementById("vertex-quad").text.trim();
-        // let quadVertexShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
-
-        // let blurFsSource =  document.getElementById("fragment-blur").text.trim();
-
-        // let blendFsSource =  document.getElementById("fragment-blend").text.trim();
-
-        // SET UP FRAMEBUFFERS AND TEXTURES
 
         let colorTarget1 = app.createTexture2DByData(null, app.width, app.height, { internalFormat: PicoGL.RGBA16F });
         let colorTarget2 = app.createTexture2DByData(null, app.width, app.height, { internalFormat: PicoGL.RGBA16F });
@@ -413,31 +330,34 @@ class BloomScene extends WebGL2DemoScene {
     }
 
     public leave(): WebGL2DemoScene {
-        // this.shadowProgram.delete();
-        // this.lightProgram.delete();
-        // this.mainProgram.delete();
-        // this.shadowBuffer.delete();
-        // this.shadowTarget.delete();
-        // this.lightDrawcall.delete();
+        this.cubeProgram.delete();
+        this.sunProgram.delete();
+        this.blurProgram.delete();
+        this.blendProgram.delete();
+        this.drawCall.delete();
+        this.sunDrawCall.delete();
+        this.sun2DrawCall.delete();
+        this.hBlurDrawCall.delete();
+        this.vBlurDrawCall.delete();
+        this.blendDrawCall.delete();
+        this.colorBuffer.delete();
+        this.blurTextureA.delete();
+        this.blurTextureB.delete();
+        this.blurReadTexture.delete();
+        this.blurWriteTexture.delete();
+        this.bloomBuffer.delete();
+        this.blurBuffer.delete();
+        this.sceneUniforms.delete();
         const engine = this.engine;
-        //engine.noDepthTest();
+        engine.noDepthTest();
         return this;
     }
 
-
-    private viewMatrix: Float32Array;
-    private viewProjMatrix: Float32Array;
-
     public resize(width: number, height: number): WebGL2DemoScene {
-        // const NEAR = 0.1;
-        // const FAR = 20.0
-        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, NEAR, FAR);
-        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-
-
-        this.colorBuffer.resize();
-        this.blurBuffer.resize();
-        this.bloomBuffer.resize();
+    
+        this.colorBuffer.resize(width, height);
+        this.blurBuffer.resize(width, height);
+        this.bloomBuffer.resize(width, height);
 
         // Make sure both targets are correct size.
         this.blurTextureA.resize(width, height);
