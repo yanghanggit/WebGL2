@@ -48,6 +48,7 @@ class BloomScene extends WebGL2DemoScene {
     private bloomBuffer: WebGL2Framebuffer;
     private blurBuffer: WebGL2Framebuffer;
     private sceneUniforms: WebGL2UniformBuffer;
+    private blankTexture: WebGL2Texture;
 
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
@@ -223,6 +224,10 @@ class BloomScene extends WebGL2DemoScene {
         this.blurTextureB = this.bloomBuffer.colorAttachments[0] as WebGL2Texture;
         this.blurReadTexture = this.blurTextureA;
         this.blurWriteTexture = this.blurTextureB;
+
+        this.blankTexture = engine.createTexture2DByData(null, 1, 1, {});
+
+        this.openUI();
     }
 
     private async loadResource(): Promise<void> {
@@ -273,7 +278,6 @@ class BloomScene extends WebGL2DemoScene {
             return;
         }
         const engine = this.engine;
-        const bloomEnabled = true;
         const cube = this.cube;
 
         cube.rotation[0] += 0.01;
@@ -290,7 +294,7 @@ class BloomScene extends WebGL2DemoScene {
         this.sunDrawCall.draw();
         this.sun2DrawCall.draw();
 
-        if (bloomEnabled) {
+        if (this.bloomEnabled) {
             for (let i = 0; i < 4; ++i) {
                 this.hBlurDrawCall.texture("uTexture", this.blurReadTexture);
                 this.bloomBuffer.colorTarget(0, this.blurWriteTexture);
@@ -312,7 +316,7 @@ class BloomScene extends WebGL2DemoScene {
 
             this.blendDrawCall.texture("uBloom", this.blurWriteTexture);
         } else {
-            //blendDrawCall.texture("uBloom", blankTexture);
+            this.blendDrawCall.texture("uBloom", this.blankTexture);
         }
         engine.defaultDrawFramebuffer().clear();
         this.blendDrawCall.draw();
@@ -338,8 +342,10 @@ class BloomScene extends WebGL2DemoScene {
         this.bloomBuffer.delete();
         this.blurBuffer.delete();
         this.sceneUniforms.delete();
+        this.blankTexture.delete();
         const engine = this.engine;
         engine.noDepthTest();
+        this.closeUI();
         return this;
     }
 
@@ -361,5 +367,47 @@ class BloomScene extends WebGL2DemoScene {
         mat4.multiply(suns[1].mvpMatrix, this.viewProjMatrix, suns[1].modelMatrix);
         suns[1].uniforms.set(0, suns[1].mvpMatrix).update();
         return this;
+    }
+
+    private bloomEnableDiv: HTMLDivElement;
+    private bloomEnabled: boolean = true;
+    private openUI(): HTMLDivElement {
+        if (this.bloomEnableDiv) {
+            return this.bloomEnableDiv;
+        }
+        ///
+        this.bloomEnableDiv = document.createElement("div");
+        document.body.appendChild(this.bloomEnableDiv);
+        const style = this.bloomEnableDiv.style; //置顶，必须显示在最上面
+        style.setProperty('position', 'absolute');
+        style.setProperty('bottom', '20px');
+        style.setProperty('right', '20px');
+        style.setProperty('color', 'white');
+        style.setProperty('z-index', '999');
+        style.setProperty('top', '0');
+        this.bloomEnableDiv.innerText = 'bloom';
+        ////
+        const input = document.createElement("input");
+        this.bloomEnableDiv.appendChild(input);
+        input.setAttribute("type", "checkbox");
+        input.setAttribute("id", "inputid");
+        input.setAttribute("name", "inputname");
+        input.setAttribute("value", "inputvalue");
+        if (this.bloomEnabled) {
+            input.setAttribute("checked", "checked");
+        }
+        ///
+        const self = this;
+        input.addEventListener("change", function () {
+            self.bloomEnabled = this.checked;
+        });
+        return this.bloomEnableDiv;
+    }
+
+    private closeUI(): void {
+        if (this.bloomEnableDiv) {
+            document.body.removeChild(this.bloomEnableDiv);
+            this.bloomEnableDiv = null;
+        }
     }
 }
