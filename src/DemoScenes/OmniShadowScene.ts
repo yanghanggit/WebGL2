@@ -1,6 +1,5 @@
 
 class OmniShadowScene extends WebGL2DemoScene {
-
     ///
     private shadowVsSource: string;
     private shadowFsSource: string;
@@ -8,39 +7,24 @@ class OmniShadowScene extends WebGL2DemoScene {
     private lightFsSource: string;
     private vsSource: string;
     private fsSource: string;
-
-    ///
-    private shadowProgram: WebGL2Program;
-    private lightProgram: WebGL2Program;
-    private mainProgram: WebGL2Program;
-
-    //
-    private webglImage: HTMLImageElement;
-    private cobblesImage: HTMLImageElement;
-
-    private projMatrix: Float32Array;
-
-    private viewMatrix: Float32Array;
-    private viewProjMatrix: Float32Array;
-
-    private boxes: any[];
-
-    private shadowBuffer: WebGL2Framebuffer;
-    private shadowTarget: WebGL2Cubemap;
-
-    // private drawCall1: WebGL2DrawCall;
-    // private drawCall2: WebGL2DrawCall;
-    // private currentDrawCall: WebGL2DrawCall;
-
-
     private lightViewMatrixNegX: Float32Array = mat4.create();
     private lightViewMatrixPosX: Float32Array = mat4.create();
     private lightViewMatrixNegY: Float32Array = mat4.create();
     private lightViewMatrixPosY: Float32Array = mat4.create();
     private lightViewMatrixNegZ: Float32Array = mat4.create();
     private lightViewMatrixPosZ: Float32Array = mat4.create();
-
-
+    private projMatrix: Float32Array;
+    private viewMatrix: Float32Array;
+    private viewProjMatrix: Float32Array;
+    private boxes: any[];
+    private webglImage: HTMLImageElement;
+    private cobblesImage: HTMLImageElement;
+    ///
+    private shadowProgram: WebGL2Program;
+    private lightProgram: WebGL2Program;
+    private mainProgram: WebGL2Program;
+    private shadowBuffer: WebGL2Framebuffer;
+    private shadowTarget: WebGL2Cubemap;
     private lightDrawcall: WebGL2DrawCall;
 
     public enter(): WebGL2DemoScene {
@@ -59,86 +43,55 @@ class OmniShadowScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        const app = this.engine;
-        const utils = this.engine;
-        const PicoGL = GL;
-        const canvas = engine.canvas;
-
-        //
-        // utils.addTimerElement();
-
-        // let canvas = document.getElementById("gl-canvas");
-        // canvas.width = window.innerWidth;
-        // canvas.height = window.innerHeight;
+        engine.clearColor(0.0, 0.0, 0.0, 1.0).depthTest();
 
         const CUBEMAP_DIM = 1024;
         const NEAR = 0.1;
-        const FAR = 20.0
+        const FAR = 20.0;
 
-        //let app = PicoGL.createApp(canvas)
-        app
-            .clearColor(0.0, 0.0, 0.0, 1.0)
-            .depthTest();
-
-        // let timer = app.createTimer();
-
-        // // SET UP SHADOW PROGRAM
-        // let shadowVsSource =  document.getElementById("shadow-vs").text.trim();
-        // let shadowFsSource =  document.getElementById("shadow-fs").text.trim();
-
-        this.shadowTarget = app.createCubemap({
-            internalFormat: PicoGL.R16F,
+        this.shadowTarget = engine.createCubemap({
+            internalFormat: GL.R16F,
             width: CUBEMAP_DIM,
             height: CUBEMAP_DIM
         });
-        let depthTarget = app.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, PicoGL.DEPTH_COMPONENT16);
-        this.shadowBuffer = app.createFramebuffer()
-            .colorTarget(0, this.shadowTarget, PicoGL.TEXTURE_CUBE_MAP_NEGATIVE_X)
+        const depthTarget = engine.createRenderbuffer(CUBEMAP_DIM, CUBEMAP_DIM, GL.DEPTH_COMPONENT16);
+        this.shadowBuffer = engine.createFramebuffer()
+            .colorTarget(0, this.shadowTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_X)
             .depthTarget(depthTarget);
 
-        // SET UP LIGHT PROGRAM
-        // let lightVsSource =  document.getElementById("sphere-vs").text.trim();
-        // let lightFsSource =  document.getElementById("sphere-fs").text.trim();
+        let positions: WebGL2VertexBuffer, normals: WebGL2VertexBuffer, uv: WebGL2VertexBuffer, indices: WebGL2VertexBuffer;
 
-        // // SET UP MAIN PROGRAM
-        // let vsSource =  document.getElementById("main-vs").text.trim();
-        // let fsSource =  document.getElementById("main-fs").text.trim();
+        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
 
-        // GEOMETRY
-        let positions, normals, uv, indices;
-
-        let box = utils.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        positions = app.createVertexBuffer(PicoGL.FLOAT, 3, box.positions);
-        normals = app.createVertexBuffer(PicoGL.FLOAT, 3, box.normals);
-        uv = app.createVertexBuffer(PicoGL.FLOAT, 2, box.uvs);
-
-        let boxArray = app.createVertexArray()
+        const boxArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, normals)
             .vertexAttributeBuffer(2, uv);
 
-        let sphere = utils.createSphere({ radius: 0.1 });
-        positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        const sphere = engine.createSphere({ radius: 0.1 });
+        positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
+        indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
 
-        let sphereArray = app.createVertexArray()
+        const sphereArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .indexBuffer(indices);
 
-        // UNIFORMS
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, NEAR, FAR);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(1, 1, 1);
+        const eyePosition = vec3.fromValues(1, 1, 1);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        let lightPosition = vec3.fromValues(0, 0, 0);
-        let lightProjMatrix = mat4.create();
-        let lightViewMatrix = mat4.create();
+        const lightPosition = vec3.fromValues(0, 0, 0);
+        const lightProjMatrix = mat4.create();
+        const lightViewMatrix = mat4.create();
         this.lightViewMatrixNegX = mat4.create();
         this.lightViewMatrixPosX = mat4.create();
         this.lightViewMatrixNegY = mat4.create();
@@ -155,11 +108,6 @@ class OmniShadowScene extends WebGL2DemoScene {
         mat4.lookAt(this.lightViewMatrixNegZ, lightPosition, vec3.fromValues(0, 0, -1), vec3.fromValues(0, -1, 0));
         mat4.lookAt(this.lightViewMatrixPosZ, lightPosition, vec3.fromValues(0, 0, 1), vec3.fromValues(0, -1, 0));
 
-        ///////////////////////////////////////
-        // CONTINUE HERE FOR OTHER FACES
-        ///////////////////////////////////////
-
-        // OBJECT DESCRIPTIONS
         const boxes = this.boxes = [
             {
                 translate: [0, 0, 0],
@@ -207,39 +155,36 @@ class OmniShadowScene extends WebGL2DemoScene {
             }
         ];
 
-        let webglTexture = app.createTexture2DByImage(this.webglImage, {
+        const  webglTexture = engine.createTexture2DByImage(this.webglImage, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')//PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY') 
         });
-        let cobblesTexture = app.createTexture2DByImage(this.cobblesImage, {
+        const  cobblesTexture = engine.createTexture2DByImage(this.cobblesImage, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')//PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY 
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        // DRAW CALLS
-
-        this.lightDrawcall = app.createDrawCall(this.lightProgram, sphereArray)
+        this.lightDrawcall = engine.createDrawCall(this.lightProgram, sphereArray)
             .uniform("uMVP", this.viewProjMatrix);
 
-        boxes[0].shadowDrawCall = app.createDrawCall(this.shadowProgram, boxArray)
+        boxes[0].shadowDrawCall = engine.createDrawCall(this.shadowProgram, boxArray)
 
-        boxes[0].mainDrawCall = app.createDrawCall(this.mainProgram, boxArray)
+        boxes[0].mainDrawCall = engine.createDrawCall(this.mainProgram, boxArray)
             .uniform("uLightPosition", lightPosition)
             .uniform("uEyePosition", eyePosition)
             .texture("uTextureMap", cobblesTexture)
             .texture("uShadowMap", this.shadowTarget);
 
         for (let i = 1, len = boxes.length; i < len; ++i) {
-            boxes[i].shadowDrawCall = app.createDrawCall(this.shadowProgram, boxArray)
+            boxes[i].shadowDrawCall = engine.createDrawCall(this.shadowProgram, boxArray)
                 .uniform("uProjection", lightProjMatrix);
 
-            boxes[i].mainDrawCall = app.createDrawCall(this.mainProgram, boxArray)
+            boxes[i].mainDrawCall = engine.createDrawCall(this.mainProgram, boxArray)
                 .uniform("uLightPosition", lightPosition)
                 .uniform("uEyePosition", eyePosition)
                 .texture("uTextureMap", webglTexture)
                 .texture("uShadowMap", this.shadowTarget);
         }
-
     }
 
     private async loadResource(): Promise<void> {
@@ -287,20 +232,14 @@ class OmniShadowScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        // this.engine.clear();
-        // this.currentDrawCall.draw();
-        // this.currentDrawCall = this.currentDrawCall === this.drawCall1 ? this.drawCall2 : this.drawCall1;
         const CUBEMAP_DIM = 1024;
-        const utils = this.engine;
-        const app = this.engine;
-
-        // UPDATE TRANSFORMS
+        const engine = this.engine;
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += boxes[i].rotateVx;
             boxes[i].rotate[1] += boxes[i].rotateVy;
 
-            utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
             mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
 
             boxes[i].shadowDrawCall.uniform("uModelMatrix", boxes[i].modelMatrix);
@@ -309,77 +248,73 @@ class OmniShadowScene extends WebGL2DemoScene {
                 .uniform("uModelMatrix", boxes[i].modelMatrix);
         }
 
-        // DRAW TO SHADOW BUFFER
         const shadowBuffer = this.shadowBuffer;
         const shadowTarget = this.shadowTarget;
-
-        app.drawFramebuffer(shadowBuffer).viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM);
+        engine.drawFramebuffer(shadowBuffer).viewport(0, 0, CUBEMAP_DIM, CUBEMAP_DIM);
 
         shadowBuffer.colorTarget(0, shadowTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_X);
-        app.clear();
+        engine.clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.uniform("uViewMatrix", this.lightViewMatrixNegX);
             boxes[i].shadowDrawCall.draw();
         }
 
         shadowBuffer.colorTarget(0, shadowTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_X);
-        app.clear();
+        engine.clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.uniform("uViewMatrix", this.lightViewMatrixPosX);
             boxes[i].shadowDrawCall.draw();
         }
 
         shadowBuffer.colorTarget(0, shadowTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_Y);
-        app.clear();
+        engine.clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.uniform("uViewMatrix", this.lightViewMatrixNegY);
             boxes[i].shadowDrawCall.draw();
         }
 
         shadowBuffer.colorTarget(0, shadowTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_Y);
-        app.clear();
+        engine.clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.uniform("uViewMatrix", this.lightViewMatrixPosY);
             boxes[i].shadowDrawCall.draw();
         }
 
         shadowBuffer.colorTarget(0, shadowTarget, GL.TEXTURE_CUBE_MAP_NEGATIVE_Z);
-        app.clear();
+        engine.clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.uniform("uViewMatrix", this.lightViewMatrixNegZ);
             boxes[i].shadowDrawCall.draw();
         }
 
         shadowBuffer.colorTarget(0, shadowTarget, GL.TEXTURE_CUBE_MAP_POSITIVE_Z);
-        app.clear();
+        engine.clear();
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].shadowDrawCall.uniform("uViewMatrix", this.lightViewMatrixPosZ);
             boxes[i].shadowDrawCall.draw();
         }
-
-        // DRAW TO SCREEN     
-        app.defaultDrawFramebuffer().defaultViewport().clear()
+ 
+        engine.defaultDrawFramebuffer().defaultViewport().clear()
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].mainDrawCall.draw();
         }
         this.lightDrawcall.draw();
-
-
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        // this.program.delete();
-        // this.drawCall1.delete();
-        // this.drawCall2.delete();
-        // this.currentDrawCall = null;
+        this.shadowProgram.delete();
+        this.lightProgram.delete();
+        this.mainProgram.delete();
+        this.shadowBuffer.delete();
+        this.shadowTarget.delete();
+        this.lightDrawcall.delete();
         const engine = this.engine;
-        //engine.noBlend();
+        engine.noDepthTest();
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        //????
         const NEAR = 0.1;
         const FAR = 20.0
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, NEAR, FAR);
