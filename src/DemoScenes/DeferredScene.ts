@@ -271,7 +271,7 @@ class DeferredScene extends WebGL2DemoScene {
         this.mainProgram.delete();
         this.gBuffer.delete();
         const engine = this.engine;
-        engine.noDepthTest().noBlend();
+        engine.noDepthTest().noBlend().depthMask(true);
         return this;
     }
 
