@@ -36,10 +36,6 @@ class OutlineScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
-        const app = engine;
-        const utils = engine;
-        const canvas = engine.canvas;
-        const PicoGL = GL;
 
         const NUM_SPHERES = 32;
         const NUM_PER_ROW = 8;
@@ -58,76 +54,63 @@ class OutlineScene extends WebGL2DemoScene {
             let z = Math.cos(angle) * SPHERE_RADIUS;
             spheres[i] = {
                 scale: [0.8, 0.8, 0.8],
-                rotate: [0, 0, 0], // Will be used for global rotation
+                rotate: [0, 0, 0],
                 translate: [x, y, z],
                 modelMatrix: mat4.create()
             };
         }
-
-        // CREATE APP WITH STENCIL BUFFER
-        //let app = PicoGL.createApp(canvas, { stencil: true })
-        app.clearColor(0.0, 0.0, 0.0, 1.0)
-            .clearMask(PicoGL.COLOR_BUFFER_BIT | PicoGL.DEPTH_BUFFER_BIT | PicoGL.STENCIL_BUFFER_BIT)
-            .depthTest()
-            .depthFunc(PicoGL.LEQUAL)
-            // ENABLE STENCIL TESTING
+        //
+        engine.clearColor(0.0, 0.0, 0.0, 1.0)
+            .clearMask(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT)
+            .depthFunc(GL.LEQUAL)
             .stencilTest()
-            // SET STENCIL TEST TO UPDATE STENCIL VALUE WHEN 
-            // DEPTH AND STENCIL TESTS PASS
-            .stencilOp(PicoGL.KEEP, PicoGL.KEEP, PicoGL.REPLACE);
+            .stencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
 
-        let sphere = utils.createSphere({ radius: 0.5 });
-        let positions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.positions);
-        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, sphere.uvs);
-        let normals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphere.normals);
-        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphere.indices);
+        const sphere = engine.createSphere({ radius: 0.5 });
+        const positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
+        const uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
+        const normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
+        const indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
+        this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData);
 
-        // PER-INSTANCE MODEL MATRICES
-        this.modelMatrices = app.createMatrixBuffer(PicoGL.FLOAT_MAT4, this.modelMatrixData);
-
-        let sphereArray = app.createVertexArray()
+        const sphereArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .vertexAttributeBuffer(1, uv)
             .vertexAttributeBuffer(2, normals)
             .instanceAttributeBuffer(3, this.modelMatrices)
             .indexBuffer(indices);
 
-        // UNIFORM DATA
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, NEAR, FAR);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, NEAR, FAR);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(0, 0.8, 2);
+        const eyePosition = vec3.fromValues(0, 0.8, 2);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
         let lightPosition = vec3.fromValues(0.5, 1, 2);
-
-        // UNIFORM BUFFERS
-        this.sceneUniforms = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4
-        ])
-            .set(0, this.viewProjMatrix)
+        this.sceneUniforms = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4
+        ]).set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .set(2, lightPosition)
             .update();
 
 
-        let texture = app.createTexture2DByImage(this.image, {
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        // DRAW CALLS
-        this.mainDrawcall = app.createDrawCall(this.mainProgram, sphereArray)
+        this.mainDrawcall = engine.createDrawCall(this.mainProgram, sphereArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms)
             .texture("uTexture", texture);
 
-        this.outlineDrawcall = app.createDrawCall(this.outlineProgram, sphereArray)
+        this.outlineDrawcall = engine.createDrawCall(this.outlineProgram, sphereArray)
             .uniformBlock("SceneUniforms", this.sceneUniforms);
 
         this.rotationMatrix = mat4.create();
@@ -187,11 +170,13 @@ class OutlineScene extends WebGL2DemoScene {
             .depthTest()
             .stencilFunc(GL.ALWAYS, 1, 0xFF)
             .stencilMask(0xFFFF);
+
         this.mainDrawcall.draw();
 
         engine.noDepthTest()
             .stencilFunc(GL.NOTEQUAL, 1, 0xFF)
             .stencilMask(0);
+
         this.outlineDrawcall.draw();
         return this;
     }

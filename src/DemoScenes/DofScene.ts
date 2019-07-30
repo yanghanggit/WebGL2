@@ -241,7 +241,6 @@ class DofScene extends WebGL2DemoScene {
         this.boxBuffer.delete();
         this.hblurBuffer.delete();
         this.blurBuffer.delete();
-        this.sceneUniforms.delete();
         this.modelMatrices.delete();
         this.boxesDrawCall.delete();
         this.hBlurDrawCall.delete();

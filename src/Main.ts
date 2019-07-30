@@ -110,7 +110,10 @@ function main(): void {
     const container = queryContainer();
     attachCanvasToContainer(container, canvas);
     //
-    const webgl2Engine = new WebGL2Engine(canvas, null);
+    const contextAttributes = {
+        stencil: true
+    };
+    const webgl2Engine = new WebGL2Engine(canvas, contextAttributes);
     __webGL2DemoPlayer__ = new WebGL2DemoPlayer(webgl2Engine);
     const app: Application = new Application(webgl2Engine, __webGL2DemoPlayer__);
     runApp(app);
