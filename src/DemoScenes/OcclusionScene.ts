@@ -1,4 +1,5 @@
 
+
 class OcclusionScene extends WebGL2DemoScene {
     //
     private drawVsSource: string;
@@ -16,6 +17,9 @@ class OcclusionScene extends WebGL2DemoScene {
     private projMatrix: Float32Array = mat4.create();
     private spheres: any[];
     private viewProjMatrix: Float32Array = mat4.create();
+
+    private readonly GRID_DIM = 6;
+    private readonly NUM_SPHERES = this.GRID_DIM * this.GRID_DIM;
     //
     private drawProgram: WebGL2Program;
     private boundingBoxProgram: WebGL2Program;
@@ -52,116 +56,106 @@ class OcclusionScene extends WebGL2DemoScene {
         this._ready = true;
     }
 
+    private readonly hudViewport: number[] = [];
+    private updateHudViewport(): number[] {
+        this.hudViewport[0] = 0;
+        this.hudViewport[1] = 0;
+        this.hudViewport[2] = this.engine.width / 5;
+        this.hudViewport[3] = this.engine.width / 5;
+        return this.hudViewport;
+    }
+
     private createScene(): void {
         ///
         const engine = this.engine;
-        const app = engine;
-        const utils = engine;
-        const PicoGL = GL;
-       
-
-        let hudViewport = [
-            0,
-            0,
-            app.width / 5,
-            app.height / 5
-        ];
-        app.depthTest()
+        const hudViewport = this.updateHudViewport();
+        engine.depthTest()
             .clearColor(0.5, 0.5, 0.5, 1.0)
             .noBlend()
-            .blendFunc(PicoGL.ONE_MINUS_SRC_ALPHA, PicoGL.ONE_MINUS_SRC_ALPHA)
+            .blendFunc(GL.ONE_MINUS_SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA)
             .noScissorTest()
             .scissor(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
 
-        let sphereData = utils.createSphere({ radius: 0.6 });
+        const sphereData = engine.createSphere({ radius: 0.6 });
 
-        let spherePositions = app.createVertexBuffer(PicoGL.FLOAT, 3, sphereData.positions);
-        let sphereUVs = app.createVertexBuffer(PicoGL.FLOAT, 2, sphereData.uvs);
-        let sphereNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, sphereData.normals);
-        let sphereIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, sphereData.indices);
+        const spherePositions = engine.createVertexBuffer(GL.FLOAT, 3, sphereData.positions);
+        const sphereUVs = engine.createVertexBuffer(GL.FLOAT, 2, sphereData.uvs);
+        const sphereNormals = engine.createVertexBuffer(GL.FLOAT, 3, sphereData.normals);
+        const sphereIndices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphereData.indices);
 
-        let sphereArray = app.createVertexArray()
+        const sphereArray = engine.createVertexArray()
             .vertexAttributeBuffer(0, spherePositions)
             .vertexAttributeBuffer(1, sphereUVs)
             .vertexAttributeBuffer(2, sphereNormals)
             .indexBuffer(sphereIndices)
 
-        let boundingBoxData = utils.computeBoundingBox(sphereData.positions, { buildGeometry: true });
-        let boundingBoxPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, boundingBoxData.geometry.positions);
-        let boundingBoxArray = app.createVertexArray().vertexAttributeBuffer(0, boundingBoxPositions);
-
+        const boundingBoxData = engine.computeBoundingBox(sphereData.positions, { buildGeometry: true });
+        const boundingBoxPositions = engine.createVertexBuffer(GL.FLOAT, 3, boundingBoxData.geometry.positions);
+        const boundingBoxArray = engine.createVertexArray().vertexAttributeBuffer(0, boundingBoxPositions);
 
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, engine.width / engine.height, 0.1, 10.0);
 
         this.viewMatrix = mat4.create();
-        let eyePosition = vec3.fromValues(0, 0, 5);
+        const eyePosition = vec3.fromValues(0, 0, 5);
         mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        // HUD
-        let hudProjMatrix = mat4.create();
-        mat4.perspective(hudProjMatrix, Math.PI / 2, app.width / app.height, 0.1, 10.0);
+        const hudProjMatrix = mat4.create();
+        mat4.perspective(hudProjMatrix, Math.PI / 2, engine.width / engine.height, 0.1, 10.0);
 
-        let hudViewMatrix = mat4.create();
-        let hudEyePosition = vec3.fromValues(0, 5, 0);
+        const hudViewMatrix = mat4.create();
+        const hudEyePosition = vec3.fromValues(0, 5, 0);
         mat4.lookAt(hudViewMatrix, hudEyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, -1));
 
-        let hudViewProjMatrix = mat4.create();
+        const hudViewProjMatrix = mat4.create();
         mat4.multiply(hudViewProjMatrix, hudProjMatrix, hudViewMatrix);
 
-        let lightPosition = vec3.fromValues(1, 1, 40);
-        this.sceneUniformBuffer = app.createUniformBuffer([
-            PicoGL.FLOAT_MAT4,
-            PicoGL.FLOAT_VEC4,
-            PicoGL.FLOAT_VEC4
+        const lightPosition = vec3.fromValues(1, 1, 40);
+        this.sceneUniformBuffer = engine.createUniformBuffer([
+            GL.FLOAT_MAT4,
+            GL.FLOAT_VEC4,
+            GL.FLOAT_VEC4
         ]).set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .set(2, lightPosition)
             .update();
 
-        let texture = app.createTexture2DByImage(this.image, {
+        const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
-            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')
+            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
 
-        const GRID_DIM = 6;
+        const GRID_DIM = this.GRID_DIM;
         const GRID_OFFSET = GRID_DIM / 2 - 0.5;
-        const NUM_SPHERES = GRID_DIM * GRID_DIM;
+        const NUM_SPHERES = this.NUM_SPHERES;
         const spheres = this.spheres = new Array(NUM_SPHERES);
-
         for (let i = 0; i < NUM_SPHERES; ++i) {
-            let x = Math.floor(i / GRID_DIM) - GRID_OFFSET;
-            let z = i % GRID_DIM - GRID_OFFSET;
-
+            const x = Math.floor(i / GRID_DIM) - GRID_OFFSET;
+            const z = i % GRID_DIM - GRID_OFFSET;
             spheres[i] = {
                 rotate: [0, 0, 0],
                 translate: [x, 0, z],
                 modelMatrix: mat4.create(),
-
                 vertexArray: sphereArray,
                 boundingBoxVertexArray: boundingBoxArray,
-
-                mainDrawCall: app.createDrawCall(this.drawProgram, sphereArray)
+                mainDrawCall: engine.createDrawCall(this.drawProgram, sphereArray)
                     .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
                     .texture("tex", texture),
-                boundingBoxDrawCall: app.createDrawCall(this.boundingBoxProgram, boundingBoxArray)
+                boundingBoxDrawCall: engine.createDrawCall(this.boundingBoxProgram, boundingBoxArray)
                     .uniformBlock("SceneUniforms", this.sceneUniformBuffer),
-                hudDrawCall: app.createDrawCall(this.hudProgram, sphereArray)
+                hudDrawCall: engine.createDrawCall(this.hudProgram, sphereArray)
                     .uniform("uViewProj", hudViewProjMatrix),
-                query: app.createQuery(PicoGL.ANY_SAMPLES_PASSED_CONSERVATIVE),
+                query: engine.createQuery(GL.ANY_SAMPLES_PASSED_CONSERVATIVE),
                 occluded: false,
-
             };
-
-            utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate);
+            engine.xformMatrix(spheres[i].modelMatrix, spheres[i].translate);
         }
     }
 
     private async loadResource(): Promise<void> {
-
         try {
             ///
             const ress: string[] = [
@@ -205,37 +199,28 @@ class OcclusionScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        
-        const app = this.engine;
-        const utils = app;
-        const spheres = this.spheres;
-
-        let occlusionCullingEnabled = true;
-
-        const GRID_DIM = 6;
-        const NUM_SPHERES = GRID_DIM * GRID_DIM;
-
-        if (occlusionCullingEnabled) {
-            spheres.sort((a: any, b: any): number => {
-                return this.depthSort(a, b);
-            });
-        }
-
-        app.viewport(0, 0, app.width, app.height)
+        const engine = this.engine;
+        engine.viewport(0, 0, engine.width, engine.height)
             .clearColor(0.5, 0.5, 0.5, 1)
             .depthTest()
             .colorMask(true, true, true, true)
             .depthMask(true)
             .clear();
 
+        const spheres = this.spheres;
+        const occlusionCullingEnabled = true;
+        if (occlusionCullingEnabled) {
+            spheres.sort((a: any, b: any): number => {
+                return this.depthSort(a, b);
+            });
+        }
         const rotationMatrix = this.rotationMatrix;
-        for (let i = 0; i < NUM_SPHERES; ++i) {
+        for (let i = 0; i < this.NUM_SPHERES; ++i) {
             const sphere = spheres[i];
             sphere.rotate[1] += 0.003;
-            utils.xformMatrix(sphere.modelMatrix, sphere.translate, null, sphere.scale);
+            engine.xformMatrix(sphere.modelMatrix, sphere.translate, null, sphere.scale);
             mat4.fromYRotation(rotationMatrix, sphere.rotate[1]);
             mat4.multiply(sphere.modelMatrix, rotationMatrix, sphere.modelMatrix);
-
             //
             if (occlusionCullingEnabled) {
                 if (sphere.query.ready()) {
@@ -244,7 +229,7 @@ class OcclusionScene extends WebGL2DemoScene {
                     }
                 }
                 if (!sphere.query.active) {
-                    app.colorMask(false, false, false, false).depthMask(false);
+                    engine.colorMask(false, false, false, false).depthMask(false);
                     sphere.query.begin();
                     sphere.boundingBoxDrawCall.uniform("uModel", sphere.modelMatrix).draw();
                     sphere.query.end();
@@ -253,19 +238,15 @@ class OcclusionScene extends WebGL2DemoScene {
                 sphere.occluded = false;
             }
             if (!sphere.occluded) {
-                app.colorMask(true, true, true, true).depthMask(true);
+                engine.colorMask(true, true, true, true).depthMask(true);
                 sphere.mainDrawCall.uniform("uModel", sphere.modelMatrix).draw();
             }
         }
-        const hudViewport = [
-            0,
-            0,
-            app.width / 5,
-            app.height / 5
-        ];
+        ///
+        const hudViewport = this.updateHudViewport();
         const showHUD = true;
         if (showHUD) {
-            app.viewport(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3])
+            engine.viewport(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3])
                 .blend()
                 .noDepthTest()
                 .scissorTest()
@@ -274,13 +255,13 @@ class OcclusionScene extends WebGL2DemoScene {
                 .clearColor(0.3, 0.3, 0.3, 1)
                 .clear();
             const spheres = this.spheres;
-            for (let i = 0; i < NUM_SPHERES; ++i) {
+            for (let i = 0; i < this.NUM_SPHERES; ++i) {
                 const sphere = spheres[i];
                 if (!sphere.occluded) {
                     sphere.hudDrawCall.uniform("uModel", sphere.modelMatrix).draw();
                 }
             }
-            app.noBlend().noScissorTest();
+            engine.noBlend().noScissorTest();
         }
         return this;
     }
@@ -290,22 +271,17 @@ class OcclusionScene extends WebGL2DemoScene {
         this.boundingBoxProgram.delete();
         this.hudProgram.delete();
         this.sceneUniformBuffer.delete();
-        const engine = this.engine;
-        engine.noDepthTest().noBlend().noScissorTest();
+        this.engine.noDepthTest().noBlend().noScissorTest().viewport(0, 0, this.engine.width, this.engine.height);
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
+        //
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
-        const app = this.engine;
-        const hudViewport = [
-            0,
-            0,
-            app.width / 5,
-            app.height / 5
-        ];
+        //
+        const hudViewport = this.updateHudViewport();
         this.engine.viewport(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
         return this;
     }
