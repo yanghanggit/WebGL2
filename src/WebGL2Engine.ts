@@ -927,7 +927,6 @@ class WebGL2Engine implements System {
       return this;
    }
 
-
    public noScissorTest(): WebGL2Engine {
       this.gl.disable(this.gl.SCISSOR_TEST);
       return this;
