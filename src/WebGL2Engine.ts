@@ -875,5 +875,62 @@ class WebGL2Engine implements System {
       return this;
    }
 
+   public scissor(x: number, y: number, width: number, height: number): WebGL2Engine {
+      this.gl.scissor(x, y, width, height);
+      return this;
+   }
+
+   public computeBoundingBox(position, options) {
+      options = options || {};
+      let buildGeometry = options.buildGeometry || false;
+
+      let boundary = {
+         min: vec3.create(),
+         max: vec3.create(),
+         geometry: null
+      };
+      vec3.set(boundary.min, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
+      vec3.set(boundary.max, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+      for (let i = 0, len = position.length; i < len; i += 3) {
+         boundary.min[0] = Math.min(position[i], boundary.min[0]);
+         boundary.max[0] = Math.max(position[i], boundary.max[0]);
+         boundary.min[1] = Math.min(position[i + 1], boundary.min[1]);
+         boundary.max[1] = Math.max(position[i + 1], boundary.max[1]);
+         boundary.min[2] = Math.min(position[i + 2], boundary.min[2]);
+         boundary.max[2] = Math.max(position[i + 2], boundary.max[2]);
+      }
+
+      if (buildGeometry) {
+         let size = vec3.create();
+         vec3.subtract(size, boundary.max, boundary.min);
+         boundary.geometry = this.createBox({
+            position: boundary.min,
+            dimensions: size
+         });
+      }
+
+      return boundary;
+   }
+
+   public createQuery(target: number): WebGL2Query {
+      return new WebGL2Query(this, target);
+   }
+
+   public colorMask(r: boolean, g: boolean, b: boolean, a: boolean): WebGL2Engine {
+      this.gl.colorMask(r, g, b, a);
+      return this;
+   }
+
+
+   public scissorTest(): WebGL2Engine {
+      this.gl.enable(this.gl.SCISSOR_TEST);
+      return this;
+   }
+
+
+   public noScissorTest(): WebGL2Engine {
+      this.gl.disable(this.gl.SCISSOR_TEST);
+      return this;
+   }
 }
 
