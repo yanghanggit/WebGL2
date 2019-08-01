@@ -17,9 +17,9 @@ class OcclusionScene extends WebGL2DemoScene {
     private projMatrix: Float32Array = mat4.create();
     private spheres: any[];
     private viewProjMatrix: Float32Array = mat4.create();
-
     private readonly GRID_DIM = 6;
     private readonly NUM_SPHERES = this.GRID_DIM * this.GRID_DIM;
+    private readonly hudViewport: number[] = [];
     //
     private drawProgram: WebGL2Program;
     private boundingBoxProgram: WebGL2Program;
@@ -53,10 +53,10 @@ class OcclusionScene extends WebGL2DemoScene {
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
+        this.openUI();
         this._ready = true;
     }
-
-    private readonly hudViewport: number[] = [];
+    
     private updateHudViewport(): number[] {
         this.hudViewport[0] = 0;
         this.hudViewport[1] = 0;
@@ -208,7 +208,7 @@ class OcclusionScene extends WebGL2DemoScene {
             .clear();
 
         const spheres = this.spheres;
-        const occlusionCullingEnabled = true;
+        const occlusionCullingEnabled = this.occlusionCullingEnabled;
         if (occlusionCullingEnabled) {
             spheres.sort((a: any, b: any): number => {
                 return this.depthSort(a, b);
@@ -272,6 +272,7 @@ class OcclusionScene extends WebGL2DemoScene {
         this.hudProgram.delete();
         this.sceneUniformBuffer.delete();
         this.engine.noDepthTest().noBlend().noScissorTest().viewport(0, 0, this.engine.width, this.engine.height);
+        this.closeUI();
         return this;
     }
 
@@ -284,5 +285,48 @@ class OcclusionScene extends WebGL2DemoScene {
         const hudViewport = this.updateHudViewport();
         this.engine.viewport(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
         return this;
+    }
+
+
+    private occlusionCullingEnabledDiv: HTMLDivElement;
+    private occlusionCullingEnabled: boolean = true;
+    private openUI(): HTMLDivElement {
+        if (this.occlusionCullingEnabledDiv) {
+            return this.occlusionCullingEnabledDiv;
+        }
+        ///
+        this.occlusionCullingEnabledDiv = document.createElement("div");
+        document.body.appendChild(this.occlusionCullingEnabledDiv);
+        const style = this.occlusionCullingEnabledDiv.style; //置顶，必须显示在最上面
+        style.setProperty('position', 'absolute');
+        style.setProperty('bottom', '20px');
+        style.setProperty('right', '20px');
+        style.setProperty('color', 'white');
+        style.setProperty('z-index', '999');
+        style.setProperty('top', '0');
+        this.occlusionCullingEnabledDiv.innerText = 'OcclusionCulling';
+        ////
+        const input = document.createElement("input");
+        this.occlusionCullingEnabledDiv.appendChild(input);
+        input.setAttribute("type", "checkbox");
+        input.setAttribute("id", "inputid");
+        input.setAttribute("name", "inputname");
+        input.setAttribute("value", "inputvalue");
+        if (this.occlusionCullingEnabled) {
+            input.setAttribute("checked", "checked");
+        }
+        ///
+        const self = this;
+        input.addEventListener("change", function () {
+            self.occlusionCullingEnabled = this.checked;
+        });
+        return this.occlusionCullingEnabledDiv;
+    }
+
+    private closeUI(): void {
+        if (this.occlusionCullingEnabledDiv) {
+            document.body.removeChild(this.occlusionCullingEnabledDiv);
+            this.occlusionCullingEnabledDiv = null;
+        }
     }
 }
