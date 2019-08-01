@@ -466,15 +466,15 @@ class WebGL2Engine implements System {
       } as SphereModel;
    }
 
-   public createVertexBuffer(type: number, itemSize: number, data: Float32Array | Uint8Array | number, usage?: number): WebGL2VertexBuffer {
+   public createVertexBuffer(type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, itemSize, data, usage);
    }
 
-   public createIndexBuffer(type: number, itemSize: number, data: Uint16Array, usage?: number): WebGL2VertexBuffer {
+   public createIndexBuffer(type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, itemSize, data, usage, true);
    }
 
-   public createMatrixBuffer(type: number, data: Float32Array | number, usage?: number): WebGL2VertexBuffer {
+   public createMatrixBuffer(type: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, 0, data, usage);
    }
 
@@ -832,7 +832,7 @@ class WebGL2Engine implements System {
       return new WebGL2Texture(this, this.gl.TEXTURE_3D, data, width, height, depth, true, options);
    }
 
-   public createInterleavedBuffer(bytesPerVertex: number, data: number | Float32Array | Uint16Array | Uint8Array, usage?: number): WebGL2VertexBuffer {
+   public createInterleavedBuffer(bytesPerVertex: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, null, bytesPerVertex, data, usage);
    }
 

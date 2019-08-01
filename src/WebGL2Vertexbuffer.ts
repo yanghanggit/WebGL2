@@ -14,7 +14,7 @@ class WebGL2VertexBuffer extends WebGL2Object {
     public readonly integer: boolean = false;
     private readonly binding: number = 0;
 
-    constructor(_engine: WebGL2Engine, type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array, usage: number = GL.STATIC_DRAW, indexArray: boolean = false) {
+    constructor(_engine: WebGL2Engine, type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array, usage: number = GL.STATIC_DRAW, indexArray: boolean = false) {
         super(_engine);
         let numColumns = 0;
         switch (type) {
@@ -81,7 +81,7 @@ class WebGL2VertexBuffer extends WebGL2Object {
         this.restore(data);
     }
 
-    public restore(data: number | Float32Array | Uint16Array | Uint8Array): WebGL2VertexBuffer {
+    public restore(data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array): WebGL2VertexBuffer {
         if (!data) {
             data = this.byteLength;
         }
