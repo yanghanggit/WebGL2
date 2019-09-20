@@ -5,7 +5,6 @@ class ClothScene extends WebGL2DemoScene {
     private vsSource: string;
     private fsSource: string;
     private program: WebGL2Program;
-    private image: HTMLImageElement;
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
     private sceneUniformBuffer: WebGL2UniformBuffer;
@@ -19,6 +18,15 @@ class ClothScene extends WebGL2DemoScene {
     private rotateYMatrix: Float32Array;
     private msaaFramebuffer: WebGL2Framebuffer;
     private textureFramebuffer: WebGL2Framebuffer;
+
+    ////
+    private updateForceProgram: WebGL2Program;
+    private updateConstraintProgram: WebGL2Program;
+    private updateCollisionProgram: WebGL2Program;
+    private updateNormalProgram: WebGL2Program;
+    private ballProgram: WebGL2Program;
+    private clothProgram: WebGL2Program;
+    private image: HTMLImageElement;
 
     //
     public enter(): WebGL2DemoScene {
@@ -94,25 +102,46 @@ class ClothScene extends WebGL2DemoScene {
     private async loadResource(): Promise<void> {
         try {
             ///
-            // const ress: string[] = [
-            //     'resource/assets/shader-rtt/rtt.vs.glsl',
-            //     'resource/assets/shader-rtt/rtt.fs.glsl',
-            // ];
-            // const txts = await this.engine.loadText(ress);
-            // this.vsSource = txts[0];
-            // this.fsSource = txts[1];
-            // //
-            // const programs = await this.engine.createPrograms(
-            //     [this.vsSource, this.fsSource],
-            // );
-            // //
-            // this.program = programs[0];
-            // //
-            // const texarrays: string[] = [
-            //     'resource/assets/bg.jpg',
-            // ];
-            // const loadImages = await this.engine.loadImages(texarrays);
-            // this.image = loadImages[0];
+            const ress: string[] = [
+                'resource/assets/shader-cloth/quad.vs.glsl',
+                'resource/assets/shader-cloth/update-force.fs.glsl',
+                'resource/assets/shader-cloth/update-constraint.fs.glsl',
+                'resource/assets/shader-cloth/update-collision.fs.glsl',
+                'resource/assets/shader-cloth/update-normal.fs.glsl',
+                'resource/assets/shader-cloth/ball.vs.glsl',
+                'resource/assets/shader-cloth/cloth.vs.glsl',
+                'resource/assets/shader-cloth/phong.fs.glsl',
+            ];
+            //
+            const txts = await this.engine.loadText(ress);
+            const quadShader = txts[0];
+            const updateForceFsSource = txts[1];
+            const updateConstraintFsSource = txts[2];
+            const updateCollisionFsSource = txts[3];
+            const updateNormalFsSource = txts[4];
+            const ballVsSource = txts[5];
+            const clothVsSource = txts[6];
+            const phongShader = txts[7];
+            const programs = await this.engine.createPrograms(
+                [quadShader, updateForceFsSource],
+                [quadShader, updateConstraintFsSource],
+                [quadShader, updateCollisionFsSource],
+                [quadShader, updateNormalFsSource],
+                [ballVsSource, phongShader],
+                [clothVsSource, phongShader]
+            );
+            this.updateForceProgram = programs[1];
+            this.updateConstraintProgram = programs[2];
+            this.updateCollisionProgram = programs[3];
+            this.updateNormalProgram = programs[4];
+            this.ballProgram = programs[5];
+            this.clothProgram = programs[6];
+            //
+            const texarrays: string[] = [
+                'resource/assets/bg.jpg',
+            ];
+            const loadImages = await this.engine.loadImages(texarrays);
+            this.image = loadImages[0];
         }
         catch (e) {
             console.error(e);
