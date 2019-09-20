@@ -343,7 +343,7 @@ class WebGL2Engine implements System {
       );
    }
 
-   public createTexture2DByData(data: Float32Array, width: number, height: number, options: CreateTextureOptions): WebGL2Texture {
+   public createTexture2DByData(data: Float32Array | Uint8Array, width: number, height: number, options: CreateTextureOptions): WebGL2Texture {
       return new WebGL2Texture(this, this.gl.TEXTURE_2D, data, width, height, undefined, false, options);
    }
 
@@ -466,7 +466,7 @@ class WebGL2Engine implements System {
       } as SphereModel;
    }
 
-   public createVertexBuffer(type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array, usage?: number): WebGL2VertexBuffer {
+   public createVertexBuffer(type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array | Int16Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, itemSize, data, usage);
    }
 

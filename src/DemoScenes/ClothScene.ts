@@ -1,24 +1,35 @@
 
+
+//
+// let targetZ = null;
+// let targetY = null;
+// canvas.addEventListener("mousemove", function(event) {
+//     targetZ = -((event.clientX / canvas.width) * 2 - 1);
+//     targetY = ((canvas.height - event.clientY) / canvas.height) * 2 - 1;
+// });
+
+
 class ClothScene extends WebGL2DemoScene {
 
     //
-    private vsSource: string;
-    private fsSource: string;
-    private program: WebGL2Program;
+    // private vsSource: string;
+    // private fsSource: string;
+    // private program: WebGL2Program;
+    // private drawCall: WebGL2DrawCall;
+    // private angleX: number = 0;
+    // private angleY: number = 0;
+    // private texture: WebGL2Texture;
+    // private modelMatrix: Float32Array;
+    // private rotateXMatrix: Float32Array;
+    // private rotateYMatrix: Float32Array;
+    // private msaaFramebuffer: WebGL2Framebuffer;
+    // private textureFramebuffer: WebGL2Framebuffer;
+
+    ///
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
-    private sceneUniformBuffer: WebGL2UniformBuffer;
-    private drawCall: WebGL2DrawCall;
-    private angleX: number = 0;
-    private angleY: number = 0;
-    private texture: WebGL2Texture;
     private projMatrix: Float32Array;
-    private modelMatrix: Float32Array;
-    private rotateXMatrix: Float32Array;
-    private rotateYMatrix: Float32Array;
-    private msaaFramebuffer: WebGL2Framebuffer;
-    private textureFramebuffer: WebGL2Framebuffer;
-
+    private sceneUniformBuffer: WebGL2UniformBuffer;
     ////
     private updateForceProgram: WebGL2Program;
     private updateConstraintProgram: WebGL2Program;
@@ -28,9 +39,22 @@ class ClothScene extends WebGL2DemoScene {
     private clothProgram: WebGL2Program;
     private image: HTMLImageElement;
 
+
+
+    private onMouseMove: (event: MouseEvent) => void;
+
     //
     public enter(): WebGL2DemoScene {
+        // this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        // this.start().catch(e => {
+        //     console.error(e);
+        // });
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        const engine = this.engine;
+        if (!engine.getExtension('EXT_color_buffer_float')) {
+            console.error(egret.getQualifiedClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
+            return this;
+        }
         this.start().catch(e => {
             console.error(e);
         });
@@ -44,59 +68,378 @@ class ClothScene extends WebGL2DemoScene {
     }
 
     private createScene(): void {
-        /*
-        //
-        const engine = this.engine;
-        engine.depthTest().clearColor(0.5, 0.5, 0.5, 1.0);
-        //
-        const SAMPLES = engine.capbility('SAMPLES');
-        const colorTarget = engine.createRenderbuffer(engine.width, engine.height, GL.RGBA8, SAMPLES);
-        const depthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16, SAMPLES);
-        this.msaaFramebuffer = engine.createFramebuffer().colorTarget(0, colorTarget).depthTarget(depthTarget);
-        //
-        const textureColorTarget = engine.createTexture2DBySize(engine.width, engine.height, {});
-        this.textureFramebuffer = engine.createFramebuffer().colorTarget(0, textureColorTarget);
-        //
-        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
-        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
-        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
-        const boxArray = engine.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
+
+
+
+        // let canvas = document.getElementById("gl-canvas");
+        // canvas.width = window.innerWidth;
+        // canvas.height = window.innerHeight;
+        const PicoGL = GL;
+        const utils = this.engine;
+        const canvas = this.engine.canvas;
+
+        let app = this.engine;//PicoGL.createApp(canvas)
+        app.clearColor(0.0, 0.0, 0.0, 1.0)
+        app.depthTest();
+
+        //let timer = app.createTimer();
+
+        const CONSTRAINT_ITERATIONS = 20;
+        const DATA_TEXTURE_DIM = 60;
+        const NUM_PARTICLES = DATA_TEXTURE_DIM * DATA_TEXTURE_DIM;
+        const STRUCTURAL_REST = 1 / DATA_TEXTURE_DIM;
+        const SHEAR_REST = Math.sqrt(2 * STRUCTURAL_REST * STRUCTURAL_REST);
+        const BALL_RADIUS = 0.15;
+        const BALL_RANGE = 0.9;
+        let ballSpeed = 0.004;
+
+        ///////////////////
+        // PROGRAMS
+        ///////////////////
+
+        // Generic quad vertex shader
+        // let quadVsSource = document.getElementById("quad-vs").text.trim();
+        // let quadShader = app.createShader(PicoGL.VERTEX_SHADER, quadVsSource);
+
+        // Update wind and gravity forces
+        // let updateForceFsSource = document.getElementById("update-force-fs").text.trim();
+
+        // // Apply structural and shear constraints
+        // let updateConstraintFsSource = document.getElementById("update-constraint-fs").text.trim();
+
+        // // Check for collision with ball
+        // let updateCollisionFsSource = document.getElementById("update-collision-fs").text.trim();
+        // // Calculate normals
+        // let updateNormalFsSource = document.getElementById("update-normal-fs").text.trim();
+
+
+        // Generic phong shader used for drawing
+        // let phongSource = document.getElementById("phong-fs").text.trim();
+        // let phongShader = app.createShader(PicoGL.FRAGMENT_SHADER, phongSource);
+
+        // // Draw ball
+        // let ballVsSource = document.getElementById("ball-vs").text.trim();
+
+        // // Draw cloth
+        // let clothVsSource = document.getElementById("cloth-vs").text.trim();
+
+        ////////////////////
+        // FRAME BUFFERS
+        ////////////////////
+
+        // Store results of force update
+        let forceTarget1 = app.createTexture2DBySize(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            internalFormat: PicoGL.RGBA32F
+        });
+        let forceTarget2 = app.createTexture2DBySize(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            internalFormat: PicoGL.RGBA32F
+        });
+
+        let updateForceFramebuffer = app.createFramebuffer(/*DATA_TEXTURE_DIM, DATA_TEXTURE_DIM*/)
+            .colorTarget(0, forceTarget1)
+            .colorTarget(1, forceTarget2);
+
+        // Results of constraint satisfaction passes
+        let updateTarget = app.createTexture2DBySize(DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            internalFormat: PicoGL.RGBA32F
+        });
+
+        let updateFramebuffer = app.createFramebuffer(/*DATA_TEXTURE_DIM, DATA_TEXTURE_DIM*/)
+            .colorTarget(0, updateTarget);
+
+        ///////////////////////////
+        // CLOTH GEOMETRY DATA
+        ///////////////////////////
+
+        let clothPositionData = new Float32Array(NUM_PARTICLES * 4);
+        let clothNormalData = new Float32Array(NUM_PARTICLES * 4);
+        let uvData = new Float32Array(NUM_PARTICLES * 2);
+        let dataTextureIndex = new Int16Array(NUM_PARTICLES * 2);
+        let indexData = new Uint16Array((DATA_TEXTURE_DIM - 1) * (DATA_TEXTURE_DIM - 1) * 6);
+
+        let indexI = 0;
+        for (let i = 0; i < NUM_PARTICLES; ++i) {
+            let vec4i = i * 4;
+            let vec2i = i * 2;
+
+            let x = (i % DATA_TEXTURE_DIM);
+            let y = Math.floor(i / DATA_TEXTURE_DIM);
+
+            let u = x / DATA_TEXTURE_DIM;
+            let v = y / DATA_TEXTURE_DIM;
+
+            clothPositionData[vec4i] = u - 0.5;
+            clothPositionData[vec4i + 1] = v + 0.8;
+
+            clothNormalData[vec4i + 2] = 1;
+
+            uvData[vec2i] = u;
+            uvData[vec2i + 1] = v;
+
+            dataTextureIndex[vec2i] = (i % DATA_TEXTURE_DIM);
+            dataTextureIndex[vec2i + 1] = Math.floor(i / DATA_TEXTURE_DIM);
+
+            if (x < DATA_TEXTURE_DIM - 1 && y < DATA_TEXTURE_DIM - 1) {
+                indexData[indexI] = i;
+                indexData[indexI + 1] = i + DATA_TEXTURE_DIM;
+                indexData[indexI + 2] = i + DATA_TEXTURE_DIM + 1;
+                indexData[indexI + 3] = i;
+                indexData[indexI + 4] = i + DATA_TEXTURE_DIM + 1;
+                indexData[indexI + 5] = i + 1;
+                indexI += 6;
+            }
+        }
+
+        ///////////////////////////
+        // SIM DATA TEXTURES
+        ///////////////////////////
+
+        let positionTextureA = app.createTexture2DByData(clothPositionData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            internalFormat: PicoGL.RGBA32F,
+            minFilter: PicoGL.NEAREST,
+            magFilter: PicoGL.NEAREST,
+            wrapS: PicoGL.CLAMP_TO_EDGE,
+            wrapT: PicoGL.CLAMP_TO_EDGE
+        });
+
+        let oldPositionTextureA = app.createTexture2DByData(clothPositionData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            internalFormat: PicoGL.RGBA32F,
+            minFilter: PicoGL.NEAREST,
+            magFilter: PicoGL.NEAREST,
+            wrapS: PicoGL.CLAMP_TO_EDGE,
+            wrapT: PicoGL.CLAMP_TO_EDGE
+        });
+
+        let positionTextureB = updateForceFramebuffer.colorAttachments[0];
+        let oldPositionTextureB = updateForceFramebuffer.colorAttachments[1];
+
+        let normalTexture = app.createTexture2DByData(clothNormalData, DATA_TEXTURE_DIM, DATA_TEXTURE_DIM, {
+            internalFormat: PicoGL.RGBA32F,
+            minFilter: PicoGL.NEAREST,
+            magFilter: PicoGL.NEAREST,
+            wrapS: PicoGL.CLAMP_TO_EDGE,
+            wrapT: PicoGL.CLAMP_TO_EDGE
+        });
+
+        /////////////////////////
+        // GEOMETRY FOR DRAWING
+        /////////////////////////
+
+        // Quad for simulation passes
+        let quadPositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+            -1, 1,
+            -1, -1,
+            1, -1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]));
+
+        let quadArray = app.createVertexArray()
+            .vertexAttributeBuffer(0, quadPositions);
+
+        // Cloth geometry for drawing
+        let dataIndex = app.createVertexBuffer(PicoGL.SHORT, 2, dataTextureIndex);
+        let uv = app.createVertexBuffer(PicoGL.FLOAT, 2, uvData);
+        let indices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, indexData);
+
+        let clothArray = app.createVertexArray()
+            .vertexAttributeBuffer(0, dataIndex)
             .vertexAttributeBuffer(1, uv)
-            .vertexAttributeBuffer(2, normals);
-        //
+            .indexBuffer(indices);
+
+        // Ball geometry
+        let ballGeo = utils.createSphere({ radius: BALL_RADIUS });
+        let ballPositions = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.positions);
+        let ballNormals = app.createVertexBuffer(PicoGL.FLOAT, 3, ballGeo.normals);
+        let ballIndices = app.createIndexBuffer(PicoGL.UNSIGNED_SHORT, 3, ballGeo.indices);
+
+        let ballArray = app.createVertexArray()
+            .vertexAttributeBuffer(0, ballPositions)
+            .vertexAttributeBuffer(1, ballNormals)
+            .indexBuffer(ballIndices);
+
+
+        ////////////////
+        // UNIFORMS
+        ////////////////
+
+        // Constraint uniforms
+        let updateHorizontal1Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([1, 0]))
+            .set(1, 0)
+            .set(2, STRUCTURAL_REST)
+            .update();
+
+        let updateHorizontal2Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([1, 0]))
+            .set(1, 1)
+            .set(2, STRUCTURAL_REST)
+            .update();
+
+        let updateVertical1Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([0, 1]))
+            .set(1, 0)
+            .set(2, STRUCTURAL_REST)
+            .update();
+
+        let updateVertical2Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([0, 1]))
+            .set(1, 1)
+            .set(2, STRUCTURAL_REST)
+            .update();
+
+        let updateShear1Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([1, 1]))
+            .set(1, 0)
+            .set(2, SHEAR_REST)
+            .update();
+
+        let updateShear2Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([1, 1]))
+            .set(1, 1)
+            .set(2, SHEAR_REST)
+            .update();
+
+        let updateShear3Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([1, -1]))
+            .set(1, 0)
+            .set(2, SHEAR_REST)
+            .update();
+
+        let updateShear4Uniforms = app.createUniformBuffer([
+            PicoGL.INT_VEC2,
+            PicoGL.INT,
+            PicoGL.FLOAT
+        ])
+            .set(0, new Int32Array([1, -1]))
+            .set(1, 1)
+            .set(2, SHEAR_REST)
+            .update();
+
+        // Draw uniforms
+        let ballPosition = vec3.fromValues(0, 0.15, -0.8);
+        let ballUniforms = app.createUniformBuffer([
+            PicoGL.FLOAT_VEC4,
+            PicoGL.FLOAT
+        ])
+            .set(0, ballPosition)
+            .set(1, BALL_RADIUS)
+            .update();
+
+        let ballColor = new Uint8Array([255, 20, 20]);
+        let ballTexture = app.createTexture2DByData(ballColor, 1, 1, { internalFormat: PicoGL.RGB8 });
+
         this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0);
+        mat4.perspective(this.projMatrix, Math.PI / 2, canvas.width / canvas.height, 0.1, 3.0);
 
         this.viewMatrix = mat4.create();
-        const eyePosition = vec3.fromValues(1, 1, 1);
-        mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+        let eyePosition = vec3.fromValues(0.5, 0.7, 1.2);
+        mat4.lookAt(this.viewMatrix, eyePosition, vec3.fromValues(0, 0.1, 0), vec3.fromValues(0, 1, 0));
 
         this.viewProjMatrix = mat4.create();
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
 
-        const lightPosition = vec3.fromValues(1, 1, 0.5);
-        this.sceneUniformBuffer = engine.createUniformBuffer([
-            GL.FLOAT_MAT4,
-            GL.FLOAT_VEC4,
-            GL.FLOAT_VEC4
+        let lightPosition = vec3.fromValues(1, 1, 1);
+
+        this. sceneUniformBuffer = app.createUniformBuffer([
+            PicoGL.FLOAT_MAT4,
+            PicoGL.FLOAT_VEC4
         ]).set(0, this.viewProjMatrix)
-            .set(1, eyePosition)
-            .set(2, lightPosition)
+            .set(1, lightPosition)
             .update();
 
-        this.modelMatrix = mat4.create();
-        this.rotateXMatrix = mat4.create();
-        this.rotateYMatrix = mat4.create();
+        let targetZ = 0;
+        let targetY = 0;
+        this.onMouseMove = (event: MouseEvent): void => {
+            targetZ = -((event.clientX / canvas.width) * 2 - 1);
+            targetY = ((canvas.height - event.clientY) / canvas.height) * 2 - 1;
+            //console.log('targetZ = ' + targetZ + 'targetY = ' + targetY);
+        };
+        canvas.addEventListener("mousemove", this.onMouseMove);
 
-        this.texture = engine.createTexture2DByImage(this.image, {
-            flipY: true,
-            maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
+
+        let texture = app.createTexture2DByImage(this.image, {
+            maxAnisotropy: app.capbility('MAX_TEXTURE_ANISOTROPY')/*PicoGL.WEBGL_INFO.MAX_TEXTURE_ANISOTROPY*/
         });
 
-        this.drawCall = engine.createDrawCall(this.program, boxArray).uniformBlock("SceneUniforms", this.sceneUniformBuffer);
-        */
+        ///////////////
+        // DRAW CALLS
+        ///////////////
+
+        // Update forces
+        let updateForceDrawCall = app.createDrawCall(this.updateForceProgram, quadArray)
+            .texture("uPositionBuffer", positionTextureA)
+            .texture("uNormalBuffer", normalTexture);
+
+        // Structural constraints
+        let updateHorizontal1DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateHorizontal1Uniforms);
+
+        let updateHorizontal2DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateHorizontal2Uniforms);
+
+        let updateVertical1DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateVertical1Uniforms);
+
+        let updateVertical2DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateVertical2Uniforms);
+
+        // Shear constraints
+        let updateShear1DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear1Uniforms);
+
+        let updateShear2DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear2Uniforms);
+
+        let updateShear3DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear3Uniforms);
+
+        let updateShear4DrawCall = app.createDrawCall(this.updateConstraintProgram, quadArray)
+            .uniformBlock("ConstraintUniforms", updateShear4Uniforms);
+
+        let updateCollisionDrawCall = app.createDrawCall(this.updateCollisionProgram, quadArray)
+            .uniformBlock("BallUniforms", ballUniforms);
+
+        let updateNormalDrawCall = app.createDrawCall(this.updateNormalProgram, quadArray);
+
+        let clothDrawCall = app.createDrawCall(this.clothProgram, clothArray)
+            .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
+            .texture("uDiffuse", texture)
+            .texture("uNormalBuffer", normalTexture);
+
+        let ballDrawCall = app.createDrawCall(this.ballProgram, ballArray)
+            .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
+            .uniformBlock("BallUniforms", ballUniforms)
+            .texture("uDiffuse", ballTexture);
     }
 
     private async loadResource(): Promise<void> {
@@ -130,12 +473,12 @@ class ClothScene extends WebGL2DemoScene {
                 [ballVsSource, phongShader],
                 [clothVsSource, phongShader]
             );
-            this.updateForceProgram = programs[1];
-            this.updateConstraintProgram = programs[2];
-            this.updateCollisionProgram = programs[3];
-            this.updateNormalProgram = programs[4];
-            this.ballProgram = programs[5];
-            this.clothProgram = programs[6];
+            this.updateForceProgram = programs[0];
+            this.updateConstraintProgram = programs[1];
+            this.updateCollisionProgram = programs[2];
+            this.updateNormalProgram = programs[3];
+            this.ballProgram = programs[4];
+            this.clothProgram = programs[5];
             //
             const texarrays: string[] = [
                 'resource/assets/bg.jpg',
@@ -152,41 +495,28 @@ class ClothScene extends WebGL2DemoScene {
         if (!this._ready) {
             return;
         }
-        // const engine = this.engine;
-        // this.angleX += 0.01;
-        // this.angleY += 0.02;
-        // mat4.fromXRotation(this.rotateXMatrix, this.angleX);
-        // mat4.fromYRotation(this.rotateYMatrix, this.angleY);
-        // mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
-        // this.drawCall.uniform("uModel", this.modelMatrix);
-        // engine.drawFramebuffer(this.msaaFramebuffer).clearColor(0.4, 0.4, 0.4, 1.0).clear();
-        // this.drawCall.texture("tex", this.texture).draw();
-        // engine.readFramebuffer(this.msaaFramebuffer)
-        //     .drawFramebuffer(this.textureFramebuffer)
-        //     .blitFramebuffer(GL.COLOR_BUFFER_BIT);
-        // engine.defaultDrawFramebuffer().clearColor(0.5, 0.5, 0.5, 1.0).clear()
-        // this.drawCall.texture("tex", this.textureFramebuffer.colorAttachments[0] as WebGL2Texture).draw();
+    
         return this;
     }
 
     public leave(): WebGL2DemoScene {
-        // this.program.delete();
-        // this.sceneUniformBuffer.delete();
-        // this.drawCall.delete();
-        // this.texture.delete();
-        // this.msaaFramebuffer.delete();
-        // this.textureFramebuffer.delete();
-        // const engine = this.engine;
-        // engine.noDepthTest();
+        
+        this.updateForceProgram.delete();
+        this.updateConstraintProgram.delete();
+        this.updateCollisionProgram.delete();
+        this.updateNormalProgram.delete();
+        this.ballProgram.delete();
+        this.clothProgram.delete();
+        //
+        this.engine.canvas.removeEventListener("mousemove", this.onMouseMove);
+        this.onMouseMove = null;
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        // this.msaaFramebuffer.resize(width, height);
-        // this.textureFramebuffer.resize(width, height);
-        // mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
-        // mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        // this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
+        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 3.0);
+        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
+        this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
         return this;
     }
 }
