@@ -279,7 +279,7 @@ class ClothScene extends WebGL2DemoScene {
             .set(1, BALL_RADIUS)
             .update();
 
-        const ballColor = new Uint8Array([255, 20, 20]);
+        const ballColor = new Uint8Array([0, 0, 0]);
         const ballTexture = engine.createTexture2DByData(ballColor, 1, 1, { internalFormat: GL.RGB8 });
 
         this.projMatrix = mat4.create();
