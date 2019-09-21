@@ -1,6 +1,8 @@
 
 class TriangleScene extends WebGL2DemoScene {
 
+    private vsSource: string;
+    private fsSource: string;
     private program: WebGL2Program;
     private drawCall: WebGL2DrawCall;
 
@@ -42,15 +44,15 @@ class TriangleScene extends WebGL2DemoScene {
         try {
             ////
             const ress: string[] = [
-                'resource/assets/shader-triangle/triangle.vs.glsl',
-                'resource/assets/shader-triangle/triangle.fs.glsl',
+                'resource/assets/vs-triangle.vertex.glsl',
+                'resource/assets/fs-triangle.fragment.glsl',
             ];
             const txts = await this.engine.loadText(ress);
-            const vsSource = txts[0];
-            const fsSource = txts[1];
+            this.vsSource = txts[0];
+            this.fsSource = txts[1];
             /////
             const programs = await this.engine.createPrograms(
-                [vsSource, fsSource]
+                [this.vsSource, this.fsSource]
             );
             this.program = programs[0];
         }
@@ -65,13 +67,13 @@ class TriangleScene extends WebGL2DemoScene {
         }
         const engine = this.engine;
         engine.clear();
+        engine.clear();
         this.drawCall.draw();
         return this;
     }
 
     public leave(): WebGL2DemoScene {
         this.program.delete();
-        this.drawCall.delete();
         return this;
     }
 
