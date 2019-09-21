@@ -46,11 +46,11 @@ class TriangleScene extends WebGL2DemoScene {
                 'resource/assets/shader-triangle/triangle.fs.glsl',
             ];
             const txts = await this.engine.loadText(ress);
-            const vsSource = txts[0];
-            const fsSource = txts[1];
+            const vssource = txts[0];
+            const fssource = txts[1];
             /////
             const programs = await this.engine.createPrograms(
-                [vsSource, fsSource]
+                [vssource, fssource]
             );
             this.program = programs[0];
         }
@@ -74,7 +74,7 @@ class TriangleScene extends WebGL2DemoScene {
         return this;
     }
 
-    public resize(width: number, height: number): WebGL2DemoScene {
-        return this;
-    }
+    // public resize(width: number, height: number): WebGL2DemoScene {
+    //     return this;
+    // }
 }

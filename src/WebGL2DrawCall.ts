@@ -1,37 +1,53 @@
-
+/**
+ * WebGL2DrawCall 封装一个draw的行为
+ */
 class WebGL2DrawCall extends WebGL2Object {
-
+    /**
+     * program
+     */
     private currentProgram: WebGL2Program;
-    private drawPrimitive: number = 0;
+    /**
+     * POINTS 点
+     * LINES 线段
+     * LINE_STRIP 线条
+     * LINE_LOOP 回路
+     * TRIANGLES 三角形
+     * TRIANGLE_STRIP 三角带
+     * TRIANGLE_FAN 三角扇
+     */
+    private drawPrimitive: number = GL.TRIANGLES;
     private currentVertexArray: WebGL2VertexArray;
     private currentTransformFeedback: WebGL2TransformFeedback;
-    private uniformIndices;
-    private uniformNames;
-    private uniformValues;
+    private readonly uniformIndices: { [index: string]: number } = {};
+    private uniformNames: Array<string>;
+    private uniformValues: Array<number | Float32Array | Int32Array>;
     private uniformCount: number = 0;
     private uniformBuffers: WebGL2UniformBuffer[];
-    private uniformBlockNames;
+    private uniformBlockNames: string[];
     private uniformBlockCount: number = 0;
-    private textures: Array<WebGL2Texture | WebGL2Cubemap> = [];//WebGL2Texture[];
+    private textures: Array<WebGL2Texture | WebGL2Cubemap> = [];
     private textureCount: number = 0;
     private offsets: Int32Array;
     private numElements: Int32Array;
     private numInstances: Int32Array;
-    private numDraws: number = 0;
+    private numDraws: number = 1;
     private MULTI_DRAW_INSTANCED: boolean = false;
 
     constructor(_engine: WebGL2Engine, program: WebGL2Program, vertexArray: WebGL2VertexArray = null, primitive?: number) {
         super(_engine);
-        //
+        const engine = this.engine;
         this.currentProgram = program;
-        this.drawPrimitive = GL.TRIANGLES;
         this.currentVertexArray = vertexArray;
-        this.uniformIndices = {};
-        this.uniformNames = new Array(this.engine.capbility('MAX_UNIFORMS'));
-        this.uniformValues = new Array(this.engine.capbility('MAX_UNIFORMS'));
-        this.uniformBuffers = new Array(this.engine.capbility('MAX_UNIFORM_BUFFERS'));
-        this.uniformBlockNames = new Array(this.engine.capbility('MAX_UNIFORM_BUFFERS'));
-        this.textures = new Array(this.engine.capbility('MAX_TEXTURE_UNITS'));
+        //
+        const MAX_UNIFORMS: number = engine.capbility('MAX_UNIFORMS');
+        this.uniformNames = new Array(MAX_UNIFORMS);
+        this.uniformValues = new Array(MAX_UNIFORMS);
+        //
+        const MAX_UNIFORM_BUFFERS: number = engine.capbility('MAX_UNIFORM_BUFFERS');
+        this.uniformBuffers = new Array(MAX_UNIFORM_BUFFERS);
+        this.uniformBlockNames = new Array(MAX_UNIFORM_BUFFERS);
+        //
+        this.textures = new Array(engine.capbility('MAX_TEXTURE_UNITS') as number);
         this.offsets = new Int32Array(1);
         this.numElements = new Int32Array(1);
         this.numInstances = new Int32Array(1);
@@ -39,15 +55,29 @@ class WebGL2DrawCall extends WebGL2Object {
             this.numElements[0] = this.currentVertexArray.numElements;
             this.numInstances[0] = this.currentVertexArray.numInstances;
         }
-        this.numDraws = 1;
-        if (primitive !== undefined) {
+        if (primitive) {
             this.primitive(primitive);
         }
-        this.MULTI_DRAW_INSTANCED = this.engine.capbility('MULTI_DRAW_INSTANCED');
+        this.MULTI_DRAW_INSTANCED = engine.capbility('MULTI_DRAW_INSTANCED');
     }
-
+    /**
+     * 设置 primitive
+     * @param primitive 设置数值，必须是那几项
+     */
     public primitive(primitive: number): WebGL2DrawCall {
-        this.drawPrimitive = primitive;
+        const checkPram = (primitive === GL.POINTS
+            || primitive === GL.LINES
+            || primitive === GL.LINE_STRIP
+            || primitive === GL.LINE_LOOP
+            || primitive === GL.TRIANGLES
+            || primitive === GL.TRIANGLE_STRIP
+            || primitive === GL.TRIANGLE_FAN);
+        if (checkPram) {
+            this.drawPrimitive = primitive;
+        }
+        else {
+            console.error('invalid primitive = ' + primitive);
+        }
         return this;
     }
 
@@ -56,7 +86,7 @@ class WebGL2DrawCall extends WebGL2Object {
         return this;
     }
 
-    public uniform(name, value): WebGL2DrawCall {
+    public uniform(name: string, value: number | Float32Array | Int32Array): WebGL2DrawCall {
         let index = this.uniformIndices[name];
         if (index === undefined) {
             index = this.uniformCount++;
@@ -67,7 +97,7 @@ class WebGL2DrawCall extends WebGL2Object {
         return this;
     }
 
-    public texture(name: string, texture: WebGL2Texture | WebGL2Cubemap): WebGL2DrawCall  {
+    public texture(name: string, texture: WebGL2Texture | WebGL2Cubemap): WebGL2DrawCall {
         const unit = this.currentProgram.samplers[name];
         this.textures[unit] = texture;
         return this;
@@ -158,7 +188,6 @@ class WebGL2DrawCall extends WebGL2Object {
     }
 
     public delete(): WebGL2Object {
-        console.log('draw call delete');
         return this;
     }
 }
