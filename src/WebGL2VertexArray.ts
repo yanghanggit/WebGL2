@@ -1,5 +1,6 @@
-
-
+/**
+ * AttributeBufferOptions
+ */
 interface AttributeBufferOptions {
     type?: number;
     size?: number;
@@ -8,33 +9,36 @@ interface AttributeBufferOptions {
     normalized?: boolean;
     integer?: boolean;
 }
-
+/**
+ * WebGL2VertexArray
+ */
 class WebGL2VertexArray extends WebGL2Object {
 
-    private vertexArray: WebGLVertexArrayObject = null;
-    public indexType: number;
+    private vertexArray: WebGLVertexArrayObject;
+    public indexType: number = 0;
     public indexed: boolean;
-    public numElements: number;
-    public numInstances: number;
-    private offsets: number;
-    private numDraws: number;
+    public numElements: number = 0;
+    public numInstances: number = 1;
+    private offsets: number = 0;
+    private numDraws: number = 1;
 
     constructor(_engine: WebGL2Engine) {
         super(_engine);
-        this.vertexArray = null;
-        this.indexType = null;
-        this.indexed = false;
-        this.numElements = 0;
-        this.numInstances = 1;
-        this.offsets = 0;
-        this.numDraws = 1;
+        //this.vertexArray = null;
+        //this.indexType = null;
+        //this.indexed = false;
+        //this.numElements = 0;
+        //this.numInstances = 1;
+        //this.offsets = 0;
+        //this.numDraws = 1;
     }
 
     public restore(): WebGL2VertexArray {
         if (this.state.vertexArray === this) {
             this.state.vertexArray = null;
         }
-        if (this.vertexArray !== null) {
+        if (this.vertexArray /*!== null*/) {
+            //会在attributeBuffer 和 indexBuffer 这2个调用点，做惰性初始化
             this.vertexArray = this.gl.createVertexArray();
         }
         return this;
@@ -51,7 +55,7 @@ class WebGL2VertexArray extends WebGL2Object {
     }
 
     public indexBuffer(vertexBuffer: WebGL2VertexBuffer): WebGL2VertexArray {
-        if (this.vertexArray === null) {
+        if (!this.vertexArray/*=== null*/) {
             this.vertexArray = this.gl.createVertexArray();
         }
         this.bind();
@@ -83,7 +87,7 @@ class WebGL2VertexArray extends WebGL2Object {
     }
 
     public attributeBuffer(attributeIndex: number, vertexBuffer: WebGL2VertexBuffer, options: AttributeBufferOptions = DUMMY_OBJECT, instanced: boolean): WebGL2VertexArray {
-        if (this.vertexArray === null) {
+        if (!this.vertexArray/* === null*/) {
             this.vertexArray = this.gl.createVertexArray();
         }
         this.bind();

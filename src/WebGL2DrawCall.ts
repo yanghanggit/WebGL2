@@ -31,7 +31,7 @@ class WebGL2DrawCall extends WebGL2Object {
     private numElements: Int32Array;
     private numInstances: Int32Array;
     private numDraws: number = 1;
-    private readonly MULTI_DRAW_INSTANCED: boolean;
+    private readonly multiDrawInstanced: boolean;
 
     constructor(_engine: WebGL2Engine, program: WebGL2Program, vertexArray: WebGL2VertexArray = null, primitive?: number) {
         super(_engine);
@@ -58,7 +58,7 @@ class WebGL2DrawCall extends WebGL2Object {
         if (primitive) {
             this.primitive(primitive);
         }
-        this.MULTI_DRAW_INSTANCED = engine.capbility('MULTI_DRAW_INSTANCED');
+        this.multiDrawInstanced = engine.capbility('MULTI_DRAW_INSTANCED');
     }
     /**
      * 设置 primitive
@@ -130,11 +130,7 @@ class WebGL2DrawCall extends WebGL2Object {
     }
 
     public draw(): WebGL2DrawCall {
-
-        ///
         ++this.engine.drawCalls;
-        ///
-
         const uniformNames = this.uniformNames;
         const uniformValues = this.uniformValues;
         const uniformBuffers = this.uniformBuffers;
@@ -142,7 +138,6 @@ class WebGL2DrawCall extends WebGL2Object {
         const textures = this.textures;
         const textureCount = this.currentProgram.samplerCount;
         let indexed = false;
-        ///
         this.currentProgram.bind();
         if (this.currentVertexArray) {
             this.currentVertexArray.bind();
@@ -158,7 +153,6 @@ class WebGL2DrawCall extends WebGL2Object {
             textures[tIndex].bind(tIndex);
         }
         const gl = this.gl;
-
         if (this.currentTransformFeedback) {
             this.currentTransformFeedback.bind();
             gl.beginTransformFeedback(this.drawPrimitive);
@@ -166,8 +160,7 @@ class WebGL2DrawCall extends WebGL2Object {
             gl.bindTransformFeedback(GL.TRANSFORM_FEEDBACK, null);
             this.state.transformFeedback = null;
         }
-
-        if (this.MULTI_DRAW_INSTANCED) {
+        if (this.multiDrawInstanced) {
             const ext = this.state.extensions.multiDrawInstanced;
             if (indexed) {
                 ext.multiDrawElementsInstancedWEBGL(this.drawPrimitive, this.numElements, 0, this.currentVertexArray.indexType, this.offsets, 0, this.numInstances, 0, this.numDraws);
@@ -183,7 +176,6 @@ class WebGL2DrawCall extends WebGL2Object {
                 gl.drawArraysInstanced(this.drawPrimitive, this.offsets[i], this.numElements[i], this.numInstances[i]);
             }
         }
-        
         if (this.currentTransformFeedback) {
             gl.endTransformFeedback();
         }
