@@ -2,7 +2,7 @@
 
 class WebGL2VertexBuffer extends WebGL2Object {
 
-    public buffer: WebGLBuffer = null;
+    public buffer: WebGLBuffer;
     public readonly type: number = 0;
     public readonly itemSize: number = 0;
     public readonly numItems: number = 0;
@@ -35,6 +35,7 @@ class WebGL2VertexBuffer extends WebGL2Object {
                 break;
             default:
                 numColumns = 1;
+                break;
         }
         switch (type) {
             case GL.FLOAT_MAT4:
@@ -61,6 +62,17 @@ class WebGL2VertexBuffer extends WebGL2Object {
         if (typeof data === "number") {
             dataLength = data;
             if (type) {
+                /*
+                const TYPE_SIZE = {
+                    [GL.BYTE]: 1,
+                    [GL.UNSIGNED_BYTE]: 1,
+                    [GL.SHORT]: 2,
+                    [GL.UNSIGNED_SHORT]: 2,
+                    [GL.INT]: 4,
+                    [GL.UNSIGNED_INT]: 4,
+                    [GL.FLOAT]: 4
+                };
+                */
                 data *= TYPE_SIZE[type];
             }
             byteLength = data;
@@ -85,25 +97,27 @@ class WebGL2VertexBuffer extends WebGL2Object {
         if (!data) {
             data = this.byteLength;
         }
+        const gl = this.gl;
         if (this.state.vertexArray) {
-            this.gl.bindVertexArray(null);
+            gl.bindVertexArray(null);
             this.state.vertexArray = null;
         }
-        this.buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferData(this.binding, (data as any), this.usage);
-        this.gl.bindBuffer(this.binding, null);
+        this.buffer = gl.createBuffer();
+        gl.bindBuffer(this.binding, this.buffer);
+        gl.bufferData(this.binding, (data as any), this.usage);
+        gl.bindBuffer(this.binding, null);
         return this;
     }
 
     public data(data: Float32Array | Uint16Array | Uint8Array): WebGL2VertexBuffer {
+        const gl = this.gl;
         if (this.state.vertexArray) {
-            this.gl.bindVertexArray(null);
+            gl.bindVertexArray(null);
             this.state.vertexArray = null;
         }
-        this.gl.bindBuffer(this.binding, this.buffer);
-        this.gl.bufferSubData(this.binding, 0, data);
-        this.gl.bindBuffer(this.binding, null);
+        gl.bindBuffer(this.binding, this.buffer);
+        gl.bufferSubData(this.binding, 0, data);
+        gl.bindBuffer(this.binding, null);
         return this;
     }
 

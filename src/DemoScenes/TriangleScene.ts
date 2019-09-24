@@ -20,12 +20,14 @@ class TriangleScene extends WebGL2DemoScene {
 
     private createScene(): void {
         const engine = this.engine;
+        //清除屏幕
         engine.clearColor(0.5, 0.5, 0.5, 1.0);
-        //
+        //opengl 默认的窗口坐标是从 [-1,+1]的，所以设置的坐标值超过这个范围时将无法显示
+        const length = 1.0;
         const positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
-            -0.5, -0.5,
-            0.5, -0.5,
-            0.0, 0.5,
+            -1.0 * length, -1.0 * length,
+            1.0 * length, -1.0 * length,
+            0.0 * length, 1.0 * length,
         ]));
         const colors = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 3, new Uint8Array([
             255, 0, 0,
@@ -73,8 +75,4 @@ class TriangleScene extends WebGL2DemoScene {
         this.drawCall.delete();
         return this;
     }
-
-    // public resize(width: number, height: number): WebGL2DemoScene {
-    //     return this;
-    // }
 }
