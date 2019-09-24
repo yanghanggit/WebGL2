@@ -1,3 +1,4 @@
+
 /**
  * AttributeBufferOptions
  */
@@ -14,6 +15,9 @@ interface AttributeBufferOptions {
  */
 class WebGL2VertexArray extends WebGL2Object {
 
+    /**
+     * WebGLVertexArrayObject
+     */
     private vertexArray: WebGLVertexArrayObject;
     public indexType: number = 0;
     public indexed: boolean;
@@ -24,20 +28,13 @@ class WebGL2VertexArray extends WebGL2Object {
 
     constructor(_engine: WebGL2Engine) {
         super(_engine);
-        //this.vertexArray = null;
-        //this.indexType = null;
-        //this.indexed = false;
-        //this.numElements = 0;
-        //this.numInstances = 1;
-        //this.offsets = 0;
-        //this.numDraws = 1;
     }
 
     public restore(): WebGL2VertexArray {
         if (this.state.vertexArray === this) {
             this.state.vertexArray = null;
         }
-        if (this.vertexArray /*!== null*/) {
+        if (this.vertexArray) {
             //会在attributeBuffer 和 indexBuffer 这2个调用点，做惰性初始化
             this.vertexArray = this.gl.createVertexArray();
         }
@@ -55,7 +52,7 @@ class WebGL2VertexArray extends WebGL2Object {
     }
 
     public indexBuffer(vertexBuffer: WebGL2VertexBuffer): WebGL2VertexArray {
-        if (!this.vertexArray/*=== null*/) {
+        if (!this.vertexArray) {
             this.vertexArray = this.gl.createVertexArray();
         }
         this.bind();
@@ -86,11 +83,16 @@ class WebGL2VertexArray extends WebGL2Object {
         return this;
     }
 
-    public attributeBuffer(attributeIndex: number, vertexBuffer: WebGL2VertexBuffer, options: AttributeBufferOptions = DUMMY_OBJECT, instanced: boolean): WebGL2VertexArray {
-        if (!this.vertexArray/* === null*/) {
+    public attributeBuffer(attributeIndex: number,
+        vertexBuffer: WebGL2VertexBuffer,
+        options: AttributeBufferOptions = DUMMY_OBJECT,
+        instanced: boolean): WebGL2VertexArray {
+            
+        if (!this.vertexArray) {
             this.vertexArray = this.gl.createVertexArray();
         }
         this.bind();
+        //用vertexAttribPointer，对vertexbuffer进行描述，先bind
         this.gl.bindBuffer(GL.ARRAY_BUFFER, vertexBuffer.buffer);
         let {
             type = vertexBuffer.type,
@@ -101,25 +103,28 @@ class WebGL2VertexArray extends WebGL2Object {
             integer = Boolean(vertexBuffer.integer && !normalized)
         } = options as AttributeBufferOptions;
         const numColumns = vertexBuffer.numColumns;
+        const typeSize = TYPE_SIZE[type];
         if (stride === 0) {
-            stride = numColumns * size * TYPE_SIZE[type];
+            stride = numColumns * size * typeSize;
         }
         for (let i = 0; i < numColumns; ++i) {
             if (integer) {
+                //描述开始，这里IPointer, 不考虑归一化normalized的情况
                 this.gl.vertexAttribIPointer(
                     attributeIndex + i,
                     size,
                     type,
                     stride,
-                    offset + i * size * TYPE_SIZE[type]);
+                    offset + i * size * typeSize);
             } else {
+                //描述开始
                 this.gl.vertexAttribPointer(
                     attributeIndex + i,
                     size,
                     type,
                     normalized,
                     stride,
-                    offset + i * size * TYPE_SIZE[type]);
+                    offset + i * size * typeSize);
             }
             if (instanced) {
                 this.gl.vertexAttribDivisor(attributeIndex + i, 1);
@@ -133,6 +138,7 @@ class WebGL2VertexArray extends WebGL2Object {
                 this.numElements = this.numElements || vertexBuffer.numItems;
             }
         }
+        //描述完成，解绑
         this.gl.bindBuffer(GL.ARRAY_BUFFER, null);
         return this;
     }
