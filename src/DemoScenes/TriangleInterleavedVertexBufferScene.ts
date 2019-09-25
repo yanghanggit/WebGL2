@@ -1,11 +1,22 @@
-
-class InterleavedTriangleScene extends WebGL2DemoScene {
-    ///
-    private vsSource: string;
-    private fsSource: string;
+/**
+ * 用同一个buffer存position 和 color来画三角形
+ */
+class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
+    /**
+     * 
+     */
     private program: WebGL2Program;
+    /**
+     * 
+     */
     private drawCall: WebGL2DrawCall;
-    ///
+    /**
+     * 
+     */
+    private drawCount: number = 0;
+    /**
+     * 
+     */
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
         this.start().catch(e => {
@@ -13,23 +24,27 @@ class InterleavedTriangleScene extends WebGL2DemoScene {
         });
         return this;
     }
-
+    /**
+     * 
+     */
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
-        this._ready = true;
+        this.ready();
     }
-
+    /**
+     * 
+     */
     private createScene(): void {
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0);
         const interleavedData = new Float32Array([
             -0.5, -0.5,
-            0,
+            0, //offset = 8 颜色
             0.5, -0.5,
-            0,
+            0, //offset = 20 颜色
             0.0, 0.5,
-            0
+            0  //offset = 32 颜色
         ]);
         const interleavedDataUByte = new Uint8Array(interleavedData.buffer);
         interleavedDataUByte.set([255, 0, 0, 255], 8);
@@ -45,27 +60,27 @@ class InterleavedTriangleScene extends WebGL2DemoScene {
             .vertexAttributeBuffer(1, interleavedBuffer, {
                 type: GL.UNSIGNED_BYTE,
                 size: 3,
-                offset: 8,
-                stride: 12,
+                offset: 8,  //2个GL.FLOAT
+                stride: 12, //2个GL.FLOAT + 3 * UNSIGNED_BYTE + 补充UNSIGNED_BYTE =  2 * 4 + 3 * 1 + 1 = 12
                 normalized: true
             });
-
         this.drawCall = engine.createDrawCall(this.program, triangleArray);
     }
-
+    /**
+     * 
+     */
     private async loadResource(): Promise<void> {
         try {
-            ///
             const ress: string[] = [
                 'resource/assets/shader-interleaved-triangle/draw.vs.glsl',
                 'resource/assets/shader-interleaved-triangle/draw.fs.glsl'
             ];
             const txts = await this.engine.loadText(ress);
-            this.vsSource = txts[0];
-            this.fsSource = txts[1];
+            const vsSource = txts[0];
+            const fsSource = txts[1];
             //
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource]
+                [vsSource, fsSource]
             );
             this.program = programs[0];
         }
@@ -73,22 +88,29 @@ class InterleavedTriangleScene extends WebGL2DemoScene {
             console.error(e);
         }
     }
-
-    public update(): WebGL2DemoScene {
-        if (!this._ready) {
-            return;
-        }
+    /**
+     * 
+     */
+    public _update(): WebGL2DemoScene {
         this.engine.clear();
         this.drawCall.draw();
         return this;
     }
-
+    /**
+     * 
+     */
     public leave(): WebGL2DemoScene {
-        this.program.delete();
-        this.drawCall.delete();
+        if (this.drawCount < 1) {
+            //只画一次就好了
+            this.program.delete();
+            this.drawCall.delete();
+        }
+        ++this.drawCount;
         return this;
     }
-
+    /**
+     * 
+     */
     public resize(width: number, height: number): WebGL2DemoScene {
         return this;
     }
