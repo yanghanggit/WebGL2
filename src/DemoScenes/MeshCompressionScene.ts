@@ -163,7 +163,7 @@ class MeshCompressionScene extends WebGL2DemoScene {
         const engine = this.engine;
         engine.clearColor(0.0, 0.0, 0.0, 1.0);
         ///
-        const sphere = engine.createSphere({ radius: 0.48 });
+        const sphere = Utils.createSphere({ radius: 0.48 });
         const uncompressedPositions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
         const uncompressedNormals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
         const indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);

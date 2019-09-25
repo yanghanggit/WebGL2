@@ -76,7 +76,7 @@ class OcclusionScene extends WebGL2DemoScene {
             .noScissorTest()
             .scissor(hudViewport[0], hudViewport[1], hudViewport[2], hudViewport[3]);
 
-        const sphereData = engine.createSphere({ radius: 0.6 });
+        const sphereData = Utils.createSphere({ radius: 0.6 });
 
         const spherePositions = engine.createVertexBuffer(GL.FLOAT, 3, sphereData.positions);
         const sphereUVs = engine.createVertexBuffer(GL.FLOAT, 2, sphereData.uvs);

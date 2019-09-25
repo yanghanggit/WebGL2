@@ -61,7 +61,7 @@ class OmniShadowScene extends WebGL2DemoScene {
 
         let positions: WebGL2VertexBuffer, normals: WebGL2VertexBuffer, uv: WebGL2VertexBuffer, indices: WebGL2VertexBuffer;
 
-        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] })
         positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
         normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
         uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
@@ -71,7 +71,7 @@ class OmniShadowScene extends WebGL2DemoScene {
             .vertexAttributeBuffer(1, normals)
             .vertexAttributeBuffer(2, uv);
 
-        const sphere = engine.createSphere({ radius: 0.1 });
+        const sphere = Utils.createSphere({ radius: 0.1 });
         positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
         indices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
 

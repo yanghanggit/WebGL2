@@ -57,7 +57,7 @@ class ShadowScene extends WebGL2DemoScene {
         });
         this.shadowBuffer = engine.createFramebuffer().depthTarget(shadowDepthTarget);
         //
-        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] })
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
         const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);

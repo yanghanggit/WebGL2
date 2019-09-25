@@ -79,7 +79,7 @@ class DeferredScene extends WebGL2DemoScene {
         console.assert(this.gBuffer.getStatus() === GL.FRAMEBUFFER_COMPLETE, "G-buffer framebuffer is not complete!");
 
         ///
-        const box = engine.createBox();
+        const box = Utils.createCube();
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
         const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
@@ -88,7 +88,7 @@ class DeferredScene extends WebGL2DemoScene {
             .vertexAttributeBuffer(1, normals)
             .vertexAttributeBuffer(2, uv);
 
-        const sphere = engine.createSphere();
+        const sphere = Utils.createSphere();
         const lightPositions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
         const lightIndices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
         const sphereArray = engine.createVertexArray()

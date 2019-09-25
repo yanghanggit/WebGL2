@@ -95,7 +95,7 @@ class BloomScene extends WebGL2DemoScene {
         this.bloomBuffer = engine.createFramebuffer()
             .colorTarget(0, bloomTarget);
 
-        const cubeData = engine.createBox({ dimensions: [1.0, 1.0, 1.0] });
+        const cubeData = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
         const cubePositions = engine.createVertexBuffer(GL.FLOAT, 3, cubeData.positions);
         const cubeUVs = engine.createVertexBuffer(GL.FLOAT, 2, cubeData.uvs);
         const cubeNormals = engine.createVertexBuffer(GL.FLOAT, 3, cubeData.normals);
@@ -105,7 +105,7 @@ class BloomScene extends WebGL2DemoScene {
             .vertexAttributeBuffer(1, cubeUVs)
             .vertexAttributeBuffer(2, cubeNormals);
 
-        const sun = engine.createSphere({ radius: 0.1 });
+        const sun = Utils.createSphere({ radius: 0.1 });
         const sunPositions = engine.createVertexBuffer(GL.FLOAT, 3, sun.positions);
         const sunIndices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sun.indices);
 

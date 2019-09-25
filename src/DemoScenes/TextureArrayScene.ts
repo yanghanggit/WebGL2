@@ -40,7 +40,7 @@ class TextureArrayScene extends WebGL2DemoScene {
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest().depthMask(true);
         //
-        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] });
+        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
         this.modelMatrixData = new Float32Array(8 * 16);
         const textureIndexData = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
         //

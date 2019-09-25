@@ -89,7 +89,7 @@ class OITScene extends WebGL2DemoScene {
         const viewProjMatrix = this.viewProjMatrix = mat4.create();
         mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
         //
-        const sphere = engine.createSphere({ radius: 0.5 } as CreateSphereModelOptions);
+        const sphere = Utils.createSphere({ radius: 0.5 });
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
         const normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);

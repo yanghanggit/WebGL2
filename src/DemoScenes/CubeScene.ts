@@ -47,7 +47,7 @@ class CubeScene extends WebGL2DemoScene {
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest();
         //做vao
-        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] });
+        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
         const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);

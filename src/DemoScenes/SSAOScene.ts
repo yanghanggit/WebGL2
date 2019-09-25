@@ -107,7 +107,7 @@ class SSAOScene extends WebGL2DemoScene {
         this.ssaoBuffer = engine.createFramebuffer().colorTarget(0, ssaoTarget);
 
         //
-        const sphere = engine.createSphere({ radius: 0.5 });
+        const sphere = Utils.createSphere({ radius: 0.5 });
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
         const normals = engine.createVertexBuffer(GL.FLOAT, 3, sphere.normals);

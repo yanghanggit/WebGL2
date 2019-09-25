@@ -179,7 +179,7 @@ class ClothScene extends WebGL2DemoScene {
             .indexBuffer(indices);
 
         // Ball geometry
-        const ballGeo = engine.createSphere({ radius: BALL_RADIUS });
+        const ballGeo = Utils.createSphere({ radius: BALL_RADIUS });
         const ballPositions = engine.createVertexBuffer(GL.FLOAT, 3, ballGeo.positions);
         const ballNormals = engine.createVertexBuffer(GL.FLOAT, 3, ballGeo.normals);
         const ballIndices = engine.createIndexBuffer(GL.UNSIGNED_SHORT, 3, ballGeo.indices);

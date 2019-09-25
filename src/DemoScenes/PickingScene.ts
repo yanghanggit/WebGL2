@@ -61,7 +61,7 @@ class PickingScene extends WebGL2DemoScene {
         const pickDepthTarget = engine.createRenderbuffer(engine.width, engine.height, GL.DEPTH_COMPONENT16);
         this.pickingBuffer = engine.createFramebuffer().colorTarget(0, pickColorTarget).depthTarget(pickDepthTarget);
 
-        const box = engine.createBox({ dimensions: [1.0, 1.0, 1.0] })
+        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] })
         const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
         const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
         const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
