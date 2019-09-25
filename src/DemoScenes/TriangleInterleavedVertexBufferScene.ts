@@ -46,12 +46,15 @@ class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
             0.0, 0.5,
             0  //offset = 32 颜色
         ]);
+        //设置颜色
         const interleavedDataUByte = new Uint8Array(interleavedData.buffer);
         interleavedDataUByte.set([255, 0, 0, 255], 8);
         interleavedDataUByte.set([0, 255, 0, 255], 20);
         interleavedDataUByte.set([0, 0, 255, 255], 32);
+        //间距12的buffer
         const interleavedBuffer = engine.createInterleavedBuffer(12, interleavedData);
-        const triangleArray = engine.createVertexArray()
+        //创建vao
+        const triangleVAO = engine.createVertexArray()
             .vertexAttributeBuffer(0, interleavedBuffer, {
                 type: GL.FLOAT,
                 size: 2,
@@ -64,7 +67,7 @@ class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
                 stride: 12, //2个GL.FLOAT + 3 * UNSIGNED_BYTE + 补充UNSIGNED_BYTE =  2 * 4 + 3 * 1 + 1 = 12
                 normalized: true
             });
-        this.drawCall = engine.createDrawCall(this.program, triangleArray);
+        this.drawCall = engine.createDrawCall(this.program, triangleVAO);
     }
     /**
      * 
@@ -92,20 +95,20 @@ class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
      * 
      */
     public _update(): WebGL2DemoScene {
-        this.engine.clear();
-        this.drawCall.draw();
+        if (this.drawCount < 1) {
+            //只画一次就好了
+            this.engine.clear();
+            this.drawCall.draw();
+        }
+        ++this.drawCount;
         return this;
     }
     /**
      * 
      */
     public leave(): WebGL2DemoScene {
-        if (this.drawCount < 1) {
-            //只画一次就好了
-            this.program.delete();
-            this.drawCall.delete();
-        }
-        ++this.drawCount;
+        this.program.delete();
+        this.drawCall.delete();
         return this;
     }
     /**

@@ -3,36 +3,36 @@
  */
 class WebGL2Program extends WebGL2Object {
     /**
-     * 
+     * WebGLProgram
      */
     private program: WebGLProgram;
     /**
-     * 
+     * transformFeedback
      */
     private readonly transformFeedbackVaryings: string[];
     /**
-     * 
+     * 维护的uniform数据
      */
     private uniforms = {};
     public uniformBlocks: { [index: string]: number } = {};
     public uniformBlockCount = 0;
     /**
-     * 
+     * 纹理数据
      */
     public readonly samplers: { [index: string]: number } = {};
     public samplerCount: number = 0;
     /**
-     * 
+     * vertex shader
      */
     private vertexSource: string;
     private vertexShader: WebGL2Shader;
     /**
-     * 
+     * fragment shader
      */
     private fragmentSource: string;
     private fragmentShader: WebGL2Shader;
     /**
-     * 
+     * 是否连接成功
      */
     public linked: boolean = false;
     /**
