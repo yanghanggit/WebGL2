@@ -169,7 +169,7 @@ class PickingScene extends WebGL2DemoScene {
             this.mainProgram = programs[1];
             //
             const texarrays: string[] = [
-                'resource/assets/bg.jpg',
+                'resource/assets/bg.png',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];

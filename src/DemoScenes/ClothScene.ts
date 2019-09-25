@@ -398,7 +398,7 @@ class ClothScene extends WebGL2DemoScene {
             this.clothProgram = programs[5];
             //
             const texarrays: string[] = [
-                'resource/assets/bg.jpg',
+                'resource/assets/longmao.jpg',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];

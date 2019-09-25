@@ -154,7 +154,7 @@ class ShadowScene extends WebGL2DemoScene {
 
             const texarrays: string[] = [
                 //"resource/assets/webgl-logo.png",
-                'resource/assets/bg.jpg',
+                'resource/assets/bg.png',
             ];
             const loadImages = await this.engine.loadImages(texarrays);
             this.image = loadImages[0];

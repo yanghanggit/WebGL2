@@ -216,7 +216,7 @@ class OmniShadowScene extends WebGL2DemoScene {
             this.mainProgram = programs[2];
             //
             const texarrays: string[] = [
-                'resource/assets/bg.jpg',
+                'resource/assets/bg.png',
                 'resource/assets/concrete.jpg',
             ];
             const loadImages = await this.engine.loadImages(texarrays);

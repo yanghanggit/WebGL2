@@ -188,7 +188,7 @@ class RenderToCubemapScene extends WebGL2DemoScene {
             this.skyboxProgram = programs[2];
             //
             const texarrays: string[] = [
-                'resource/assets/bg.jpg',
+                'resource/assets/bg.png',
                 'resource/assets/sky-negx.png',
                 'resource/assets/sky-posx.png',
                 'resource/assets/sky-negy.png',

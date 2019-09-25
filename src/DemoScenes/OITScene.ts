@@ -159,7 +159,7 @@ class OITScene extends WebGL2DemoScene {
             this.accumProgram = programs[0];
             this.blendProgram = programs[1];
             //
-            const images = await this.engine.loadImages(["resource/assets/bg.jpg"]);//(["resource/assets/webgl-logo.png"]);
+            const images = await this.engine.loadImages(["resource/assets/bg.png"]);//(["resource/assets/webgl-logo.png"]);
             this.image = images[0];
         }
         catch (e) {
