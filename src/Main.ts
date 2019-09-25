@@ -75,7 +75,10 @@ function getQualifiedClassName(value: any): string {
 
 /////////
 const __SceneClasses__ = [
-    TriangleScene,
+    //很简单的场景
+    TriangleUBOScene, //用ubo做位置偏移的场景
+    TriangleScene, //最普通三角形场景
+    
 
 
     
@@ -105,7 +108,7 @@ const __SceneClasses__ = [
     ShadowScene,
     TextureArrayScene,
     
-    UBOScene,
+    
     OITScene,
 ];
 let __currentSceneIndex__ = 0;

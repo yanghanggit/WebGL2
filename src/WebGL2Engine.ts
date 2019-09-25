@@ -247,24 +247,30 @@ class WebGL2Engine implements System {
    public createTimer(): WebGL2Timer {
       return new WebGL2Timer(this);
    }
-
-   public createPrograms(...sources: any[]): Promise<any> {
+   /**
+    * 资源组
+    * @param sources 
+    */
+   public createPrograms(...sources: any[]): Promise<Array<WebGL2Program>> {
       return new Promise((resolve, reject) => {
          const numPrograms = sources.length;
-         const programs = new Array(numPrograms);
-         const pendingPrograms = new Array(numPrograms);
+         const programs = new Array<WebGL2Program>(numPrograms);
+         const pendingPrograms = new Array<WebGL2Program>(numPrograms);
          let numPending = numPrograms;
+         //创建
          for (let i = 0; i < numPrograms; ++i) {
-            const source = sources[i];
-            const vsSource = source[0];
-            const fsSource = source[1];
-            const xformFeedbackVars = source[2];
-            programs[i] = new WebGL2Program(this, vsSource, fsSource, xformFeedbackVars);
+            const sourceGroup = sources[i];
+            const vsSource = sourceGroup[0];
+            const fsSource = sourceGroup[1];
+            const transformFeedback = sourceGroup[2];
+            programs[i] = new WebGL2Program(this, vsSource, fsSource, transformFeedback);
             pendingPrograms[i] = programs[i];
          }
+         //连接
          for (let i = 0; i < numPrograms; ++i) {
             programs[i].link();
          }
+         //每帧检查
          const poll = () => {
             let linked = 0;
             for (let i = 0; i < numPending; ++i) {
@@ -277,6 +283,7 @@ class WebGL2Engine implements System {
                      return;
                   }
                } else {
+                  //
                   pendingPrograms[i - linked] = pendingPrograms[i];
                }
             }

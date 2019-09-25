@@ -1,22 +1,50 @@
-
+/**
+ * WebGL2Program 封装 WebGLProgram
+ */
 class WebGL2Program extends WebGL2Object {
-
-    private program: WebGLProgram = null;
-    private readonly transformFeedbackVaryings: string[] = null;
+    /**
+     * 
+     */
+    private program: WebGLProgram;
+    /**
+     * 
+     */
+    private readonly transformFeedbackVaryings: string[];
+    /**
+     * 
+     */
     private uniforms = {};
     public uniformBlocks: { [index: string]: number } = {};
     public uniformBlockCount = 0;
+    /**
+     * 
+     */
     public readonly samplers: { [index: string]: number } = {};
     public samplerCount: number = 0;
+    /**
+     * 
+     */
     private vertexSource: string;
-    private vertexShader: WebGL2Shader = null;
+    private vertexShader: WebGL2Shader;
+    /**
+     * 
+     */
     private fragmentSource: string;
-    private fragmentShader: WebGL2Shader = null;
-    private linked: boolean = false;
-
-    constructor(_engine: WebGL2Engine, vsSource: string | WebGL2Shader, fsSource: string | WebGL2Shader, xformFeebackVars: string[]) {
+    private fragmentShader: WebGL2Shader;
+    /**
+     * 
+     */
+    public linked: boolean = false;
+    /**
+     * constructor
+     * @param _engine 
+     * @param vsSource 
+     * @param fsSource 
+     * @param xformFeebackVars 
+     */
+    constructor(_engine: WebGL2Engine, vsSource: string | WebGL2Shader, fsSource: string | WebGL2Shader, transformFeedback: string[]) {
         super(_engine);
-        this.transformFeedbackVaryings = xformFeebackVars || null;
+        this.transformFeedbackVaryings = transformFeedback || null;
         if (typeof vsSource === "string") {
             this.vertexSource = vsSource;
         } else {
@@ -29,36 +57,42 @@ class WebGL2Program extends WebGL2Object {
         }
         this.initialize();
     }
-
+    /**
+     * 
+     */
     public restore(): WebGL2Program {
         this.initialize();
         this.link();
         this.checkLinkage();
         return this;
     }
-
+    /**
+     * 
+     */
     public translatedVertexSource(): string {
         if (this.vertexShader) {
             return this.vertexShader.translatedSource();
-        } else {
-            const vertexShader = new WebGL2Shader(this.engine, GL.VERTEX_SHADER, this.vertexSource);
-            const translatedSource = vertexShader.translatedSource();
-            vertexShader.delete();
-            return translatedSource;
         }
+        const vertexShader = new WebGL2Shader(this.engine, GL.VERTEX_SHADER, this.vertexSource);
+        const translatedSource = vertexShader.translatedSource();
+        vertexShader.delete();
+        return translatedSource;
     }
-
+    /**
+     * 
+     */
     public translatedFragmentSource(): string {
         if (this.fragmentShader) {
             return this.fragmentShader.translatedSource();
-        } else {
-            const fragmentShader = new WebGL2Shader(this.engine, GL.FRAGMENT_SHADER, this.fragmentSource);
-            const translatedSource = fragmentShader.translatedSource();
-            fragmentShader.delete();
-            return translatedSource;
         }
+        const fragmentShader = new WebGL2Shader(this.engine, GL.FRAGMENT_SHADER, this.fragmentSource);
+        const translatedSource = fragmentShader.translatedSource();
+        fragmentShader.delete();
+        return translatedSource;
     }
-
+    /**
+     * 
+     */
     public delete(): WebGL2Object {
         if (this.program) {
             this.gl.deleteProgram(this.program);
@@ -70,7 +104,9 @@ class WebGL2Program extends WebGL2Object {
         }
         return this;
     }
-
+    /**
+     * 
+     */
     public initialize(): WebGL2Program {
         if (this.state.program === this) {
             this.gl.useProgram(null);
@@ -88,7 +124,9 @@ class WebGL2Program extends WebGL2Object {
         this.program = this.gl.createProgram();
         return this;
     }
-
+    /**
+     * 
+     */
     public link(): WebGL2Program {
         this.gl.attachShader(this.program, this.vertexShader.shader);
         this.gl.attachShader(this.program, this.fragmentShader.shader);
@@ -98,14 +136,18 @@ class WebGL2Program extends WebGL2Object {
         this.gl.linkProgram(this.program);
         return this;
     }
-
+    /**
+     * 
+     */
     public checkCompletion(): boolean {
         if (this.engine.capbility('PARALLEL_SHADER_COMPILE')) {
             return this.gl.getProgramParameter(this.program, GL.COMPLETION_STATUS_KHR);
         }
         return true;
     }
-
+    /**
+     * 
+     */
     public checkLinkage(): WebGL2Program {
         if (this.linked) {
             return this;
@@ -128,9 +170,11 @@ class WebGL2Program extends WebGL2Object {
         }
         return this;
     }
-
+    /**
+     * 初始化所有uniform 和 uniform block
+     */
     public initVariables(): WebGL2Program {
-        //
+        //必须先绑定
         this.bind();
         //
         const numUniforms = this.gl.getProgramParameter(this.program, GL.ACTIVE_UNIFORMS);
@@ -138,7 +182,7 @@ class WebGL2Program extends WebGL2Object {
         for (let i = 0; i < numUniforms; ++i) {
             const uniformInfo = this.gl.getActiveUniform(this.program, i);
             const uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
-            let UniformClass: any = null;
+            let UniformClass: any;
             const type = uniformInfo.type;
             const numElements = uniformInfo.size;
             switch (type) {
@@ -214,12 +258,16 @@ class WebGL2Program extends WebGL2Object {
         }
         return this;
     }
-
-    public uniform(name, value): WebGL2Program {
+    /**
+     * 设置一个uniform的值
+     */
+    public uniform(name: string, value: number | Float32Array | Int32Array): WebGL2Program {
         this.uniforms[name].set(value);
         return this;
     }
-
+    /**
+     * 绑定
+     */
     public bind(): WebGL2Program {
         if (this.state.program !== this) {
             this.gl.useProgram(this.program);
