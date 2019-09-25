@@ -33,6 +33,10 @@ class TriangleUBOScene extends WebGL2DemoScene {
     /**
      * 
      */
+    private drawCount: number = 0;
+    /**
+     * 
+     */
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
         this.start().catch(e => {
@@ -109,9 +113,12 @@ class TriangleUBOScene extends WebGL2DemoScene {
      * 
      */
     public _update(): WebGL2DemoScene {
-        this.engine.clear();
-        this.drawCall1.draw();
-        this.drawCall2.draw();
+        if (this.drawCount < 1) {
+            this.engine.clear();
+            this.drawCall1.draw();
+            this.drawCall2.draw();
+        }
+        ++this.drawCount;
         return this;
     }
     /**
