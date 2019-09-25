@@ -1,29 +1,62 @@
-
+/**
+ * 
+ */
 class WebGL2UniformBuffer extends WebGL2Object {
-
+    /**
+     * WebGLBuffer
+     */
     private buffer: WebGLBuffer;
+    /**
+     * 多个格式的数据
+     */
     private readonly dataViews: { [index: number]: Float32Array | Int32Array | Uint32Array } = {};
+    /**
+     * 更新使用
+     */
     private readonly offsets: number[];
+    /**
+     * 更新使用
+     */
     private readonly sizes: number[];
+    /**
+     * 
+     */
     private readonly types: number[];
-    private size: number;
-    private readonly usage: number;
-    private currentBase: number;
+    /**
+     * 
+     */
+    private size: number = 0;
+    /**
+     * 
+     */
+    private readonly usage: number = 0;
+    /**
+     * 
+     */
+    private currentBase: number = -1;
+    /**
+     * 
+     */
     private readonly type: number;
+    /**
+     * 
+     */
     private readonly data: Float32Array;
-    private dirtyStart: number;;
-    private dirtyEnd: number;
+    /**
+     * 更新使用
+     */
+    private dirtyStart: number;
+    /**
+     * 更新使用
+     */
+    private dirtyEnd: number = 0;
 
     constructor(_engine: WebGL2Engine, layout: number[], usage: number = GL.DYNAMIC_DRAW) {
         super(_engine);
-        this.buffer = null;
-        this.dataViews = {};
         this.offsets = new Array(layout.length);
         this.sizes = new Array(layout.length);
         this.types = new Array(layout.length);
-        this.size = 0;
         this.usage = usage;
-        this.currentBase = -1;
         for (let i = 0, len = layout.length; i < len; ++i) {
             const type = layout[i];
             switch (type) {
@@ -33,7 +66,6 @@ class WebGL2UniformBuffer extends WebGL2Object {
                 case GL.BOOL:
                     this.offsets[i] = this.size;
                     this.sizes[i] = 1;
-
                     if (type === GL.INT) {
                         this.types[i] = GL.INT;
                     } else if (this.type === GL.UNSIGNED_INT) {
@@ -117,10 +149,11 @@ class WebGL2UniformBuffer extends WebGL2Object {
         this.dataViews[GL.INT] = new Int32Array(this.data.buffer);
         this.dataViews[GL.UNSIGNED_INT] = new Uint32Array(this.data.buffer);
         this.dirtyStart = this.size;
-        this.dirtyEnd = 0;
         this.restore();
     }
-
+    /**
+     * 
+     */
     public restore(): WebGL2UniformBuffer {
         if (this.currentBase !== -1 && this.state.uniformBuffers[this.currentBase] === this) {
             this.state.uniformBuffers[this.currentBase] = null;
@@ -131,8 +164,12 @@ class WebGL2UniformBuffer extends WebGL2Object {
         this.gl.bindBuffer(GL.UNIFORM_BUFFER, null);
         return this;
     }
-
-    public set(index: number, value: Float32Array | Int32Array | number | boolean): WebGL2UniformBuffer {
+    /**
+     * 局部赋值，等update来更新 dirtyStart + dirtyEnd
+     * @param index 
+     * @param value 
+     */
+    public set(index: number, value: number | boolean | Float32Array | Int32Array): WebGL2UniformBuffer {
         const view = this.dataViews[this.types[index]];
         const offset = this.offsets[index];
         const size = this.sizes[index];
@@ -149,7 +186,9 @@ class WebGL2UniformBuffer extends WebGL2Object {
         }
         return this;
     }
-
+    /**
+     * 局部更新bufferSubData
+     */
     public update(): WebGL2UniformBuffer {
         if (this.dirtyStart >= this.dirtyEnd) {
             return this;
@@ -163,7 +202,9 @@ class WebGL2UniformBuffer extends WebGL2Object {
         this.dirtyEnd = 0;
         return this;
     }
-
+    /**
+     * 删除对象
+     */
     public delete(): WebGL2UniformBuffer {
         if (this.buffer) {
             this.gl.deleteBuffer(this.buffer);
@@ -174,7 +215,10 @@ class WebGL2UniformBuffer extends WebGL2Object {
         }
         return this;
     }
-
+    /**
+     * 绑定
+     * @param base 
+     */
     public bind(base: number): WebGL2UniformBuffer {
         const currentBuffer = this.state.uniformBuffers[base];
         if (currentBuffer !== this) {
