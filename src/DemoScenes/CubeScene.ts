@@ -1,23 +1,31 @@
-
+/**
+ * 一个简单盒子的场景
+ */
 class CubeScene extends WebGL2DemoScene {
-    
-    //
+    /**
+     * camera
+     */
+    private viewMatrix: Float32Array;
     private projMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
-    private viewMatrix: Float32Array;
-    private drawCall: WebGL2DrawCall;
+    /**
+     * cube 辅助数据, 控制盒子的
+     */
+    private modelMatrix: Float32Array = mat4.create();
     private angleX: number = 0;
     private angleY: number = 0;
-    private modelMatrix: Float32Array = mat4.create();
     private rotateXMatrix: Float32Array = mat4.create();
     private rotateYMatrix: Float32Array = mat4.create();
-    private sceneUniformBuffer: WebGL2UniformBuffer;
-    private vsSource: string;
-    private fsSource: string;
-    private program: WebGL2Program;
+    /**
+     * 资源
+     */
     private image: HTMLImageElement;
-
-    //
+    private sceneUniformBuffer: WebGL2UniformBuffer;
+    private program: WebGL2Program;
+    private drawCall: WebGL2DrawCall;
+    /**
+     * 
+     */
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
         this.start().catch(e => {
@@ -25,13 +33,17 @@ class CubeScene extends WebGL2DemoScene {
         });
         return this;
     }
-
+    /**
+     * 
+     */
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
-        this._ready = true;
+        this.ready();
     }
-
+    /**
+     * 
+     */
     private createScene(): void {
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest();
@@ -60,11 +72,12 @@ class CubeScene extends WebGL2DemoScene {
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC4
-        ]).set(0, this.viewProjMatrix)
+        ])
+            .set(0, this.viewProjMatrix)
             .set(1, eyePosition)
             .set(2, lightPosition)
             .update();
-        
+
         const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
@@ -73,7 +86,9 @@ class CubeScene extends WebGL2DemoScene {
             .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
             .texture("tex", texture);
     }
-
+    /**
+     * 
+     */
     private async loadResource(): Promise<void> {
         try {
             ///
@@ -82,11 +97,11 @@ class CubeScene extends WebGL2DemoScene {
                 'resource/assets/shader-cube/cube.fs.glsl',
             ];
             const txts = await this.engine.loadText(ress);
-            this.vsSource = txts[0];
-            this.fsSource = txts[1];
+            const vsSource = txts[0];
+            const fsSource = txts[1];
             //
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource],
+                [vsSource, fsSource],
             );
             //
             this.program = programs[0];
@@ -101,31 +116,35 @@ class CubeScene extends WebGL2DemoScene {
             console.error(e);
         }
     }
+    /**
+     * 
+     */
+    public _update(): WebGL2DemoScene {
 
-    public update(): WebGL2DemoScene {
-        if (!this._ready) {
-            return;
-        }
         this.angleX += 0.01;
         this.angleY += 0.02;
         mat4.fromXRotation(this.rotateXMatrix, this.angleX);
         mat4.fromYRotation(this.rotateYMatrix, this.angleY);
         mat4.multiply(this.modelMatrix, this.rotateXMatrix, this.rotateYMatrix);
         this.drawCall.uniform("uModel", this.modelMatrix);
+
         this.engine.clear();
         this.drawCall.draw();
         return this;
     }
-
+    /**
+     * 
+     */
     public leave(): WebGL2DemoScene {
         this.drawCall.delete();
         this.sceneUniformBuffer.delete();
         this.program.delete();
-        const engine = this.engine;
-        engine.noDepthTest();
+        this.engine.noDepthTest();
         return this;
     }
-
+    /**
+     * 
+     */
     public resize(width: number, height: number): WebGL2DemoScene {
         mat4.perspective(this.projMatrix, Math.PI / 2, width / height, 0.1, 10.0);
         mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
