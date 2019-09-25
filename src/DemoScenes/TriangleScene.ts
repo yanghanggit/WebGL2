@@ -67,13 +67,13 @@ class TriangleScene extends WebGL2DemoScene {
         当我们需要时，只需要使用相应的VAO即可。
         VAO的这种方式有点像一个中介，把所有繁琐的绑定和顶点设置工作都集中起来处理，我们需要绘制时，直接找这个中介就好了。
          */
-        const triangleVAO = engine.createVertexArray()
+        const vao = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)//layout = 0: 位置
             .vertexAttributeBuffer(1, colors, { normalized: true }); //layout = 1: 颜色,需要归一化
         /*
         对于绘制行为一次封装
         */
-        this.drawCall = engine.createDrawCall(this.program, triangleVAO);
+        this.drawCall = engine.createDrawCall(this.program, vao);
     }
     /**
     *

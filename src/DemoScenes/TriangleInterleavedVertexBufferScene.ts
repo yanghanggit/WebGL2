@@ -54,7 +54,7 @@ class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
         //间距12的buffer
         const interleavedBuffer = engine.createInterleavedBuffer(12, interleavedData);
         //创建vao
-        const triangleVAO = engine.createVertexArray()
+        const vao = engine.createVertexArray()
             .vertexAttributeBuffer(0, interleavedBuffer, {
                 type: GL.FLOAT,
                 size: 2,
@@ -67,7 +67,7 @@ class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
                 stride: 12, //2个GL.FLOAT + 3 * UNSIGNED_BYTE + 补充UNSIGNED_BYTE =  2 * 4 + 3 * 1 + 1 = 12
                 normalized: true
             });
-        this.drawCall = engine.createDrawCall(this.program, triangleVAO);
+        this.drawCall = engine.createDrawCall(this.program, vao);
     }
     /**
      * 
@@ -109,12 +109,6 @@ class TriangleInterleavedVertexBufferScene extends WebGL2DemoScene {
     public leave(): WebGL2DemoScene {
         this.program.delete();
         this.drawCall.delete();
-        return this;
-    }
-    /**
-     * 
-     */
-    public resize(width: number, height: number): WebGL2DemoScene {
         return this;
     }
 }

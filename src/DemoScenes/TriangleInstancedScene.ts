@@ -39,31 +39,42 @@ class TriangleInstancedScene extends WebGL2DemoScene {
     private createScene(): void {
         ///
         const engine = this.engine;
-        engine.clearColor(0.0, 0.0, 0.0, 1.0);
-
+        engine.clearColor(0.5, 0.5, 0.5, 1.0);
+        //位置
         const positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
             0.3, -0.3,
             0.0, 0.3
         ]));
+        //画4个，四个绝对坐标
+        /*
+        out vec4 vColor;
+        void main() {
+            vColor = color;
+            gl_Position = position;
+            gl_Position.xy += offset; <==== 这句是关键在用下面的位置
+        }
+        */
         const offsets = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
-            -0.4, -0.4,
-            0.4, -0.4,
-            -0.4, 0.4,
-            0.4, 0.4
+            -0.5, -0.5,
+            0.5, -0.5,
+            -0.5, 0.5,
+            0.5, 0.5
         ]));
+        //颜色
         const colors = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 3, new Uint8Array([
             255, 0, 0,
             0, 255, 0,
             0, 0, 255,
             0, 255, 255
         ]));
-        const triangleArray = engine.createVertexArray()
+        //
+        const vao = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .instanceAttributeBuffer(1, offsets)
             .instanceAttributeBuffer(2, colors, { normalized: true });
         //
-        this.drawCall = engine.createDrawCall(this.program, triangleArray);
+        this.drawCall = engine.createDrawCall(this.program, vao);
     }
     /**
     * 
@@ -106,12 +117,6 @@ class TriangleInstancedScene extends WebGL2DemoScene {
     public leave(): WebGL2DemoScene {
         this.drawCall.delete();
         this.program.delete();
-        return this;
-    }
-    /**
-    * 
-    */
-    public resize(width: number, height: number): WebGL2DemoScene {
         return this;
     }
 }

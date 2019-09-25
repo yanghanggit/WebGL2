@@ -15,22 +15,6 @@ class TriangleUBOScene extends WebGL2DemoScene {
     */
     private drawCall2: WebGL2DrawCall;
     /**
-    * 
-    */
-    private positions: WebGL2VertexBuffer;
-    /**
-    * 
-    */
-    private triangleArray: WebGL2VertexArray;
-    /**
-    * 
-    */
-    private uniformBuffer1: WebGL2UniformBuffer;
-    /**
-    * 
-    */
-    private uniformBuffer2: WebGL2UniformBuffer;
-    /**
      * 
      */
     private drawCount: number = 0;
@@ -59,15 +43,15 @@ class TriangleUBOScene extends WebGL2DemoScene {
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0);
         //
-        this.positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
+        const positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -0.5, -0.5,
             0.5, -0.5,
             0.0, 0.5
         ]));
         //
-        this.triangleArray = engine.createVertexArray().vertexAttributeBuffer(0, this.positions);
+        const vao = engine.createVertexArray().vertexAttributeBuffer(0, positions);
         //
-        this.uniformBuffer1 = engine.createUniformBuffer([
+        const uniformBuffer1 = engine.createUniformBuffer([
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC2
         ])
@@ -75,7 +59,7 @@ class TriangleUBOScene extends WebGL2DemoScene {
             .set(1, new Float32Array([-0.5, 0.0])) //offset
             .update();
         //
-        this.uniformBuffer2 = engine.createUniformBuffer([
+        const uniformBuffer2 = engine.createUniformBuffer([
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC2
         ])
@@ -83,8 +67,8 @@ class TriangleUBOScene extends WebGL2DemoScene {
             .set(1, new Float32Array([0.5, 0.0])) //offset
             .update();
         //
-        this.drawCall1 = engine.createDrawCall(this.program, this.triangleArray).uniformBlock("TriangleUniforms", this.uniformBuffer1);
-        this.drawCall2 = engine.createDrawCall(this.program, this.triangleArray).uniformBlock("TriangleUniforms", this.uniformBuffer2);
+        this.drawCall1 = engine.createDrawCall(this.program, vao).uniformBlock("TriangleUniforms", uniformBuffer1);
+        this.drawCall2 = engine.createDrawCall(this.program, vao).uniformBlock("TriangleUniforms", uniformBuffer2);
     }
     /**
      * 
@@ -128,16 +112,6 @@ class TriangleUBOScene extends WebGL2DemoScene {
         this.program.delete();
         this.drawCall1.delete();
         this.drawCall2.delete();
-        this.positions.delete();
-        this.triangleArray.delete();
-        this.uniformBuffer1.delete();
-        this.uniformBuffer2.delete();
-        return this;
-    }
-    /**
-     * 
-     */
-    public resize(width: number, height: number): WebGL2DemoScene {
         return this;
     }
 }

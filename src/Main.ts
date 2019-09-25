@@ -75,7 +75,8 @@ function getQualifiedClassName(value: any): string {
 
 /////////
 const __SceneClasses__ = [
-    //很简单的场景
+    
+    //很简单的场景, 不考虑摄像机，就是画三角形
     TriangleInstancedScene, //实例化的测试简单测试场景
     TriangleInterleavedVertexBufferScene, //用同一个buffer存position 和 color来画三角形
     TriangleUBOScene, //用ubo做位置偏移的场景
