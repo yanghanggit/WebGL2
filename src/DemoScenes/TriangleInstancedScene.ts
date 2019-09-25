@@ -1,11 +1,23 @@
 
-class InstancedScene extends WebGL2DemoScene {
-
-    private vsSource: string;
-    private fsSource: string;
+/**
+ * 实例化的测试简单测试场景
+ */
+class TriangleInstancedScene extends WebGL2DemoScene {
+    /**
+     * 
+     */
     private drawCall: WebGL2DrawCall;
+    /**
+     * 
+     */
     private program: WebGL2Program;
-
+    /**
+     * 
+     */
+    private drawCount: number = 0;
+    /**
+     * 
+     */
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
         this.start().catch(e => {
@@ -13,13 +25,17 @@ class InstancedScene extends WebGL2DemoScene {
         });
         return this;
     }
-
+    /**
+     * 
+     */
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
-        this._ready = true;
+        this.ready();
     }
-
+    /**
+    * 
+    */
     private createScene(): void {
         ///
         const engine = this.engine;
@@ -49,7 +65,9 @@ class InstancedScene extends WebGL2DemoScene {
         //
         this.drawCall = engine.createDrawCall(this.program, triangleArray);
     }
-
+    /**
+    * 
+    */
     private async loadResource(): Promise<void> {
         try {
             ///
@@ -58,11 +76,11 @@ class InstancedScene extends WebGL2DemoScene {
                 'resource/assets/shader-instanced/instanced.fs.glsl'
             ];
             const txts = await this.engine.loadText(ress);
-            this.vsSource = txts[0];
-            this.fsSource = txts[1];
+            const vsSource = txts[0];
+            const fsSource = txts[1];
             //
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource]
+                [vsSource, fsSource]
             );
             this.program = programs[0];
         }
@@ -70,22 +88,29 @@ class InstancedScene extends WebGL2DemoScene {
             console.error(e);
         }
     }
-
-    public update(): WebGL2DemoScene {
-        if (!this._ready) {
-            return;
+    /**
+    * 
+    */
+    public _update(): WebGL2DemoScene {
+        if (this.drawCount < 1) {
+            //只画一次就好了
+            this.engine.clear();
+            this.drawCall.draw();
         }
-        this.engine.clear();
-        this.drawCall.draw();
+        ++this.drawCount;
         return this;
     }
-
+    /**
+    * 
+    */
     public leave(): WebGL2DemoScene {
         this.drawCall.delete();
         this.program.delete();
         return this;
     }
-
+    /**
+    * 
+    */
     public resize(width: number, height: number): WebGL2DemoScene {
         return this;
     }

@@ -76,6 +76,7 @@ function getQualifiedClassName(value: any): string {
 /////////
 const __SceneClasses__ = [
     //很简单的场景
+    TriangleInstancedScene, //实例化的测试简单测试场景
     TriangleInterleavedVertexBufferScene, //用同一个buffer存position 和 color来画三角形
     TriangleUBOScene, //用ubo做位置偏移的场景
     TriangleScene, //最普通三角形场景
@@ -95,7 +96,7 @@ const __SceneClasses__ = [
     PickingScene,
     _125CubesScene,
     _64CubesScene,
-    InstancedScene,
+    TriangleInstancedScene,
     _3DTextureScene,
     RenderTo3DTextureScene,
     WanderingTrianglesScene,
