@@ -25,25 +25,25 @@ namespace Utils {
     export function createCube(options?: CreateCubeOptions): CubeModel {
         options = options || {};
 
-        let dimensions = options.dimensions || [1, 1, 1];
-        let position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2];
-        let x = position[0];
-        let y = position[1];
-        let z = position[2];
-        let width = dimensions[0];
-        let height = dimensions[1];
-        let depth = dimensions[2];
+        const dimensions = options.dimensions || [1, 1, 1];
+        const position = options.position || [-dimensions[0] / 2, -dimensions[1] / 2, -dimensions[2] / 2];
+        const x = position[0];
+        const y = position[1];
+        const z = position[2];
+        const width = dimensions[0];
+        const height = dimensions[1];
+        const depth = dimensions[2];
 
-        let fbl = { x: x, y: y, z: z + depth };
-        let fbr = { x: x + width, y: y, z: z + depth };
-        let ftl = { x: x, y: y + height, z: z + depth };
-        let ftr = { x: x + width, y: y + height, z: z + depth };
-        let bbl = { x: x, y: y, z: z };
-        let bbr = { x: x + width, y: y, z: z };
-        let btl = { x: x, y: y + height, z: z };
-        let btr = { x: x + width, y: y + height, z: z };
+        const fbl = { x: x, y: y, z: z + depth };
+        const fbr = { x: x + width, y: y, z: z + depth };
+        const ftl = { x: x, y: y + height, z: z + depth };
+        const ftr = { x: x + width, y: y + height, z: z + depth };
+        const bbl = { x: x, y: y, z: z };
+        const bbr = { x: x + width, y: y, z: z };
+        const btl = { x: x, y: y + height, z: z };
+        const btr = { x: x + width, y: y + height, z: z };
 
-        let positions = new Float32Array([
+        const positions = new Float32Array([
             //front
             fbl.x, fbl.y, fbl.z,
             fbr.x, fbr.y, fbr.z,
@@ -93,7 +93,7 @@ namespace Utils {
             fbr.x, fbr.y, fbr.z
         ]);
 
-        let uvs = new Float32Array([
+        const uvs = new Float32Array([
             //front
             0, 0,
             1, 0,
@@ -143,7 +143,7 @@ namespace Utils {
             1, 1
         ]);
 
-        let normals = new Float32Array([
+        const normals = new Float32Array([
             // front
             0, 0, 1,
             0, 0, 1,
@@ -197,7 +197,7 @@ namespace Utils {
             positions: positions,
             normals: normals,
             uvs: uvs
-        };
+        } as CubeModel;
     }
     /**
      * 
@@ -222,18 +222,18 @@ namespace Utils {
     */
     export function createSphere(options?: CreateSphereOptions): SphereModel {
         options = options || {} as CreateSphereOptions;
-        let longBands = options.longBands || 32;
-        let latBands = options.latBands || 32;
-        let radius = options.radius || 1;
-        let lat_step = Math.PI / latBands;
-        let long_step = 2 * Math.PI / longBands;
-        let num_positions = longBands * latBands * 4;
-        let num_indices = longBands * latBands * 6;
+        const longBands = options.longBands || 32;
+        const latBands = options.latBands || 32;
+        const radius = options.radius || 1;
+        const lat_step = Math.PI / latBands;
+        const long_step = 2 * Math.PI / longBands;
+        const num_positions = longBands * latBands * 4;
+        const num_indices = longBands * latBands * 6;
         let lat_angle: number, long_angle: number;
-        let positions = new Float32Array(num_positions * 3);
-        let normals = new Float32Array(num_positions * 3);
-        let uvs = new Float32Array(num_positions * 2);
-        let indices = new Uint16Array(num_indices);
+        const positions = new Float32Array(num_positions * 3);
+        const normals = new Float32Array(num_positions * 3);
+        const uvs = new Float32Array(num_positions * 2);
+        const indices = new Uint16Array(num_indices);
         let x1: number, x2: number, x3: number, x4: number,
             y1: number, y2: number,
             z1: number, z2: number, z3: number, z4: number,
@@ -326,6 +326,5 @@ namespace Utils {
             indices: indices
         } as SphereModel;
     }
-
 }
 
