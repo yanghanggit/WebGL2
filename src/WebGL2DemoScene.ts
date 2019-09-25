@@ -1,18 +1,28 @@
 
 /**
- * camera
+ * 简单封装一个摄像机类
  */
 class Camera {
     /**
      * 
      */
-    private readonly viewMatrix: Float32Array = mat4.create();
-    private readonly projMatrix: Float32Array = mat4.create();
-    private readonly viewProjMatrix: Float32Array = mat4.create();
+    public readonly viewMatrix: Float32Array = mat4.create();
     /**
      * 
      */
-    private readonly eyePosition: Float32Array = vec3.fromValues(0, 0, 0);
+    public readonly projMatrix: Float32Array = mat4.create();
+    private _fovy: number = Math.PI / 2;
+    private _aspect: number = 16.0 / 9 / 0;
+    private _near: number = 0.1;
+    private _far: number = 10.0;
+    /**
+     * 
+     */
+    public readonly viewProjMatrix: Float32Array = mat4.create();
+    /**
+     * 
+     */
+    public readonly eyePosition: Float32Array = vec3.fromValues(0, 0, 0);
     /**
      * 
      */
@@ -33,13 +43,34 @@ class Camera {
      * @param far 
      */
     constructor(fovy: number, aspect: number, near: number, far: number) {
-        //
-        this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, fovy, aspect, near, far); 
-        //
+        this.perspective(fovy, aspect, near, far);
         this.eye(1, 1, 1);
         this.lookAt(0, 0, 0);
         this.update();
+    }
+    /**
+     * 
+     */
+    public set aspect(val: number) {
+        this.dirty = true;
+        this._aspect = val;
+        mat4.perspective(this.projMatrix, this._fovy, this._aspect, this._near, this._far);
+    }
+    /**
+     * 
+     * @param fovy 
+     * @param aspect 
+     * @param near 
+     * @param far 
+     */
+    public perspective(fovy: number, aspect: number, near: number, far: number): Camera {
+        this.dirty = true;
+        this._fovy = fovy;
+        this._aspect = aspect;
+        this._near = near;
+        this._far = far;
+        mat4.perspective(this.projMatrix, fovy, aspect, near, far);
+        return this;
     }
     /**
      * 
@@ -48,10 +79,10 @@ class Camera {
      * @param z 
      */
     public lookAt(x: number, y: number, z: number): Camera {
+        this.dirty = true;
         this.center[0] = x;
         this.center[1] = y;
         this.center[2] = z;
-        this.dirty = true;
         return this;
     }
     /**
@@ -61,10 +92,10 @@ class Camera {
      * @param z 
      */
     public eye(x: number, y: number, z: number): Camera {
+        this.dirty = true;
         this.eyePosition[0] = x;
         this.eyePosition[1] = y;
         this.eyePosition[2] = z;
-        this.dirty = true;
         return this;
     }
     /**
@@ -101,6 +132,10 @@ class WebGL2DemoScene {
      */
     protected _ready: boolean;
     /**
+     * 
+     */
+    protected _resizeDirty: boolean;
+    /**
      * constructor
      * @param player 
      */
@@ -123,15 +158,26 @@ class WebGL2DemoScene {
      * 更新
      */
     public update(): WebGL2DemoScene {
-        if (this._ready) {
-            this._update();
+        if (!this._ready) {
+            return this;
         }
+        if (this._resizeDirty) {
+            this._resizeDirty = false;
+            this.onResize();
+        }
+        this.onUpdate();
         return this;
     }
     /**
      * 核心执行
      */
-    protected _update(): WebGL2DemoScene {
+    protected onUpdate(): WebGL2DemoScene {
+        return this;
+    }
+    /**
+     * 核心执行
+     */
+    protected onResize(): WebGL2DemoScene {
         return this;
     }
     /**
@@ -164,6 +210,7 @@ class WebGL2DemoScene {
      * @param height 窗口height
      */
     public resize(width: number, height: number): WebGL2DemoScene {
+        this._resizeDirty = true;
         return this;
     }
 }

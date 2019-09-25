@@ -16,9 +16,9 @@ in vec2 vUV;
 in vec3 vNormal;
 
 out vec4 fragColor;
+
 void main() {
     vec3 color = texture(tex, vUV).rgb;
-
     vec3 normal = normalize(vNormal);
     vec3 eyeVec = normalize(eyePosition.xyz - vPosition);
     vec3 incidentVec = normalize(vPosition - lightPosition.xyz);

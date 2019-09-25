@@ -110,7 +110,7 @@ class TriangleInstancedScene extends WebGL2DemoScene {
     /**
     * 
     */
-    public _update(): WebGL2DemoScene {
+    public onUpdate(): WebGL2DemoScene {
         if (this.drawCount < 1) {
             //只画一次就好了
             this.engine.clear();

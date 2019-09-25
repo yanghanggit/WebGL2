@@ -96,7 +96,7 @@ class TriangleUBOScene extends WebGL2DemoScene {
     /**
      * 
      */
-    public _update(): WebGL2DemoScene {
+    public onUpdate(): WebGL2DemoScene {
         if (this.drawCount < 1) {
             this.engine.clear();
             this.drawCall1.draw();
