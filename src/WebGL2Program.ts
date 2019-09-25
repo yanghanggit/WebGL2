@@ -182,7 +182,12 @@ class WebGL2Program extends WebGL2Object {
         for (let i = 0; i < numUniforms; ++i) {
             const uniformInfo = this.gl.getActiveUniform(this.program, i);
             const uniformHandle = this.gl.getUniformLocation(this.program, uniformInfo.name);
-            let UniformClass: any;
+
+            let UniformClass: {
+                new(engine: WebGL2Engine, handle: WebGLUniformLocation, type: number, count: number):
+                    SingleComponentUniform | MultiNumericUniform | MultiBoolUniform | MatrixUniform
+            };
+
             const type = uniformInfo.type;
             const numElements = uniformInfo.size;
             switch (type) {
