@@ -267,7 +267,12 @@ class WebGL2Program extends WebGL2Object {
      * 设置一个uniform的值
      */
     public uniform(name: string, value: number | Float32Array | Int32Array): WebGL2Program {
-        this.uniforms[name].set(value);
+        if (this.uniforms[name]) {
+            this.uniforms[name].set(value);
+        }
+        else {
+            //console.warn('uniform name do not exist = ' + name + ', value = ' + value);
+        }
         return this;
     }
     /**

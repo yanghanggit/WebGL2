@@ -73,16 +73,19 @@ class CubeScene extends WebGL2DemoScene {
             .set(1, this.camera.eyePosition)
             .set(2, lightPosition)
             .update();
+
         //纹理
         const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
+
         //drawcall
         this.drawCall = engine.createDrawCall(this.program, vao)
             .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
-            .texture("tex", texture);
-            //.uniform();
+            .texture("tex", texture)
+            .uniform('powv', 100.0)
+            .uniform('ambient', 0.1);
     }
     /**
      * 
