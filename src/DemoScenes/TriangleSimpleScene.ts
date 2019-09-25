@@ -1,7 +1,7 @@
 /**
  * 一个简单三角形场景
  */
-class TriangleScene extends WebGL2DemoScene {
+class TriangleSimpleScene extends WebGL2DemoScene {
     /**
      * 
      */
