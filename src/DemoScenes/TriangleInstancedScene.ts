@@ -40,13 +40,13 @@ class TriangleInstancedScene extends WebGL2DemoScene {
         ///
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0);
-        //位置
+        //自身位置
         const positions = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
             -0.3, -0.3,
             0.3, -0.3,
             0.0, 0.3
         ]));
-        //画4个，四个绝对坐标
+        //画4个，四个坐标, 4个items
         /*
         out vec4 vColor;
         void main() {
@@ -56,23 +56,31 @@ class TriangleInstancedScene extends WebGL2DemoScene {
         }
         */
         const offsets = engine.createVertexBuffer(GL.FLOAT, 2, new Float32Array([
-            -0.5, -0.5,
-            0.5, -0.5,
-            -0.5, 0.5,
-            0.5, 0.5
+            -0.5, -0.5, //item[0]
+            0.5, -0.5,  //item[1]
+            -0.5, 0.5,  //item[2]
+            0.5, 0.5    //item[3]
         ]));
-        //颜色
+        //颜色4个items
         const colors = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 3, new Uint8Array([
-            255, 0, 0,
-            0, 255, 0,
-            0, 0, 255,
-            0, 255, 255
+            255, 0, 0,  //item[0]
+            0, 255, 0,  //item[1]
+            0, 0, 255,  //item[2]
+            0, 255, 255 //item[3]
+        ]));
+        //测试的颜色
+        const colorMask = engine.createVertexBuffer(GL.FLOAT, 3, new Float32Array([
+            Math.random(), Math.random(), Math.random(),  //item[0]
+            Math.random(), Math.random(), Math.random(),  //item[1]
+            Math.random(), Math.random(), Math.random(),  //item[2]
+            Math.random(), Math.random(), Math.random(),   //item[3]
         ]));
         //
         const vao = engine.createVertexArray()
             .vertexAttributeBuffer(0, positions)
             .instanceAttributeBuffer(1, offsets)
-            .instanceAttributeBuffer(2, colors, { normalized: true });
+            .instanceAttributeBuffer(2, colors, { normalized: true })
+            .instanceAttributeBuffer(3, colorMask, { normalized: false });
         //
         this.drawCall = engine.createDrawCall(this.program, vao);
     }
