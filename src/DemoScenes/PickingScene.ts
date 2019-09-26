@@ -188,7 +188,7 @@ class PickingScene extends WebGL2DemoScene {
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
+            Utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
             mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
             boxes[i].pickingDrawCall.uniform("uMVP", boxes[i].mvpMatrix);
             boxes[i].frameUniforms.set(0, boxes[i].mvpMatrix)

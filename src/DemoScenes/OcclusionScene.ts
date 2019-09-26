@@ -151,7 +151,7 @@ class OcclusionScene extends WebGL2DemoScene {
                 query: engine.createQuery(GL.ANY_SAMPLES_PASSED_CONSERVATIVE),
                 occluded: false,
             };
-            engine.xformMatrix(spheres[i].modelMatrix, spheres[i].translate);
+            Utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate);
         }
     }
 
@@ -218,7 +218,7 @@ class OcclusionScene extends WebGL2DemoScene {
         for (let i = 0; i < this.NUM_SPHERES; ++i) {
             const sphere = spheres[i];
             sphere.rotate[1] += 0.003;
-            engine.xformMatrix(sphere.modelMatrix, sphere.translate, null, sphere.scale);
+            Utils.xformMatrix(sphere.modelMatrix, sphere.translate, null, sphere.scale);
             mat4.fromYRotation(rotationMatrix, sphere.rotate[1]);
             mat4.multiply(sphere.modelMatrix, rotationMatrix, sphere.modelMatrix);
             //

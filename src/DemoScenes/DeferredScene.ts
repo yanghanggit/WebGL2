@@ -173,7 +173,7 @@ class DeferredScene extends WebGL2DemoScene {
         const lights = this.lights;
         for (let i = 0, len = lights.length; i < len; ++i) {
             const lightMatrix = mat4.create();
-            engine.xformMatrix(lightMatrix, lights[i].position);
+            Utils.xformMatrix(lightMatrix, lights[i].position);
             mat4.multiply(lightMatrix, this.viewProjMatrix, lightMatrix);
 
             lights[i].uniforms = engine.createUniformBuffer([
@@ -236,7 +236,7 @@ class DeferredScene extends WebGL2DemoScene {
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
+            Utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
             mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
             boxes[i].matrixUniforms.set(0, boxes[i].mvpMatrix)
                 .set(1, boxes[i].modelMatrix)
@@ -285,7 +285,7 @@ class DeferredScene extends WebGL2DemoScene {
         const lights = this.lights;
         for (let i = 0, len = lights.length; i < len; ++i) {
             lightMatrix = mat4.create();
-            engine.xformMatrix(lightMatrix, lights[i].position);
+            Utils.xformMatrix(lightMatrix, lights[i].position);
             mat4.multiply(lightMatrix, this.viewProjMatrix, lightMatrix);
             lights[i].uniforms.set(0, lightMatrix).update();
         }

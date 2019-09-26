@@ -373,22 +373,6 @@ class WebGL2Engine implements System {
       return new WebGL2DrawCall(this, program, vertexArray, primitive);
    }
 
-   public xformMatrix(xform: Float32Array, translate: Float32Array, rotate?: Float32Array, scale?: Float32Array): Float32Array {
-      translate = translate || zeros;
-      rotate = rotate || zeros;
-      scale = scale || ones;
-      mat4.fromTranslation(translateMat, translate);
-      mat4.fromXRotation(rotateXMat, rotate[0]);
-      mat4.fromYRotation(rotateYMat, rotate[1]);
-      mat4.fromZRotation(rotateZMat, rotate[2]);
-      mat4.fromScaling(scaleMat, scale);
-      mat4.multiply(xform, rotateXMat, scaleMat);
-      mat4.multiply(xform, rotateYMat, xform);
-      mat4.multiply(xform, rotateZMat, xform);
-      mat4.multiply(xform, translateMat, xform);
-      return xform;
-   }
-
    public drawFramebuffer(framebuffer: WebGL2Framebuffer): WebGL2Engine {
       framebuffer.bindForDraw();
       return this;
@@ -649,6 +633,23 @@ class WebGL2Engine implements System {
          .vertexAttributeBuffer(0, positions)
          .vertexAttributeBuffer(1, uv)
          .vertexAttributeBuffer(2, normals);
+      return vao;
+   }
+   /**
+    * 创建一个关于sphere的VAO
+    * @param options 
+    */
+   public createSphereVAO(options?: Utils.CreateSphereOptions): WebGL2VertexArray {
+      const sphere = Utils.createSphere(options);
+      const positions = this.createVertexBuffer(GL.FLOAT, 3, sphere.positions);
+      const uv = this.createVertexBuffer(GL.FLOAT, 2, sphere.uvs);
+      const normals = this.createVertexBuffer(GL.FLOAT, 3, sphere.normals);
+      const indices = this.createIndexBuffer(GL.UNSIGNED_SHORT, 3, sphere.indices);
+      const vao = this.createVertexArray()
+         .vertexAttributeBuffer(0, positions)
+         .vertexAttributeBuffer(1, uv)
+         .vertexAttributeBuffer(2, normals)
+         .indexBuffer(indices);
       return vao;
    }
 }

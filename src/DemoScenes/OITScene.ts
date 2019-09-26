@@ -183,7 +183,7 @@ class OITScene extends WebGL2DemoScene {
             sphereTrans = spheresTransform[i];
             modelMatrix = sphereTrans.modelMatrix;
             sphereTrans.rotate[1] += 0.002;
-            engine.xformMatrix(modelMatrix, sphereTrans.translate, null, sphereTrans.scale);
+            Utils.xformMatrix(modelMatrix, sphereTrans.translate, null, sphereTrans.scale);
             mat4.fromYRotation(rotationMatrix, sphereTrans.rotate[1]);
             mat4.multiply(modelMatrix, rotationMatrix, modelMatrix)
             modelMatrixData.set(modelMatrix, i * 4 * 4);

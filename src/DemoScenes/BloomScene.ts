@@ -164,13 +164,13 @@ class BloomScene extends WebGL2DemoScene {
             }
         ];
 
-        engine.xformMatrix(suns[0].modelMatrix, suns[0].position, null, null);
+        Utils.xformMatrix(suns[0].modelMatrix, suns[0].position, null, null);
         mat4.multiply(suns[0].mvpMatrix, this.viewProjMatrix, suns[0].modelMatrix);
         suns[0].uniforms.set(0, suns[0].mvpMatrix)
             .set(1, suns[0].color)
             .update();
 
-        engine.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(30, 30, 30));
+        Utils.xformMatrix(suns[1].modelMatrix, suns[1].position, null, vec3.fromValues(30, 30, 30));
         mat4.multiply(suns[1].mvpMatrix, this.viewProjMatrix, suns[1].modelMatrix);
         suns[1].uniforms.set(0, suns[1].mvpMatrix)
             .set(1, suns[1].color)
@@ -283,7 +283,7 @@ class BloomScene extends WebGL2DemoScene {
         cube.rotation[0] += 0.01;
         cube.rotation[1] += 0.02;
 
-        engine.xformMatrix(cube.modelMatrix, null, cube.rotation, null);
+        Utils.xformMatrix(cube.modelMatrix, null, cube.rotation, null);
         this.drawCall.uniform("uModel", cube.modelMatrix);
 
         this.colorBuffer.colorTarget(1, this.blurReadTexture);

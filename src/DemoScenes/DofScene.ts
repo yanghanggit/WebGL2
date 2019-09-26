@@ -222,7 +222,7 @@ class DofScene extends WebGL2DemoScene {
         for (let i = 0, len = boxes.length; i < len; ++i) {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
+            Utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate as Float32Array, boxes[i].rotate as Float32Array, boxes[i].scale as Float32Array);
             this.modelMatrixData.set(boxes[i].modelMatrix, i * 16);
         }
         this.modelMatrices.data(this.modelMatrixData);

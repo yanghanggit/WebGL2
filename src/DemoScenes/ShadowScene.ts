@@ -175,7 +175,7 @@ class ShadowScene extends WebGL2DemoScene {
             boxes[i].rotate[0] += 0.01;
             boxes[i].rotate[1] += 0.02;
 
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+            Utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
             mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
             mat4.multiply(boxes[i].lightMvpMatrix, this.lightViewProjMatrix, boxes[i].modelMatrix);
 

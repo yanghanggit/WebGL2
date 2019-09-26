@@ -211,7 +211,7 @@ namespace Utils {
     /**
     * 
     */
-   export interface CreateSphereOptions {
+    export interface CreateSphereOptions {
         longBands?: number,
         latBands?: number,
         radius: number,
@@ -325,6 +325,22 @@ namespace Utils {
             uvs: uvs,
             indices: indices
         } as SphereModel;
+    }
+
+    export function xformMatrix(xform: Float32Array, translate: Float32Array, rotate?: Float32Array, scale?: Float32Array): Float32Array {
+        translate = translate || zeros;
+        rotate = rotate || zeros;
+        scale = scale || ones;
+        mat4.fromTranslation(translateMat, translate);
+        mat4.fromXRotation(rotateXMat, rotate[0]);
+        mat4.fromYRotation(rotateYMat, rotate[1]);
+        mat4.fromZRotation(rotateZMat, rotate[2]);
+        mat4.fromScaling(scaleMat, scale);
+        mat4.multiply(xform, rotateXMat, scaleMat);
+        mat4.multiply(xform, rotateYMat, xform);
+        mat4.multiply(xform, rotateZMat, xform);
+        mat4.multiply(xform, translateMat, xform);
+        return xform;
     }
 }
 

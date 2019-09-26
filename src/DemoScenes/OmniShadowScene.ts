@@ -239,7 +239,7 @@ class OmniShadowScene extends WebGL2DemoScene {
             boxes[i].rotate[0] += boxes[i].rotateVx;
             boxes[i].rotate[1] += boxes[i].rotateVy;
 
-            engine.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
+            Utils.xformMatrix(boxes[i].modelMatrix, boxes[i].translate, boxes[i].rotate, boxes[i].scale);
             mat4.multiply(boxes[i].mvpMatrix, this.viewProjMatrix, boxes[i].modelMatrix);
 
             boxes[i].shadowDrawCall.uniform("uModelMatrix", boxes[i].modelMatrix);

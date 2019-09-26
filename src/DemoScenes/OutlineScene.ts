@@ -157,7 +157,7 @@ class OutlineScene extends WebGL2DemoScene {
         for (let i = 0, len = spheres.length; i < len; ++i) {
             spheres[i].rotate[1] += 0.002;
 
-            engine.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);
+            Utils.xformMatrix(spheres[i].modelMatrix, spheres[i].translate, null, spheres[i].scale);
             mat4.fromYRotation(this.rotationMatrix, spheres[i].rotate[1]);
             mat4.multiply(spheres[i].modelMatrix, this.rotationMatrix, spheres[i].modelMatrix)
 

@@ -75,7 +75,7 @@ function getQualifiedClassName(value: any): string {
 /////////
 const __SceneClasses__ = [
 
-    
+    SphereScene,
     CubeScene,
 
     /*

@@ -182,7 +182,7 @@ class TextureArrayScene extends WebGL2DemoScene {
             rotation[0] += rv[0];
             rotation[1] += rv[1];
             rotation[2] += rv[2];
-            engine.xformMatrix(box.modelMatrix, box.translation, rotation, null);
+            Utils.xformMatrix(box.modelMatrix, box.translation, rotation, null);
             modelMatrices.data(this.modelMatrixData);
         }
         this.drawCall.draw();
