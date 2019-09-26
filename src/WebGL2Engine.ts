@@ -641,7 +641,7 @@ class WebGL2Engine implements System {
     * @param options 
     */
    public createCubeVAO(options?: Utils.CreateCubeOptions): WebGL2VertexArray {
-      const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
+      const box = Utils.createCube(options);
       const positions = this.createVertexBuffer(GL.FLOAT, 3, box.positions);
       const uv = this.createVertexBuffer(GL.FLOAT, 2, box.uvs);
       const normals = this.createVertexBuffer(GL.FLOAT, 3, box.normals);
