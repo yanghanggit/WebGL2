@@ -326,7 +326,13 @@ namespace Utils {
             indices: indices
         } as SphereModel;
     }
-
+    /**
+     * scale -> rotation -> translation
+     * @param xform 
+     * @param translate 
+     * @param rotate 
+     * @param scale 
+     */
     export function xformMatrix(xform: Float32Array, translate: Float32Array, rotate?: Float32Array, scale?: Float32Array): Float32Array {
         translate = translate || zeros;
         rotate = rotate || zeros;

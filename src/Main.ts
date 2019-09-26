@@ -78,6 +78,7 @@ const __SceneClasses__ = [
     ********************************
     */
     //简单几何体的场景
+    _64CubesScene,
     SphereScene,
     CubeScene,
      /*
@@ -107,7 +108,7 @@ const __SceneClasses__ = [
     DeferredScene,
     PickingScene,
     _125CubesScene,
-    _64CubesScene,
+   
 
     _3DTextureScene,
     RenderTo3DTextureScene,

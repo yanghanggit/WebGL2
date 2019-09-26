@@ -1,28 +1,32 @@
 
 class _64CubesScene extends WebGL2DemoScene {
-    
-    ///
-    private projMatrix: Float32Array;
-    private viewMatrix: Float32Array;
-    private viewProjMatrix: Float32Array;
+    /**
+    * camera
+    */
+    private camera: Camera;
+    /**
+     * 做逻辑的
+     */
     private eyeRadius: number = 30;
     private eyeRotation: number = 0;
-    private eyePosition: Float32Array;
     private lightPosition: Float32Array;
+    /**
+     * 盒子模型
+     */
     private boxes: any[] = [];
     private rotationAxis: Float32Array;
     private modelMatrixData: Float32Array;
-    private vsSource: string;
-    private fsSource: string;
+    /**
+     * 资源
+     */
     private image: HTMLImageElement;
-    private NEAR: number = 0.1;
-    private FAR: number = 100.0;
-    ///
     private program: WebGL2Program;
     private boxesDrawCall: WebGL2DrawCall;
     private sceneUniformBuffer: WebGL2UniformBuffer;
     private modelMatrices: WebGL2VertexBuffer;
-
+    /**
+     * 
+     */
     public enter(): WebGL2DemoScene {
         this.application.profile.setTitle(egret.getQualifiedClassName(this));
         this.start().catch(e => {
@@ -30,62 +34,60 @@ class _64CubesScene extends WebGL2DemoScene {
         });
         return this;
     }
-
+    /**
+     * 
+     */
     private async start(): Promise<void> {
         await this.loadResource();
         this.createScene();
-        this._ready = true;
+        this.ready();
     }
-
+    /**
+     * 
+     */
     private createScene(): void {
-        const engine = this.engine;
-        const BOX_GRID_DIM = 40;
-        const NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
-        this.NEAR = 0.1;
-        this.FAR = 100.0;
         //
+        const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0)
             .depthTest()
             .depthFunc(GL.LEQUAL)
             .cullBackfaces();
+
         //
-        const box = Utils.createCube({ dimensions: [0.5, 0.5, 0.5] })
-        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
-        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        const BOX_GRID_DIM = 40;
+        const NUM_BOXES = BOX_GRID_DIM * BOX_GRID_DIM * BOX_GRID_DIM;
         this.modelMatrixData = new Float32Array(NUM_BOXES * 16);
         this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData);
-        const boxArray = engine.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
-            .vertexAttributeBuffer(1, uv)
-            .vertexAttributeBuffer(2, normals)
-            .instanceAttributeBuffer(3, this.modelMatrices)
-        //
-        this.projMatrix = mat4.create();
-        mat4.perspective(this.projMatrix, Math.PI / 2, engine.canvas.width / engine.canvas.height, this.NEAR, this.FAR);
-        this.viewMatrix = mat4.create();
-        this.eyePosition = vec3.fromValues(0, 22, 0);
-        this.viewProjMatrix = mat4.create();
+        const boxVAO = engine.createCubeVAO({ dimensions: [0.5, 0.5, 0.5] })
+            .instanceAttributeBuffer(3, this.modelMatrices);
+
+        //摄像机
+        this.camera = new Camera(Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 100.0)
+            .eye(0, 22, 0)
+            .lookAt(0, 0, 0)
+            .update();
+
+        //灯光
         this.lightPosition = vec3.create();
         this.sceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
             GL.FLOAT_VEC4
         ]);
-
+        //
         const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
-
+        //
         this.boxes = new Array(NUM_BOXES);
-        this.boxesDrawCall = engine.createDrawCall(this.program, boxArray)
+        this.boxesDrawCall = engine.createDrawCall(this.program, boxVAO)
             .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
             .texture("uTexture", texture);
-
+        //
         this.rotationAxis = vec3.fromValues(1, 1, 1);
         vec3.normalize(this.rotationAxis, this.rotationAxis);
-
+        //
         let boxI = 0;
         let offset = -Math.floor(BOX_GRID_DIM / 2);
         const boxes = this.boxes;
@@ -104,10 +106,10 @@ class _64CubesScene extends WebGL2DemoScene {
                 }
             }
         }
-        this.eyeRadius = 30;
-        this.eyeRotation = 0;
     }
-
+    /**
+     * 
+     */
     private async loadResource(): Promise<void> {
         try {
             ///
@@ -116,11 +118,11 @@ class _64CubesScene extends WebGL2DemoScene {
                 'resource/assets/shader-64cubes/64cubes.fs.glsl'
             ];
             const txts = await this.engine.loadText(ress);
-            this.vsSource = txts[0];
-            this.fsSource = txts[1];
+            const vsSource = txts[0];
+            const fsSource = txts[1];
             //
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource]
+                [vsSource, fsSource]
             );
             this.program = programs[0];
             //
@@ -134,24 +136,24 @@ class _64CubesScene extends WebGL2DemoScene {
             console.error(e);
         }
     }
-
-    public update(): WebGL2DemoScene {
-        if (!this._ready) {
-            return;
-        }
+    /**
+     * 
+     */
+    public onUpdate(): WebGL2DemoScene {
         this.eyeRotation += 0.002;
-        this.eyePosition[0] = Math.sin(this.eyeRotation) * this.eyeRadius;
-        this.eyePosition[2] = Math.cos(this.eyeRotation) * this.eyeRadius;
-        this.lightPosition.set(this.eyePosition);
+        const camera = this.camera;
+        camera.eyePosition[0] = Math.sin(this.eyeRotation) * this.eyeRadius;
+        camera.eyePosition[2] = Math.cos(this.eyeRotation) * this.eyeRadius;
+        camera.lookAt(0, -5, 0).update();
+        //
+        this.lightPosition.set(camera.eyePosition);
         this.lightPosition[0] += 5;
-        mat4.lookAt(this.viewMatrix, this.eyePosition, vec3.fromValues(0, -5, 0), vec3.fromValues(0, 1, 0));
-        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
         this.sceneUniformBuffer
-            .set(0, this.viewProjMatrix)
-            .set(1, this.eyePosition)
+            .set(0, camera.viewProjMatrix)
+            .set(1, camera.eyePosition)
             .set(2, this.lightPosition)
             .update();
-
+        //
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
             let box = boxes[i];
@@ -165,21 +167,30 @@ class _64CubesScene extends WebGL2DemoScene {
         this.boxesDrawCall.draw();
         return this;
     }
-
+    /**
+     * 
+     */
     public leave(): WebGL2DemoScene {
         this.program.delete();
         this.boxesDrawCall.delete();
         this.sceneUniformBuffer.delete();
         this.modelMatrices.delete();
-        const engine = this.engine;
-        engine.noDepthTest().noCullBackfaces();
+        this.engine.noDepthTest().noCullBackfaces();
         return this;
     }
-
+    /**
+     * 
+     */
     public resize(width: number, height: number): WebGL2DemoScene {
-        mat4.perspective(this.projMatrix, Math.PI / 2, width / height, this.NEAR, this.FAR);
-        mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
-        this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
+        super.resize(width, height);
+        this.camera.aspect = width / height;
+        return this;
+    }
+    /**
+     * 
+     */
+    protected onResize(): WebGL2DemoScene {
+        this.sceneUniformBuffer.set(0, this.camera.viewProjMatrix).update();
         return this;
     }
 }

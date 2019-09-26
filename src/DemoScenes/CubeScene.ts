@@ -48,7 +48,7 @@ class CubeScene extends WebGL2DemoScene {
         engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest();
 
         //摄像机
-        this.camera = new Camera(Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0)
+        this.camera = new Camera(Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 100.0)
             .eye(1, 1, 3)
             .lookAt(0, 0, 0)
             .update();
