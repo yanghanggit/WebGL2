@@ -74,9 +74,15 @@ function getQualifiedClassName(value: any): string {
 }
 /////////
 const __SceneClasses__ = [
-
+    /*
+    ********************************
+    */
+    //简单几何体的场景
     SphereScene,
     CubeScene,
+     /*
+    ********************************
+    */
 
     /*
     ********************************

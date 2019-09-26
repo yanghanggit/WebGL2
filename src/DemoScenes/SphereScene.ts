@@ -13,7 +13,7 @@ class SphereScene extends WebGL2DemoScene {
     private readonly scale = vec3.fromValues(1, 1, 1);
     private readonly translate = vec3.fromValues(0, 0, 0);
     /**
-     * move
+     * move 路径随便走一走
      */
     private readonly path: Array<Float32Array> = [];
     private nextPathIndex: number = 0;
