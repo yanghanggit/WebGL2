@@ -1,5 +1,8 @@
 
-class _64CubesScene extends WebGL2DemoScene {
+/**
+ * CubeIntancedScene
+ */
+class CubeIntancedScene extends WebGL2DemoScene {
     /**
     * camera
     */
@@ -9,6 +12,9 @@ class _64CubesScene extends WebGL2DemoScene {
      */
     private eyeRadius: number = 30;
     private eyeRotation: number = 0;
+    /**
+     * 灯管位置
+     */
     private lightPosition: Float32Array;
     /**
      * 盒子模型
@@ -106,6 +112,8 @@ class _64CubesScene extends WebGL2DemoScene {
                 }
             }
         }
+        //
+        this.updateCamera(0);
     }
     /**
      * 
@@ -137,15 +145,26 @@ class _64CubesScene extends WebGL2DemoScene {
         }
     }
     /**
+     * 更新摄像机的位置，绕着跑
+     * @param rot 
+     */
+    private updateCamera(rot: number): WebGL2DemoScene {
+        this.eyeRotation += rot;
+        const camera = this.camera;
+        const newX = Math.sin(this.eyeRotation) * this.eyeRadius;
+        const oldY = camera.eyePosition[1];
+        const newZ = Math.cos(this.eyeRotation) * this.eyeRadius;
+        camera.eye(newX, oldY, newZ).update();
+        return this;
+    }
+    /**
      * 
      */
     public onUpdate(): WebGL2DemoScene {
-        this.eyeRotation += 0.002;
-        const camera = this.camera;
-        camera.eyePosition[0] = Math.sin(this.eyeRotation) * this.eyeRadius;
-        camera.eyePosition[2] = Math.cos(this.eyeRotation) * this.eyeRadius;
-        camera.lookAt(0, -5, 0).update();
         //
+        this.updateCamera(0.002);
+        //
+        const camera = this.camera;
         this.lightPosition.set(camera.eyePosition);
         this.lightPosition[0] += 5;
         this.sceneUniformBuffer
@@ -156,8 +175,7 @@ class _64CubesScene extends WebGL2DemoScene {
         //
         const boxes = this.boxes;
         for (let i = 0, len = boxes.length; i < len; ++i) {
-            let box = boxes[i];
-
+            const box = boxes[i];
             mat4.rotate(box.rotationMatrix, box.rotationMatrix, 0.02, this.rotationAxis);
             mat4.multiply(box.modelMatrix, box.translationMatrix, box.rotationMatrix)
         }

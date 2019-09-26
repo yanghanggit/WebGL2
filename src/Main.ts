@@ -78,7 +78,7 @@ const __SceneClasses__ = [
     ********************************
     */
     //简单几何体的场景
-    _64CubesScene,
+    CubeIntancedScene,
     SphereScene,
     CubeScene,
      /*
