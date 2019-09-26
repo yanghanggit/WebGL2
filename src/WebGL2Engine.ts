@@ -347,7 +347,7 @@ class WebGL2Engine implements System {
    public createFramebuffer(): WebGL2Framebuffer {
       return new WebGL2Framebuffer(this);
    }
-   
+
 
    public createVertexBuffer(type: number, itemSize: number, data: number | Float32Array | Uint16Array | Uint8Array | Int8Array | Uint16Array | Int16Array, usage?: number): WebGL2VertexBuffer {
       return new WebGL2VertexBuffer(this, type, itemSize, data, usage);
@@ -465,7 +465,7 @@ class WebGL2Engine implements System {
       this.gl.disable(this.gl.DEPTH_TEST);
       return this;
    }
-   
+
    public createTextureArrayByImage(image: HTMLImageElement, width: number, height: number, depth: number, options: CreateTextureOptions): WebGL2Texture {
       return new WebGL2Texture(this, this.gl.TEXTURE_2D_ARRAY, image, width, height, depth, true, options);
    }
@@ -635,6 +635,21 @@ class WebGL2Engine implements System {
    public noScissorTest(): WebGL2Engine {
       this.gl.disable(this.gl.SCISSOR_TEST);
       return this;
+   }
+   /**
+    * 创建一个关于cube的VAO
+    * @param options 
+    */
+   public createCubeVAO(options?: Utils.CreateCubeOptions): WebGL2VertexArray {
+      const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
+      const positions = this.createVertexBuffer(GL.FLOAT, 3, box.positions);
+      const uv = this.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+      const normals = this.createVertexBuffer(GL.FLOAT, 3, box.normals);
+      const vao = this.createVertexArray()
+         .vertexAttributeBuffer(0, positions)
+         .vertexAttributeBuffer(1, uv)
+         .vertexAttributeBuffer(2, normals);
+      return vao;
    }
 }
 

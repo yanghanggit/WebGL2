@@ -6,7 +6,7 @@ namespace Utils {
     /**
     * 
     */
-    interface CubeModel {
+    export interface CubeModel {
         positions?: Float32Array;
         normals?: Float32Array;
         uvs?: Float32Array;
@@ -14,7 +14,7 @@ namespace Utils {
     /**
      * 
      */
-    interface CreateCubeOptions {
+    export interface CreateCubeOptions {
         dimensions?: Float32Array | number[],
         position?: Float32Array,
     };
@@ -202,7 +202,7 @@ namespace Utils {
     /**
      * 
      */
-    interface SphereModel {
+    export interface SphereModel {
         positions: Float32Array,
         normals: Float32Array,
         uvs: Float32Array,
@@ -211,7 +211,7 @@ namespace Utils {
     /**
     * 
     */
-    interface CreateSphereOptions {
+   export interface CreateSphereOptions {
         longBands?: number,
         latBands?: number,
         radius: number,

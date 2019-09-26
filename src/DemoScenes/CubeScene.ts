@@ -46,24 +46,14 @@ class CubeScene extends WebGL2DemoScene {
         //
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest();
-        //做vao
-        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
-        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
-        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
-        const vao = engine.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
-            .vertexAttributeBuffer(1, uv)
-            .vertexAttributeBuffer(2, normals);
 
         //摄像机
         this.camera = new Camera(Math.PI / 2, engine.canvas.width / engine.canvas.height, 0.1, 10.0)
-            .eye(1, 1, 1)
+            .eye(1, 1, 3)
             .lookAt(0, 0, 0)
             .update();
 
         //灯光
-        const lightPosition = vec3.fromValues(1, 1, 0.5);
         this.sceneUniformBuffer = engine.createUniformBuffer([
             GL.FLOAT_MAT4,
             GL.FLOAT_VEC4,
@@ -71,16 +61,15 @@ class CubeScene extends WebGL2DemoScene {
         ])
             .set(0, this.camera.viewProjMatrix)
             .set(1, this.camera.eyePosition)
-            .set(2, lightPosition)
+            .set(2, vec3.fromValues(1, 1, 0.5)) //灯光位置
             .update();
 
-        //纹理
+        //drawcall： texture + vao
         const texture = engine.createTexture2DByImage(this.image, {
             flipY: true,
             maxAnisotropy: engine.capbility('MAX_TEXTURE_ANISOTROPY')
         });
-
-        //drawcall
+        const vao = engine.createCubeVAO({ dimensions: [1.0, 1.0, 1.0] });
         this.drawCall = engine.createDrawCall(this.program, vao)
             .uniformBlock("SceneUniforms", this.sceneUniformBuffer)
             .texture("tex", texture)
