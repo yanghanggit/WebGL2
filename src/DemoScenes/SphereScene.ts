@@ -12,7 +12,13 @@ class SphereScene extends WebGL2DemoScene {
     private readonly modelMatrix: Float32Array = mat4.create();
     private readonly scale = vec3.fromValues(1, 1, 1);
     private readonly translate = vec3.fromValues(0, 0, 0);
-    private direction: number = 1;
+    /**
+     * move
+     */
+    private readonly path: Array<Float32Array> = [];
+    private nextPathIndex: number = 0;
+    private readonly speed: Float32Array = vec3.fromValues(0.01, 0.01, 0.01);
+    private readonly direction: Float32Array = vec3.create();
     /**
      * 资源
      */
@@ -108,19 +114,31 @@ class SphereScene extends WebGL2DemoScene {
             console.error(e);
         }
     }
-
+    /**
+     * 
+     */
     private moveSphere(): void {
-        this.translate[2] += 0.01 * this.direction;
-        if (this.direction > 0) {
-            if (this.translate[2] > 0.5) {
-                this.direction *= -1;
+        const path = this.path;
+        if (path.length === 0) {
+            path[0] = new Float32Array([0.5, 0, 0]);
+            path[1] = new Float32Array([-0.5, 0, 0]);
+            path[2] = new Float32Array([0, 0, 0.5]);
+            path[3] = new Float32Array([0, 0, -0.5]);
+        }
+        //
+        const targetPos = path[this.nextPathIndex];
+        const distance = vec3.distance(targetPos, this.translate);
+        if (distance < 0.1) {
+            ++this.nextPathIndex;
+            if (this.nextPathIndex >= path.length) {
+                this.nextPathIndex = 0;
             }
         }
-        else {
-            if (this.translate[2] < -0.5) {
-                this.direction *= -1;
-            }
-        }
+        //
+        vec3.subtract(this.direction, targetPos, this.translate);
+        vec3.normalize(this.direction, this.direction);
+        vec3.multiply(this.direction, this.direction, this.speed);
+        vec3.add(this.translate, this.translate, this.direction);
         Utils.xformMatrix(this.modelMatrix, this.translate, null, this.scale);
     }
     /**
