@@ -75,6 +75,7 @@ function getQualifiedClassName(value: any): string {
 /////////
 const __SceneClasses__ = [
 
+    
     CubeScene,
 
     /*
@@ -88,7 +89,7 @@ const __SceneClasses__ = [
     /*
     ********************************
     */
-
+    TextureArrayScene,
     ClothScene,
     OcclusionScene,
     MeshCompressionScene,
@@ -112,7 +113,7 @@ const __SceneClasses__ = [
     RTTScene,
     SSAOScene,
     ShadowScene,
-    TextureArrayScene,
+   
 
 
     OITScene,

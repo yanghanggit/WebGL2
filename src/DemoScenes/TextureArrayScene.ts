@@ -40,20 +40,21 @@ class TextureArrayScene extends WebGL2DemoScene {
         const engine = this.engine;
         engine.clearColor(0.5, 0.5, 0.5, 1.0).depthTest().depthMask(true);
         //
-        const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
+        //const box = Utils.createCube({ dimensions: [1.0, 1.0, 1.0] });
         this.modelMatrixData = new Float32Array(8 * 16);
         const textureIndexData = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7]);
         //
-        const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
-        const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
-        const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
+        // const positions = engine.createVertexBuffer(GL.FLOAT, 3, box.positions);
+        // const uv = engine.createVertexBuffer(GL.FLOAT, 2, box.uvs);
+        // const normals = engine.createVertexBuffer(GL.FLOAT, 3, box.normals);
         const textureIndices = engine.createVertexBuffer(GL.UNSIGNED_BYTE, 1, textureIndexData);
         this.modelMatrices = engine.createMatrixBuffer(GL.FLOAT_MAT4, this.modelMatrixData.length);
         //
-        const boxArray = engine.createVertexArray()
-            .vertexAttributeBuffer(0, positions)
-            .vertexAttributeBuffer(1, uv)
-            .vertexAttributeBuffer(2, normals)
+        const boxArray = engine.createCubeVAO({ dimensions: [1.0, 1.0, 1.0] })
+        // engine.createVertexArray()
+        //     .vertexAttributeBuffer(0, positions)
+        //     .vertexAttributeBuffer(1, uv)
+        //     .vertexAttributeBuffer(2, normals)
             .instanceAttributeBuffer(3, textureIndices)
             .instanceAttributeBuffer(4, this.modelMatrices);
         //
