@@ -6,8 +6,6 @@ layout(std140, column_major) uniform;
 
 uniform SceneUniforms {
     mat4 uViewProj;
-    vec4 uEyePosition;
-    //bool useDebugColor;
 };
 
 uniform samplerCube skyCubemap;
