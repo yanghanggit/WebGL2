@@ -1,6 +1,14 @@
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
 
 class RenderToCubemapScene extends WebGL2DemoScene {
-
     //
     private cubemapDrawCall: WebGL2DrawCall;
     private cubeDrawCall: WebGL2DrawCall;
@@ -8,9 +16,6 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     private angleX: number = 0;
     private angleY: number = 0;
     private cubemapBuffer: WebGL2Framebuffer;
-    private cubemapFsSource: string;
-    private skyboxVsSource: string;
-    private skyboxFsSource: string;
     private program: WebGL2Program;
     private cubemapProgram: WebGL2Program;
     private skyboxProgram: WebGL2Program;
@@ -20,8 +25,6 @@ class RenderToCubemapScene extends WebGL2DemoScene {
     private skyboxViewProjMatrix: Float32Array;
     private sceneUniformBuffer: WebGL2UniformBuffer;
     private skyboxSceneUniforms: WebGL2UniformBuffer;
-    private vsSource: string;
-    private fsSource: string;
     private viewMatrix: Float32Array;
     private viewProjMatrix: Float32Array;
     private projMatrix: Float32Array;
@@ -171,16 +174,16 @@ class RenderToCubemapScene extends WebGL2DemoScene {
                 'resource/assets/shader-rtt-cubemap/skybox.fs.glsl',
             ];
             const txts = await this.engine.loadText(ress);
-            this.vsSource = txts[0];
-            this.fsSource = txts[1];
-            this.cubemapFsSource = txts[2];
-            this.skyboxVsSource = txts[3];
-            this.skyboxFsSource = txts[4];
+            const vsSource = txts[0];
+            const fsSource = txts[1];
+            const cubemapFsSource = txts[2];
+            const skyboxVsSource = txts[3];
+            const skyboxFsSource = txts[4];
             //
             const programs = await this.engine.createPrograms(
-                [this.vsSource, this.fsSource],
-                [this.vsSource, this.cubemapFsSource],
-                [this.skyboxVsSource, this.skyboxFsSource]
+                [vsSource, fsSource],
+                [vsSource, cubemapFsSource],
+                [skyboxVsSource, skyboxFsSource]
             );
             //
             this.program = programs[0];

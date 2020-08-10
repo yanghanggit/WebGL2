@@ -74,6 +74,9 @@ function getQualifiedClassName(value: any): string {
 }
 /////////
 const __SceneClasses__ = [
+
+    RenderToCubemapScene,
+
     /*
     ********************************
     */
@@ -115,7 +118,7 @@ const __SceneClasses__ = [
     WanderingTrianglesScene,
     CubemapScene,
     
-    RenderToCubemapScene,
+    //RenderToCubemapScene,//???
     MSAAScene,
     RTTScene,
     SSAOScene,
