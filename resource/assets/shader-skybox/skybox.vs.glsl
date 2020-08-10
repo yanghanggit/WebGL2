@@ -10,10 +10,11 @@ uniform SceneUniforms {
 };
 
 out vec3 vPosition;
-out vec2 vUV;
+
 void main() {
+
     vec4 worldPosition = vec4(position.xyz * 5.0, 1.0);            
     vPosition = position.xyz;
-    vUV  = uv;
     gl_Position = uViewProj * worldPosition;
+    
 }

@@ -11,7 +11,6 @@ uniform SceneUniforms {
 uniform samplerCube skyCubemap;
 
 in vec3 vPosition;
-in vec2 vUV;
 
 out vec4 fragColor;
 
