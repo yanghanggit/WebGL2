@@ -1,11 +1,5 @@
 /**
  * 
- * 
- * 
- * 
- * 
- * 
- * 
  */
 
 class SkyboxScene extends WebGL2DemoScene {
@@ -32,8 +26,8 @@ class SkyboxScene extends WebGL2DemoScene {
     private rotateXMatrix: Float32Array = mat4.create();
     private rotateYMatrix: Float32Array = mat4.create();
     private readonly cubemapDim: number = 2048;
-    private debugColorEnableDiv: HTMLDivElement;
-    private debugColorEnabled: boolean = false;
+    //private debugColorEnableDiv: HTMLDivElement;
+    //private debugColorEnabled: boolean = false;
 
     //
     public enter(): WebGL2DemoScene {
@@ -127,7 +121,7 @@ class SkyboxScene extends WebGL2DemoScene {
             GL.BOOL
         ]).set(0, this.skyboxViewProjMatrix)
             .set(1, eyePosition)
-            .set(2, this.debugColorEnabled)
+            //.set(2, this.debugColorEnabled)
             .update();
 
         const texture = engine.createTexture2DByImage(this.webglImage, {
@@ -160,7 +154,7 @@ class SkyboxScene extends WebGL2DemoScene {
             .uniformBlock("SceneUniforms", this.skyboxSceneUniforms);
 
 
-        this.openUI();
+        //this.openUI();
     }
 
     private async loadResource(): Promise<void> {
@@ -170,8 +164,8 @@ class SkyboxScene extends WebGL2DemoScene {
                 'resource/assets/shader-rtt-cubemap/cube.vs.glsl',
                 'resource/assets/shader-rtt-cubemap/cube.fs.glsl',
                 'resource/assets/shader-rtt-cubemap/cubemap.fs.glsl',
-                'resource/assets/shader-rtt-cubemap/skybox.vs.glsl',
-                'resource/assets/shader-rtt-cubemap/skybox.fs.glsl',
+                'resource/assets/shader-skybox/skybox.vs.glsl',
+                'resource/assets/shader-skybox/skybox.fs.glsl',
             ];
             const txts = await this.engine.loadText(ress);
             const vsSource = txts[0];
@@ -223,14 +217,14 @@ class SkyboxScene extends WebGL2DemoScene {
         this.cubemapDrawCall.uniform("uModel", this.modelMatrix);
         this.cubeDrawCall.uniform("uModel", this.modelMatrix);
         //
-        engine.drawFramebuffer(this.cubemapBuffer)
-            .viewport(0, 0, this.cubemapDim, this.cubemapDim)
-            .clear();
-        this.cubemapDrawCall.draw();
+        // engine.drawFramebuffer(this.cubemapBuffer)
+        //     .viewport(0, 0, this.cubemapDim, this.cubemapDim)
+        //     .clear();
+        //this.cubemapDrawCall.draw();
         //
         engine.defaultDrawFramebuffer().defaultViewport().clear();
         this.skyboxDrawcall.draw();
-        this.cubeDrawCall.draw();
+        //this.cubeDrawCall.draw();
         return this;
     }
 
@@ -246,7 +240,7 @@ class SkyboxScene extends WebGL2DemoScene {
         this.skyboxSceneUniforms.delete();
         const engine = this.engine;
         engine.noDepthTest();
-        this.closeUI();
+        //this.closeUI();
         return this;
     }
 
@@ -257,46 +251,5 @@ class SkyboxScene extends WebGL2DemoScene {
         this.sceneUniformBuffer.set(0, this.viewProjMatrix).update();
         this.skyboxSceneUniforms.set(0, this.skyboxViewProjMatrix).update();
         return this;
-    }
-
-    private openUI(): HTMLDivElement {
-        if (this.debugColorEnableDiv) {
-            return this.debugColorEnableDiv;
-        }
-        ///
-        this.debugColorEnableDiv = document.createElement("div");
-        document.body.appendChild(this.debugColorEnableDiv);
-        const style = this.debugColorEnableDiv.style; //置顶，必须显示在最上面
-        style.setProperty('position', 'absolute');
-        style.setProperty('bottom', '20px');
-        style.setProperty('right', '20px');
-        style.setProperty('color', 'white');
-        style.setProperty('z-index', '999');
-        style.setProperty('top', '0');
-        this.debugColorEnableDiv.innerText = 'debug-color';
-        ////
-        const input = document.createElement("input"); 
-        this.debugColorEnableDiv.appendChild(input); 
-        input.setAttribute("type","checkbox");  
-        input.setAttribute("id","inputid");  
-        input.setAttribute("name","inputname");  
-        input.setAttribute("value","inputvalue");  
-        if (this.debugColorEnabled) {
-            input.setAttribute("checked", "checked");  
-        }
-        ///
-        const self = this;
-        input.addEventListener("change", function() {
-            self.debugColorEnabled = this.checked;
-            self.skyboxSceneUniforms.set(2, self.debugColorEnabled).update();
-        });
-        return this.debugColorEnableDiv;
-    }
-
-    private closeUI(): void {
-        if (this.debugColorEnableDiv) {
-            document.body.removeChild(this.debugColorEnableDiv);
-            this.debugColorEnableDiv = null;
-        }
     }
 }
