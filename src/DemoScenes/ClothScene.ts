@@ -1,5 +1,13 @@
 
 
+
+//(options?: CreateCubeOptions): CubeModel {
+
+
+//this.application.profile.setTitle(Utils.getClassName(this));
+
+
+
 class ClothScene extends WebGL2DemoScene {
 
     private viewMatrix: Float32Array;
@@ -41,10 +49,10 @@ class ClothScene extends WebGL2DemoScene {
 
     //
     public enter(): WebGL2DemoScene {
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        this.application.profile.setTitle(Utils.getClassName(this));
         const engine = this.engine;
         if (!engine.getExtension('EXT_color_buffer_float')) {
-            console.error(egret.getQualifiedClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
+            console.error(Utils.getClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
             return this;
         }
         this.start().catch(e => {
@@ -418,7 +426,7 @@ class ClothScene extends WebGL2DemoScene {
         const BALL_RANGE = 0.9;
         let ballSpeed = 0.004;
 
-        
+
 
         this.updateForceDrawCall.texture("uPositionBuffer", this.positionTextureA);
         this.updateForceDrawCall.texture("uOldPositionBuffer", this.oldPositionTextureA);

@@ -29,7 +29,7 @@ class Application implements System {
         this.addSystem(this._engine);
         this.addSystem(this._profile);
 
-        this.webTouchHandler = new WebTouchHandler(null, engine.canvas);
+        this.webTouchHandler = new WebTouchHandler(engine.canvas);
     }
 
     private addSystem(sys: System): boolean {

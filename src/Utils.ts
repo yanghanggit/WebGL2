@@ -1,4 +1,9 @@
 
+
+
+
+
+
 /**
  * 工具合集
  */
@@ -347,6 +352,17 @@ namespace Utils {
         mat4.multiply(xform, rotateZMat, xform);
         mat4.multiply(xform, translateMat, xform);
         return xform;
+    }
+
+    /**
+     * 
+     * @param instance 
+     */
+    export function getClassName(instance: any): string {
+        if (!instance){
+            return "NULL";
+        }
+        return instance.constructor.name;
     }
 }
 

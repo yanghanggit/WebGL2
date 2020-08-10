@@ -28,7 +28,7 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 //namespace egret.web {
-const $TempPoint = new egret.Point;
+//const $TempPoint = new egret.Point;
 /**
  * @private
  */
@@ -37,10 +37,10 @@ class WebTouchHandler /*extends HashObject*/ {
     /**
      * @private
      */
-    public constructor(stage: egret.Stage, canvas: HTMLCanvasElement) {
+    public constructor(/*stage: egret.Stage,*/ canvas: HTMLCanvasElement) {
         //super();
         this.canvas = canvas;
-        this.touch = new egret.sys.TouchHandler(stage);
+        //this.touch = new egret.sys.TouchHandler(stage);
         this.addListeners();
     }
 
@@ -51,7 +51,7 @@ class WebTouchHandler /*extends HashObject*/ {
     /**
      * @private
      */
-    private touch: egret.sys.TouchHandler;
+    //private touch: egret.sys.TouchHandler;
 
     /**
      * @private
@@ -142,8 +142,8 @@ class WebTouchHandler /*extends HashObject*/ {
      * @private
      */
     private onTouchBegin = (event: any): void => {
-        let location = this.getLocation(event);
-        this.touch.onTouchBegin(location.x, location.y, event.identifier);
+        //let location = this.getLocation(event);
+        //this.touch.onTouchBegin(location.x, location.y, event.identifier);
     }
 
     private onMouseMove = (event: MouseEvent) => {
@@ -158,8 +158,8 @@ class WebTouchHandler /*extends HashObject*/ {
      * @private
      */
     private onTouchMove = (event: any): void => {
-        let location = this.getLocation(event);
-        this.touch.onTouchMove(location.x, location.y, event.identifier);
+        //let location = this.getLocation(event);
+        //this.touch.onTouchMove(location.x, location.y, event.identifier);
 
     }
 
@@ -170,46 +170,46 @@ class WebTouchHandler /*extends HashObject*/ {
         ////这么招吧，是在不愿意再改这个了
         nextScene();
         ////
-        let location = this.getLocation(event);
-        this.touch.onTouchEnd(location.x, location.y, event.identifier);
+        //let location = this.getLocation(event);
+        //this.touch.onTouchEnd(location.x, location.y, event.identifier);
     }
 
     /**
      * @private
      */
-    private getLocation(event: any): egret.Point {
-        event.identifier = +event.identifier || 0;
-        let doc = document.documentElement;
-        let box = this.canvas.getBoundingClientRect();
-        let left = box.left + window.pageXOffset - doc.clientLeft;
-        let top = box.top + window.pageYOffset - doc.clientTop;
-        let x = event.pageX - left, newx = x;
-        let y = event.pageY - top, newy = y;
-        if (this.rotation == 90) {
-            newx = y;
-            newy = box.width - x;
-        }
-        else if (this.rotation == -90) {
-            newx = box.height - y;
-            newy = x;
-        }
-        newx = newx / this.scaleX;
-        newy = newy / this.scaleY;
-        return $TempPoint.setTo(Math.round(newx), Math.round(newy));
-    }
+    // private getLocation(event: any): egret.Point {
+    //     event.identifier = +event.identifier || 0;
+    //     let doc = document.documentElement;
+    //     let box = this.canvas.getBoundingClientRect();
+    //     let left = box.left + window.pageXOffset - doc.clientLeft;
+    //     let top = box.top + window.pageYOffset - doc.clientTop;
+    //     let x = event.pageX - left, newx = x;
+    //     let y = event.pageY - top, newy = y;
+    //     if (this.rotation == 90) {
+    //         newx = y;
+    //         newy = box.width - x;
+    //     }
+    //     else if (this.rotation == -90) {
+    //         newx = box.height - y;
+    //         newy = x;
+    //     }
+    //     newx = newx / this.scaleX;
+    //     newy = newy / this.scaleY;
+    //     return $TempPoint.setTo(Math.round(newx), Math.round(newy));
+    // }
 
     /**
      * @private
      */
-    private scaleX: number = 1;
-    /**
-     * @private
-     */
-    private scaleY: number = 1;
-    /**
-     * @private
-     */
-    private rotation: number = 0;
+    // private scaleX: number = 1;
+    // /**
+    //  * @private
+    //  */
+    // private scaleY: number = 1;
+    // /**
+    //  * @private
+    //  */
+    // private rotation: number = 0;
 
     /**
      * @private
@@ -217,18 +217,18 @@ class WebTouchHandler /*extends HashObject*/ {
      * @param scaleX 水平方向的缩放比例。
      * @param scaleY 垂直方向的缩放比例。
      */
-    public updateScaleMode(scaleX: number, scaleY: number, rotation: number): void {
-        this.scaleX = scaleX;
-        this.scaleY = scaleY;
-        this.rotation = rotation;
-    }
+    // public updateScaleMode(scaleX: number, scaleY: number, rotation: number): void {
+    //     this.scaleX = scaleX;
+    //     this.scaleY = scaleY;
+    //     this.rotation = rotation;
+    // }
 
-    /**
-     * @private
-     * 更新同时触摸点的数量
-     */
-    public $updateMaxTouches(): void {
-        this.touch.$initMaxTouches();
-    }
+    // /**
+    //  * @private
+    //  * 更新同时触摸点的数量
+    //  */
+    // public $updateMaxTouches(): void {
+    //     this.touch.$initMaxTouches();
+    // }
 }
 //}

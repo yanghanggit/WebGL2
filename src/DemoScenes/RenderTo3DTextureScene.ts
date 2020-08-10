@@ -16,7 +16,7 @@ class RenderTo3DTextureScene extends WebGL2DemoScene {
 
     //
     public enter(): WebGL2DemoScene {
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        this.application.profile.setTitle(Utils.getClassName(this));
         this.start().catch(e => {
             console.error(e);
         });

@@ -51,10 +51,10 @@ class BloomScene extends WebGL2DemoScene {
     private blankTexture: WebGL2Texture;
 
     public enter(): WebGL2DemoScene {
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        this.application.profile.setTitle(Utils.getClassName(this));
         const engine = this.engine;
         if (!engine.getExtension('EXT_color_buffer_float')) {
-            console.error(egret.getQualifiedClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
+            console.error(Utils.getClassName(this) + ": This example requires extension <b>EXT_color_buffer_float</b> which is not supported on this system.");
             return this;
         }
         this.start().catch(e => {

@@ -27,7 +27,7 @@ class _125CubesScene extends WebGL2DemoScene {
     private boxesDrawCall: WebGL2DrawCall;
     ///
     public enter(): WebGL2DemoScene {
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        this.application.profile.setTitle(Utils.getClassName(this));
         this.start().catch(e => {
             console.error(e);
         });

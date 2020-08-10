@@ -2,8 +2,8 @@
 class EmptyScene extends WebGL2DemoScene {
     
     public enter(): WebGL2DemoScene {
-        console.warn('enter => ' + egret.getQualifiedClassName(this));
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        console.warn('enter => ' + Utils.getClassName(this));
+        this.application.profile.setTitle(Utils.getClassName(this));
         this.start().catch(e => {
             console.error(e);
         });
@@ -11,19 +11,19 @@ class EmptyScene extends WebGL2DemoScene {
     }
 
     private async start(): Promise<void> {
-        console.warn('start => ' + egret.getQualifiedClassName(this));
+        console.warn('start => ' + Utils.getClassName(this));
         await this.loadResource();
         this.createScene();
         this._ready = true; 
     }
 
     private createScene(): void {
-        console.warn('createScene => ' + egret.getQualifiedClassName(this));
+        console.warn('createScene => ' + Utils.getClassName(this));
     }
 
     private async loadResource(): Promise<void> {
         try {
-            console.warn('loadResource => ' + egret.getQualifiedClassName(this));
+            console.warn('loadResource => ' + Utils.getClassName(this));
         }
         catch (e) {
             console.error(e);
@@ -39,12 +39,12 @@ class EmptyScene extends WebGL2DemoScene {
     }
 
     public leave(): WebGL2DemoScene {
-        console.warn('leave => ' + egret.getQualifiedClassName(this));
+        console.warn('leave => ' + Utils.getClassName(this));
         return this;
     }
 
     public resize(width: number, height: number): WebGL2DemoScene {
-        console.warn('resize => ' + egret.getQualifiedClassName(this));
+        console.warn('resize => ' + Utils.getClassName(this));
         return this;
     }
 }

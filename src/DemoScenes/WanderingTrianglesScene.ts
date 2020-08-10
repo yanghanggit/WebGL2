@@ -15,7 +15,7 @@ class WanderingTrianglesScene extends WebGL2DemoScene {
     private updateProgram: WebGL2Program;
 
     public enter(): WebGL2DemoScene {
-        this.application.profile.setTitle(egret.getQualifiedClassName(this));
+        this.application.profile.setTitle(Utils.getClassName(this));
         this.start().catch(e => {
             console.error(e);
         });
