@@ -27,6 +27,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 
+
+class ActionSet {
+
+};
+
 //namespace egret.web {
 //const $TempPoint = new egret.Point;
 /**
@@ -53,6 +58,9 @@ class WebTouchHandler /*extends HashObject*/ {
      */
     //private touch: egret.sys.TouchHandler;
 
+
+    private _actionSet: ActionSet = null;
+
     /**
      * @private
      * 添加事件监听
@@ -77,9 +85,11 @@ class WebTouchHandler /*extends HashObject*/ {
         }
         else {
             //if (!Capabilities.isMobile) {
-                this.addMouseListener();
+            this.addMouseListener();
             //}
             this.addTouchListener();
+            //
+            this.addKeyboardListener();
         }
     }
 
@@ -129,9 +139,47 @@ class WebTouchHandler /*extends HashObject*/ {
     }
 
     /**
+     * 
+     */
+    private addKeyboardListener(): void {
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('keyup', this.onKeyUp);
+    }
+    /**
+     * 
+     * @param event 
+     */
+    private onKeyDown(event: KeyboardEvent) {
+        //console.log('qefefqqf', event);
+        //event.preventDefault();
+        //event.stopPropagation();
+        //if ()
+
+
+
+        return false;
+    }
+    /**
+     * 
+     * @param event 
+     */
+    private onKeyUp(event: KeyboardEvent) {
+        // if (event.keyCode === 18) {
+        //     event.preventDefault();
+        //     event.stopPropagation();
+        //     return false;
+        // }
+        // if (event.altKey && event.keyCode === 83) {
+        //     event.preventDefault();
+        //     event.stopPropagation();
+        //     return false;
+        // }
+    }
+
+    /**
      * @private
      */
-    private prevent(event): void {
+    private prevent(event: any): void {
         event.stopPropagation();
         if (event["isScroll"] != true && !this.canvas['userTyping']) {
             event.preventDefault();
@@ -230,5 +278,21 @@ class WebTouchHandler /*extends HashObject*/ {
     // public $updateMaxTouches(): void {
     //     this.touch.$initMaxTouches();
     // }
+
+
+    /**
+    * 
+    */
+    public setActionSet(action: ActionSet): void {
+        console.log("WebTouchHandler: setActionSet")
+        this.clearActionSet();
+        this._actionSet = action;
+    }
+    /**
+     * 
+     */
+    public clearActionSet(): void {
+        this._actionSet = null;
+    }
 }
 //}

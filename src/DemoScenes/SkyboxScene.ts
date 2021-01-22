@@ -40,6 +40,11 @@ class SkyboxScene extends WebGL2DemoScene {
     private projMatrix: Float32Array;
     /**
      * 
+     */
+    private _actionSet: ActionSet = null;
+
+    /**
+     * 
      * 
      */
     public enter(): WebGL2DemoScene {
@@ -112,6 +117,11 @@ class SkyboxScene extends WebGL2DemoScene {
         this.skyboxDrawcall = engine.createDrawCall(this.skyboxProgram, boxArray)
             .texture("skyCubemap", skyCubemap)
             .uniformBlock("SceneUniforms", this.skyboxSceneUniforms);
+
+
+        //设置操作
+        this._actionSet = new ActionSet();
+        this.application.webTouchHandler.setActionSet(this._actionSet);
     }
     /**
      * 
@@ -169,6 +179,11 @@ class SkyboxScene extends WebGL2DemoScene {
         this.skyboxProgram.delete();
         this.skyboxSceneUniforms.delete();
         this.engine.noDepthTest();
+
+
+        //
+        this.application.webTouchHandler.clearActionSet();
+        this._actionSet = null;
         return this;
     }
     /**

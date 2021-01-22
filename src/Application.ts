@@ -5,15 +5,24 @@ class RunEvent {
 
 class Application implements System {
 
+    //
     private _exited: boolean = false;
+    //
     private _started: boolean = false;
+    //
     private _paused: boolean = false;
+    //
     private _engine: WebGL2Engine = null;
+    //
     private _player: WebGL2DemoPlayer = null;
+    //
     private _profile: WebGL2Profile = null;
+    //
     private readonly subsystems: System[] = [];
+    //
     private readonly _events: RunEvent[] = [];
-    private readonly webTouchHandler: WebTouchHandler = null;
+    //
+    private readonly _webTouchHandler: WebTouchHandler = null;
 
     constructor(engine: WebGL2Engine, _player: WebGL2DemoPlayer) {
         //
@@ -28,8 +37,8 @@ class Application implements System {
         this.addSystem(this._player);
         this.addSystem(this._engine);
         this.addSystem(this._profile);
-
-        this.webTouchHandler = new WebTouchHandler(engine.canvas);
+        //
+        this._webTouchHandler = new WebTouchHandler(engine.canvas);
     }
 
     private addSystem(sys: System): boolean {
@@ -144,6 +153,13 @@ class Application implements System {
         this._player.resize(width, height);
         this._engine.resize(width, height);
         return this;
+    }
+
+    /**
+     * 
+     */
+    public get webTouchHandler(): WebTouchHandler {
+        return this._webTouchHandler;
     }
 }
 
